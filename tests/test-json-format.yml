@@ -1,0 +1,75 @@
+name: Test JSON format output
+on:
+  workflow_dispatch:
+
+jobs:
+  test-json:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          format: 'json'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert findings-count output is a non-negative integer
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output is empty"
+            exit 1
+          fi
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: $FINDINGS"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
+
+      - name: Assert critical-count is a non-negative integer
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          if [ -z "$CRITICAL" ]; then
+            echo "FAIL: critical-count output is empty"
+            exit 1
+          fi
+          if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a non-negative integer: $CRITICAL"
+            exit 1
+          fi
+          echo "PASS: critical-count=$CRITICAL"
+
+      - name: Assert high-count is a non-negative integer
+        env:
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "high-count: $HIGH"
+          if [ -z "$HIGH" ]; then
+            echo "FAIL: high-count output is empty"
+            exit 1
+          fi
+          if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count is not a non-negative integer: $HIGH"
+            exit 1
+          fi
+          echo "PASS: high-count=$HIGH"
+
+      - name: Assert exit-code is 0 when fail-on=none
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 when fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS"

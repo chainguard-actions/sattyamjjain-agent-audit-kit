@@ -1,0 +1,41 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ignore-paths:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          format: 'console'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'node_modules,.git,vendor'
+
+      - name: Assert scan completed and outputs are set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output is empty"
+            exit 1
+          fi
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: $FINDINGS"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 when fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: scan with ignore-paths completed successfully"

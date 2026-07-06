@@ -1,0 +1,41 @@
+name: Test preset input (mcp-ox-2026-04)
+on:
+  workflow_dispatch:
+
+jobs:
+  test-preset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          format: 'console'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          preset: 'mcp-ox-2026-04'
+
+      - name: Assert scan completed with preset
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output is empty"
+            exit 1
+          fi
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: $FINDINGS"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 when fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: scan with preset completed successfully, findings=$FINDINGS"

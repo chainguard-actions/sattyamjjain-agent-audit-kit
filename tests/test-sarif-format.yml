@@ -1,0 +1,84 @@
+name: Test SARIF format output
+on:
+  workflow_dispatch:
+
+jobs:
+  test-sarif:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          format: 'sarif'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert sarif-file output is set
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "sarif-file: $SARIF_FILE"
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: sarif-file=$SARIF_FILE"
+
+      - name: Assert SARIF file exists in workspace
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking for SARIF file: $GITHUB_WORKSPACE/$SARIF_FILE"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF_FILE" ]; then
+            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF_FILE"
+            ls -la "$GITHUB_WORKSPACE/" || true
+            exit 1
+          fi
+          echo "PASS: SARIF file exists"
+
+      - name: Assert SARIF file is valid JSON
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Validating SARIF JSON..."
+          if ! python3 -c "import json; json.load(open('$GITHUB_WORKSPACE/$SARIF_FILE'))"; then
+            echo "FAIL: SARIF file is not valid JSON"
+            exit 1
+          fi
+          echo "PASS: SARIF file is valid JSON"
+
+      - name: Assert SARIF has expected structure
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking SARIF structure..."
+          python3 - <<'EOF'
+          import json, sys, os
+          sarif_path = os.path.join(os.environ['GITHUB_WORKSPACE'], os.environ['SARIF_FILE'])
+          with open(sarif_path) as f:
+              sarif = json.load(f)
+          if 'runs' not in sarif:
+              print("FAIL: SARIF missing 'runs' key")
+              sys.exit(1)
+          if '$schema' not in sarif and 'version' not in sarif:
+              print("FAIL: SARIF missing '$schema' or 'version' key")
+              sys.exit(1)
+          print(f"PASS: SARIF structure valid, runs={len(sarif['runs'])}")
+          EOF
+
+      - name: Assert exit-code is 0 when fail-on=none
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 when fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS"
