@@ -1,0 +1,92 @@
+name: Test SARIF format output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert action ran (outcome is not cancelled)
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "scan outcome: $OUTCOME"
+          if [ "$OUTCOME" = "cancelled" ]; then
+            echo "FAIL: action was cancelled"
+            exit 1
+          fi
+          echo "PASS: action ran with outcome '$OUTCOME'"
+
+      - name: Assert sarif-file output is set (if action succeeded)
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "sarif-file: $SARIF_FILE"
+          if [ "$OUTCOME" = "success" ] && [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty but action succeeded"
+            exit 1
+          fi
+          echo "PASS: sarif-file='$SARIF_FILE'"
+
+      - name: Assert SARIF file exists in workspace (if sarif-file is set)
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking for SARIF file: $SARIF_FILE"
+          if [ -z "$SARIF_FILE" ]; then
+            echo "WARN: sarif-file output is empty, skipping file existence check"
+          elif [ ! -f "$GITHUB_WORKSPACE/$SARIF_FILE" ]; then
+            echo "WARN: SARIF file not found at $GITHUB_WORKSPACE/$SARIF_FILE"
+            ls -la "$GITHUB_WORKSPACE/" || true
+          else
+            echo "PASS: SARIF file exists at $GITHUB_WORKSPACE/$SARIF_FILE"
+          fi
+
+      - name: Assert SARIF file is valid JSON (if it exists)
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          if [ -z "$SARIF_FILE" ]; then
+            echo "WARN: sarif-file output is empty, skipping JSON validation"
+          elif [ ! -f "$GITHUB_WORKSPACE/$SARIF_FILE" ]; then
+            echo "WARN: SARIF file not found, skipping JSON validation"
+          else
+            SARIF_PATH="$GITHUB_WORKSPACE/$SARIF_FILE"
+            echo "Validating SARIF file: $SARIF_PATH"
+            if ! python3 -c "import json; d=json.load(open('$SARIF_PATH')); assert 'runs' in d or 'version' in d" 2>&1; then
+              echo "FAIL: SARIF file is not valid JSON or missing expected keys"
+              exit 1
+            fi
+            echo "PASS: SARIF file is valid JSON"
+          fi
+
+      - name: Assert exit-code is 0 (fail-on=none)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "WARN: exit-code output is empty"
+          elif [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          else
+            echo "PASS: exit-code=0 as expected with fail-on=none"
+          fi

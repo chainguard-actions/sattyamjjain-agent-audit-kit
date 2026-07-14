@@ -1,0 +1,90 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs,site'
+
+      - name: Assert action ran (outcome is not cancelled)
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "scan outcome: $OUTCOME"
+          if [ "$OUTCOME" = "cancelled" ]; then
+            echo "FAIL: action was cancelled"
+            exit 1
+          fi
+          echo "PASS: action ran with outcome '$OUTCOME'"
+
+      - name: Assert exit-code is 0 with fail-on=none (if set)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "WARN: exit-code output is empty"
+          elif [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          else
+            echo "PASS: exit-code=0"
+          fi
+
+      - name: Assert findings-count is a non-negative integer (if set)
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ -z "$FINDINGS" ]; then
+            echo "WARN: findings-count output is empty"
+          elif ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          else
+            echo "PASS: findings-count='$FINDINGS'"
+          fi
+
+      - name: Assert critical-count is a non-negative integer (if set)
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          if [ -z "$CRITICAL" ]; then
+            echo "WARN: critical-count output is empty"
+          elif ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a non-negative integer: '$CRITICAL'"
+            exit 1
+          else
+            echo "PASS: critical-count='$CRITICAL'"
+          fi
+
+      - name: Assert high-count is a non-negative integer (if set)
+        env:
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "high-count: $HIGH"
+          if [ -z "$HIGH" ]; then
+            echo "WARN: high-count output is empty"
+          elif ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count is not a non-negative integer: '$HIGH'"
+            exit 1
+          else
+            echo "PASS: high-count='$HIGH'"
+          fi

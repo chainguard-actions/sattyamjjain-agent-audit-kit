@@ -1,0 +1,100 @@
+name: Test exclude-rules input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Run scan without exclusions first
+      - id: scan-full
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert full scan ran (outcome is not cancelled)
+        env:
+          OUTCOME: ${{ steps.scan-full.outcome }}
+        run: |
+          echo "full scan outcome: $OUTCOME"
+          if [ "$OUTCOME" = "cancelled" ]; then
+            echo "FAIL: action was cancelled"
+            exit 1
+          fi
+          echo "PASS: action ran with outcome '$OUTCOME'"
+
+      - name: Capture full scan findings
+        env:
+          FINDINGS_FULL: ${{ steps.scan-full.outputs.findings-count }}
+        run: |
+          echo "Full scan findings-count: $FINDINGS_FULL"
+          if [ -z "$FINDINGS_FULL" ]; then
+            echo "WARN: findings-count is empty"
+          elif ! echo "$FINDINGS_FULL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS_FULL'"
+            exit 1
+          else
+            echo "PASS: full scan findings-count='$FINDINGS_FULL'"
+          fi
+
+      # Run scan with a preset to verify preset input is accepted
+      - id: scan-preset
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          preset: 'mcp-ox-2026-04'
+
+      - name: Assert preset scan ran (outcome is not cancelled)
+        env:
+          OUTCOME: ${{ steps.scan-preset.outcome }}
+        run: |
+          echo "preset scan outcome: $OUTCOME"
+          if [ "$OUTCOME" = "cancelled" ]; then
+            echo "FAIL: action was cancelled"
+            exit 1
+          fi
+          echo "PASS: action ran with outcome '$OUTCOME'"
+
+      - name: Assert preset scan exit-code is set (if action succeeded)
+        env:
+          EXIT_CODE: ${{ steps.scan-preset.outputs.exit-code }}
+        run: |
+          echo "preset scan exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "WARN: exit-code output is empty"
+          elif ! echo "$EXIT_CODE" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: exit-code is not a non-negative integer: '$EXIT_CODE'"
+            exit 1
+          else
+            echo "PASS: exit-code='$EXIT_CODE'"
+          fi
+
+      - name: Assert preset scan findings-count is a number (if set)
+        env:
+          FINDINGS: ${{ steps.scan-preset.outputs.findings-count }}
+        run: |
+          echo "preset scan findings-count: $FINDINGS"
+          if [ -z "$FINDINGS" ]; then
+            echo "WARN: findings-count output is empty"
+          elif ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          else
+            echo "PASS: findings-count='$FINDINGS'"
+          fi

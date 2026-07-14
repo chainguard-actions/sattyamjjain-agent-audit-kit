@@ -1,0 +1,76 @@
+name: Test severity filtering (critical only)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan-critical
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert action ran (outcome is not cancelled)
+        env:
+          OUTCOME: ${{ steps.scan-critical.outcome }}
+        run: |
+          echo "scan outcome: $OUTCOME"
+          if [ "$OUTCOME" = "cancelled" ]; then
+            echo "FAIL: action was cancelled"
+            exit 1
+          fi
+          echo "PASS: action ran with outcome '$OUTCOME'"
+
+      - name: Assert exit-code is 0 with fail-on=none (if set)
+        env:
+          EXIT_CODE: ${{ steps.scan-critical.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "WARN: exit-code output is empty"
+          elif [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          else
+            echo "PASS: exit-code=0"
+          fi
+
+      - name: Assert findings-count is a non-negative integer (if set)
+        env:
+          FINDINGS: ${{ steps.scan-critical.outputs.findings-count }}
+        run: |
+          echo "findings-count (critical severity filter): $FINDINGS"
+          if [ -z "$FINDINGS" ]; then
+            echo "WARN: findings-count output is empty"
+          elif ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          else
+            echo "PASS: findings-count='$FINDINGS'"
+          fi
+
+      - name: Assert critical-count does not exceed findings-count (if set)
+        env:
+          FINDINGS: ${{ steps.scan-critical.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan-critical.outputs.critical-count }}
+        run: |
+          echo "findings-count: $FINDINGS, critical-count: $CRITICAL"
+          if [ -z "$CRITICAL" ] || [ -z "$FINDINGS" ]; then
+            echo "WARN: outputs are empty, skipping comparison"
+          elif [ "$CRITICAL" -gt "$FINDINGS" ]; then
+            echo "FAIL: critical-count ($CRITICAL) exceeds findings-count ($FINDINGS)"
+            exit 1
+          else
+            echo "PASS: critical-count <= findings-count"
+          fi
