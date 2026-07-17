@@ -76,8 +76,8 @@ jobs:
 
       - name: Publish to gh-pages
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           cd pages_staging
           git init -q
@@ -86,5 +86,5 @@ jobs:
           git checkout -b gh-pages
           git add .
           git commit -q -m "snapshot: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force origin gh-pages

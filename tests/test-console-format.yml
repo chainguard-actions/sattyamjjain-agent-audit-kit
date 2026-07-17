@@ -1,4 +1,4 @@
-name: Test ignore-paths input
+name: Test console output format with critical severity filter
 on:
   workflow_dispatch:
 
@@ -12,15 +12,15 @@ jobs:
         uses: .
         with:
           path: '.'
-          severity: 'low'
+          severity: 'critical'
           fail-on: 'none'
-          format: 'sarif'
+          format: 'console'
           upload-sarif: 'false'
           comment-on-pr: 'false'
-          ignore-paths: 'tests,docs,examples'
           fingerprint-strategy: 'disabled'
+        continue-on-error: true
 
-      - name: Assert exit-code is set and numeric
+      - name: Assert exit-code output is set
         env:
           EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
         run: |
@@ -44,9 +44,9 @@ jobs:
             echo "FAIL: expected exit-code 0 with fail-on=none, got '$EXIT_CODE'"
             exit 1
           fi
-          echo "PASS: exit-code is 0"
+          echo "PASS: exit-code is 0 as expected with fail-on=none"
 
-      - name: Assert findings-count is numeric
+      - name: Assert findings-count is set and numeric
         env:
           FINDINGS: ${{ steps.scan.outputs.findings-count }}
         run: |
@@ -60,22 +60,3 @@ jobs:
             exit 1
           fi
           echo "PASS: findings-count is '$FINDINGS'"
-
-      - name: Assert SARIF file exists and is valid JSON
-        env:
-          SARIF: ${{ steps.scan.outputs.sarif-file }}
-        run: |
-          echo "sarif-file: $SARIF"
-          if [ -z "$SARIF" ]; then
-            echo "FAIL: sarif-file output was not set"
-            exit 1
-          fi
-          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
-            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF"
-            exit 1
-          fi
-          if ! python3 -c "import json; json.load(open('$GITHUB_WORKSPACE/$SARIF'))"; then
-            echo "FAIL: SARIF file is not valid JSON"
-            exit 1
-          fi
-          echo "PASS: SARIF file exists and is valid JSON"

@@ -1,9 +1,9 @@
-name: Test ignore-paths input
+name: Test fingerprint-strategy options
 on:
   workflow_dispatch:
 
 jobs:
-  test:
+  test-line-hash:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -17,23 +17,7 @@ jobs:
           format: 'sarif'
           upload-sarif: 'false'
           comment-on-pr: 'false'
-          ignore-paths: 'tests,docs,examples'
-          fingerprint-strategy: 'disabled'
-
-      - name: Assert exit-code is set and numeric
-        env:
-          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
-        run: |
-          echo "exit-code: $EXIT_CODE"
-          if [ -z "$EXIT_CODE" ]; then
-            echo "FAIL: exit-code output was not set"
-            exit 1
-          fi
-          if ! echo "$EXIT_CODE" | grep -qE '^[0-9]+$'; then
-            echo "FAIL: exit-code '$EXIT_CODE' is not numeric"
-            exit 1
-          fi
-          echo "PASS: exit-code is '$EXIT_CODE'"
+          fingerprint-strategy: 'line-hash'
 
       - name: Assert exit-code is 0 with fail-on=none
         env:
@@ -46,30 +30,53 @@ jobs:
           fi
           echo "PASS: exit-code is 0"
 
-      - name: Assert findings-count is numeric
+      - name: Assert SARIF file is valid JSON
         env:
-          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
         run: |
-          echo "findings-count: $FINDINGS"
-          if [ -z "$FINDINGS" ]; then
-            echo "FAIL: findings-count output was not set"
+          echo "sarif-file: $SARIF"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
+            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF"
             exit 1
           fi
-          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
-            echo "FAIL: findings-count '$FINDINGS' is not numeric"
+          if ! python3 -c "import json; json.load(open('$GITHUB_WORKSPACE/$SARIF'))"; then
+            echo "FAIL: SARIF file is not valid JSON"
             exit 1
           fi
-          echo "PASS: findings-count is '$FINDINGS'"
+          echo "PASS: SARIF is valid JSON"
+
+  test-disabled:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert exit-code is 0 with fail-on=none and disabled fingerprints
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code is 0"
 
       - name: Assert SARIF file exists and is valid JSON
         env:
           SARIF: ${{ steps.scan.outputs.sarif-file }}
         run: |
           echo "sarif-file: $SARIF"
-          if [ -z "$SARIF" ]; then
-            echo "FAIL: sarif-file output was not set"
-            exit 1
-          fi
           if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
             echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF"
             exit 1

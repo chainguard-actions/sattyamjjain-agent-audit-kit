@@ -1,18 +1,15 @@
 name: Test fail-on=none always passes
 on:
   workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_EVENT_NAME: push
-      GITHUB_REF: refs/heads/main
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - id: scan
         uses: .
-        continue-on-error: true
         with:
           path: '.'
           severity: 'low'
@@ -22,72 +19,50 @@ jobs:
           comment-on-pr: 'false'
           fingerprint-strategy: 'disabled'
 
-      - name: Assert action ran (outcome is not cancelled)
-        env:
-          OUTCOME: ${{ steps.scan.outcome }}
-        run: |
-          echo "scan outcome: $OUTCOME"
-          if [ "$OUTCOME" = "cancelled" ]; then
-            echo "FAIL: action was cancelled"
-            exit 1
-          fi
-          echo "PASS: action ran with outcome '$OUTCOME'"
-
-      - name: Assert exit-code is 0 when fail-on=none (if set)
+      - name: Assert action succeeded (exit-code 0 with fail-on=none)
         env:
           EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
         run: |
           echo "exit-code: $EXIT_CODE"
-          if [ -z "$EXIT_CODE" ]; then
-            echo "WARN: exit-code output is empty (action may have errored)"
-          elif [ "$EXIT_CODE" != "0" ]; then
-            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on=none, got '$EXIT_CODE'"
             exit 1
-          else
-            echo "PASS: exit-code=0 as expected"
           fi
+          echo "PASS: action exited with code 0 as expected"
 
-      - name: Assert all numeric outputs are valid (if set)
+      - name: Assert findings-count is a non-negative integer
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count '$FINDINGS' is not a non-negative integer"
+            exit 1
+          fi
+          echo "PASS: findings-count is '$FINDINGS'"
+
+      - name: Assert critical-count does not exceed findings-count
         env:
           FINDINGS: ${{ steps.scan.outputs.findings-count }}
           CRITICAL: ${{ steps.scan.outputs.critical-count }}
-          HIGH: ${{ steps.scan.outputs.high-count }}
         run: |
           echo "findings-count: $FINDINGS"
           echo "critical-count: $CRITICAL"
-          echo "high-count: $HIGH"
-
-          for VAR in "$FINDINGS" "$CRITICAL" "$HIGH"; do
-            if [ -z "$VAR" ]; then
-              echo "WARN: output '$VAR' is empty"
-              continue
-            fi
-            if ! echo "$VAR" | grep -qE '^[0-9]+$'; then
-              echo "FAIL: output '$VAR' is not a non-negative integer"
-              exit 1
-            fi
-          done
-
-          if [ -n "$CRITICAL" ] && [ -n "$FINDINGS" ] && [ "$CRITICAL" -gt "$FINDINGS" ]; then
-            echo "FAIL: critical-count ($CRITICAL) > findings-count ($FINDINGS)"
+          if [ "$CRITICAL" -gt "$FINDINGS" ]; then
+            echo "FAIL: critical-count ($CRITICAL) exceeds findings-count ($FINDINGS)"
             exit 1
           fi
-          if [ -n "$HIGH" ] && [ -n "$FINDINGS" ] && [ "$HIGH" -gt "$FINDINGS" ]; then
-            echo "FAIL: high-count ($HIGH) > findings-count ($FINDINGS)"
-            exit 1
-          fi
+          echo "PASS: critical-count ($CRITICAL) <= findings-count ($FINDINGS)"
 
-          echo "PASS: all numeric outputs are valid"
-
-      - name: Assert sarif-file output is set (if action succeeded)
+      - name: Assert high-count does not exceed findings-count
         env:
-          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
-          OUTCOME: ${{ steps.scan.outcome }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
         run: |
-          echo "sarif-file: $SARIF_FILE"
-          echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "success" ] && [ -z "$SARIF_FILE" ]; then
-            echo "FAIL: sarif-file output is empty but action succeeded"
+          echo "findings-count: $FINDINGS"
+          echo "high-count: $HIGH"
+          if [ "$HIGH" -gt "$FINDINGS" ]; then
+            echo "FAIL: high-count ($HIGH) exceeds findings-count ($FINDINGS)"
             exit 1
           fi
-          echo "PASS: sarif-file='$SARIF_FILE'"
+          echo "PASS: high-count ($HIGH) <= findings-count ($FINDINGS)"
