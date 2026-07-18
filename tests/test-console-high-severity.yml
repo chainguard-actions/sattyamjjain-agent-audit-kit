@@ -1,0 +1,36 @@
+name: Test console format with high severity filter
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'high'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+      - name: Assert critical-count and high-count outputs are set
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "findings-count: $FINDINGS"
+          if [ -z "$CRITICAL" ]; then
+            echo "FAIL: critical-count output was not set"
+            exit 1
+          fi
+          if [ -z "$HIGH" ]; then
+            echo "FAIL: high-count output was not set"
+            exit 1
+          fi
+          echo "PASS: critical=$CRITICAL high=$HIGH findings=$FINDINGS"

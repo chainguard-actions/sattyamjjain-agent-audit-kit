@@ -1,0 +1,52 @@
+name: Test severity filter and high severity threshold
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          format: 'console'
+          severity: 'high'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert exit-code is 0 (fail-on=none)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: exit-code=0"
+
+      - name: Assert findings-count is a number
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
+
+      - name: Assert high-count does not exceed findings-count
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "findings-count: $FINDINGS, high-count: $HIGH"
+          if [ "$HIGH" -gt "$FINDINGS" ]; then
+            echo "FAIL: high-count ($HIGH) exceeds findings-count ($FINDINGS)"
+            exit 1
+          fi
+          echo "PASS: high-count <= findings-count"

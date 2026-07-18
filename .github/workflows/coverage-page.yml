@@ -1,0 +1,42 @@
+name: coverage-page
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'agent_audit_kit/data/ox-cve-manifest.json'
+      - 'agent_audit_kit/data/prisma-airs-*.json'
+      - 'scripts/build_coverage_page.py'
+      - 'agent_audit_kit/coverage.py'
+      - 'agent_audit_kit/translators/prisma_airs.py'
+      - '.github/workflows/coverage-page.yml'
+  schedule:
+    - cron: '17 4 * * *'  # nightly 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Install AAK
+        run: pip install -e .
+      - name: Build coverage page
+        run: python scripts/build_coverage_page.py
+      - name: Commit + push
+        run: |
+          if ! git diff --quiet -- site/coverage/; then
+            git config user.name "aak-bot"
+            git config user.email "aak-bot@users.noreply.github.com"
+            git add site/coverage/
+            git commit -m "chore: refresh public coverage page"
+            git push
+          else
+            echo "no coverage-page change"
+          fi
