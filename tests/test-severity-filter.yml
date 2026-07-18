@@ -1,4 +1,4 @@
-name: Test basic scan with JSON format
+name: Test severity filter critical only
 on:
   workflow_dispatch:
 jobs:
@@ -11,37 +11,28 @@ jobs:
         with:
           path: '.'
           format: 'json'
-          severity: 'low'
+          severity: 'critical'
           fail-on: 'none'
           upload-sarif: 'false'
           comment-on-pr: 'false'
         continue-on-error: true
 
-      - name: Assert findings-count output is set
+      - name: Assert findings-count is a non-negative integer
         env:
           FINDINGS: ${{ steps.scan.outputs.findings-count }}
-          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
         run: |
           echo "findings-count: $FINDINGS"
-          echo "exit-code: $EXIT_CODE"
           if [ -z "$FINDINGS" ]; then
             echo "FAIL: findings-count output was not set"
             exit 1
           fi
-          echo "PASS: findings-count is set to '$FINDINGS'"
-
-      - name: Assert exit-code output is set
-        env:
-          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
-        run: |
-          echo "exit-code: $EXIT_CODE"
-          if [ -z "$EXIT_CODE" ]; then
-            echo "FAIL: exit-code output was not set"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count '$FINDINGS' is not a non-negative integer"
             exit 1
           fi
-          echo "PASS: exit-code is set to '$EXIT_CODE'"
+          echo "PASS: findings-count='$FINDINGS' is a valid non-negative integer"
 
-      - name: Assert critical-count output is set
+      - name: Assert critical-count is a non-negative integer
         env:
           CRITICAL: ${{ steps.scan.outputs.critical-count }}
         run: |
@@ -50,9 +41,13 @@ jobs:
             echo "FAIL: critical-count output was not set"
             exit 1
           fi
-          echo "PASS: critical-count is set to '$CRITICAL'"
+          if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count '$CRITICAL' is not a non-negative integer"
+            exit 1
+          fi
+          echo "PASS: critical-count='$CRITICAL' is a valid non-negative integer"
 
-      - name: Assert high-count output is set
+      - name: Assert high-count is a non-negative integer
         env:
           HIGH: ${{ steps.scan.outputs.high-count }}
         run: |
@@ -61,4 +56,8 @@ jobs:
             echo "FAIL: high-count output was not set"
             exit 1
           fi
-          echo "PASS: high-count is set to '$HIGH'"
+          if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count '$HIGH' is not a non-negative integer"
+            exit 1
+          fi
+          echo "PASS: high-count='$HIGH' is a valid non-negative integer"
