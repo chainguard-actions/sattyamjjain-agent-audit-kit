@@ -1,0 +1,58 @@
+name: Test exclude-rules and ignore-paths inputs
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: 'tests/fixtures/clean-project'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: '.git,node_modules'
+
+      - name: Assert scan completed without error
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2 (unexpected error)"
+            exit 1
+          fi
+          if ! echo "$EXIT_CODE" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: exit-code '$EXIT_CODE' is not numeric"
+            exit 1
+          fi
+          echo "PASS: scan completed without error, exit-code=$EXIT_CODE"
+
+      - name: Assert all outputs are set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF"
+          FAILED=0
+          for VAR in "$FINDINGS" "$CRITICAL" "$HIGH" "$SARIF"; do
+            if [ -z "$VAR" ]; then
+              echo "FAIL: one or more outputs are empty"
+              FAILED=1
+            fi
+          done
+          if [ "$FAILED" = "1" ]; then
+            exit 1
+          fi
+          echo "PASS: all outputs are set"

@@ -1,9 +1,9 @@
-name: Test basic scan (default settings)
+name: Test basic scan with defaults
 on:
   workflow_dispatch:
 
 jobs:
-  test-basic:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -11,7 +11,7 @@ jobs:
       - id: scan
         uses: .
         with:
-          path: '.'
+          path: 'tests/fixtures/clean-project'
           severity: 'low'
           fail-on: 'none'
           format: 'sarif'
@@ -27,7 +27,7 @@ jobs:
             echo "FAIL: exit-code output was not set"
             exit 1
           fi
-          echo "PASS: exit-code is '$EXIT_CODE'"
+          echo "PASS: exit-code output is set to '$EXIT_CODE'"
 
       - name: Assert findings-count output is set
         env:
@@ -38,7 +38,29 @@ jobs:
             echo "FAIL: findings-count output was not set"
             exit 1
           fi
-          echo "PASS: findings-count is '$FINDINGS'"
+          echo "PASS: findings-count output is set to '$FINDINGS'"
+
+      - name: Assert critical-count output is set
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          if [ -z "$CRITICAL" ]; then
+            echo "FAIL: critical-count output was not set"
+            exit 1
+          fi
+          echo "PASS: critical-count output is set to '$CRITICAL'"
+
+      - name: Assert high-count output is set
+        env:
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "high-count: $HIGH"
+          if [ -z "$HIGH" ]; then
+            echo "FAIL: high-count output was not set"
+            exit 1
+          fi
+          echo "PASS: high-count output is set to '$HIGH'"
 
       - name: Assert sarif-file output is set
         env:
@@ -49,14 +71,15 @@ jobs:
             echo "FAIL: sarif-file output was not set"
             exit 1
           fi
-          echo "PASS: sarif-file is '$SARIF'"
+          echo "PASS: sarif-file output is set to '$SARIF'"
 
       - name: Assert SARIF file exists in workspace
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
         run: |
-          SARIF_PATH="${GITHUB_WORKSPACE}/agent-audit-results.sarif"
-          echo "Checking for SARIF file at: $SARIF_PATH"
-          if [ ! -f "$SARIF_PATH" ]; then
-            echo "FAIL: SARIF file not found at $SARIF_PATH"
+          echo "Checking for SARIF file: $GITHUB_WORKSPACE/$SARIF"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
+            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF"
             exit 1
           fi
           echo "PASS: SARIF file exists"

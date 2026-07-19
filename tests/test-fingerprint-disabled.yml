@@ -1,0 +1,62 @@
+name: Test fingerprint-strategy disabled
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: 'tests/fixtures/clean-project'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert scan completed without error
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2"
+            exit 1
+          fi
+          if ! echo "$EXIT_CODE" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: exit-code '$EXIT_CODE' is not numeric"
+            exit 1
+          fi
+          echo "PASS: scan completed, exit-code=$EXIT_CODE"
+
+      - name: Assert SARIF file exists and is valid JSON
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/$SARIF"
+          echo "Checking SARIF file at: $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found at $SARIF_PATH"
+            exit 1
+          fi
+          if ! python3 -c "import json; json.load(open('$SARIF_PATH'))" 2>/dev/null; then
+            echo "FAIL: SARIF file is not valid JSON"
+            exit 1
+          fi
+          echo "PASS: SARIF file exists and is valid JSON"
+
+      - name: Assert findings-count is numeric
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count '$FINDINGS' is not numeric"
+            exit 1
+          fi
+          echo "PASS: findings-count is numeric: $FINDINGS"

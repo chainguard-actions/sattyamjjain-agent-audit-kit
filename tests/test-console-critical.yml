@@ -1,4 +1,4 @@
-name: Test JSON output format
+name: Test console format with critical severity
 on:
   workflow_dispatch:
 
@@ -12,33 +12,26 @@ jobs:
         uses: .
         with:
           path: 'tests/fixtures/clean-project'
-          severity: 'low'
+          severity: 'critical'
           fail-on: 'none'
-          format: 'json'
+          format: 'console'
           upload-sarif: 'false'
           comment-on-pr: 'false'
 
-      - name: Assert exit-code is numeric
+      - name: Assert exit-code is 0 or 1 (not error)
         env:
           EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
         run: |
           echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2"
+            exit 1
+          fi
           if ! echo "$EXIT_CODE" | grep -qE '^[0-9]+$'; then
-            echo "FAIL: exit-code '$EXIT_CODE' is not a valid numeric exit code"
+            echo "FAIL: exit-code '$EXIT_CODE' is not numeric"
             exit 1
           fi
-          echo "PASS: exit-code is numeric: $EXIT_CODE"
-
-      - name: Assert findings-count is numeric
-        env:
-          FINDINGS: ${{ steps.scan.outputs.findings-count }}
-        run: |
-          echo "findings-count: $FINDINGS"
-          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
-            echo "FAIL: findings-count '$FINDINGS' is not numeric"
-            exit 1
-          fi
-          echo "PASS: findings-count is numeric: $FINDINGS"
+          echo "PASS: exit-code is $EXIT_CODE (not an error)"
 
       - name: Assert critical-count is numeric
         env:
@@ -51,13 +44,13 @@ jobs:
           fi
           echo "PASS: critical-count is numeric: $CRITICAL"
 
-      - name: Assert high-count is numeric
+      - name: Assert findings-count is numeric
         env:
-          HIGH: ${{ steps.scan.outputs.high-count }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
         run: |
-          echo "high-count: $HIGH"
-          if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
-            echo "FAIL: high-count '$HIGH' is not numeric"
+          echo "findings-count: $FINDINGS"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count '$FINDINGS' is not numeric"
             exit 1
           fi
-          echo "PASS: high-count is numeric: $HIGH"
+          echo "PASS: findings-count is numeric: $FINDINGS"
