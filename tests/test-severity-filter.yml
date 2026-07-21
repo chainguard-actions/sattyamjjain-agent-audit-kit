@@ -1,0 +1,55 @@
+name: Test severity filtering (critical only)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Scan with critical severity filter
+        id: scan-critical
+        uses: .
+        with:
+          path: '.'
+          format: 'sarif'
+          severity: 'critical'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert critical scan outputs are set
+        env:
+          FINDINGS: ${{ steps.scan-critical.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan-critical.outputs.critical-count }}
+          HIGH: ${{ steps.scan-critical.outputs.high-count }}
+          EXIT_CODE: ${{ steps.scan-critical.outputs.exit-code }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "exit-code: $EXIT_CODE"
+
+          # All outputs must be set
+          for var in FINDINGS CRITICAL HIGH EXIT_CODE; do
+            val="${!var}"
+            if [ -z "$val" ]; then
+              echo "FAIL: $var output was not set"
+              exit 1
+            fi
+          done
+
+          # With severity=critical, high-count should be 0 (only critical reported)
+          if [ "$HIGH" != "0" ]; then
+            echo "FAIL: expected high-count=0 when severity=critical, got $HIGH"
+            exit 1
+          fi
+
+          # exit-code should be 0 with fail-on=none
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+
+          echo "PASS: severity filter working correctly"

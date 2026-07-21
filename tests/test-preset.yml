@@ -1,0 +1,52 @@
+name: Test preset-based scanning (mcp-ox-2026-04)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          format: 'sarif'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          preset: 'mcp-ox-2026-04'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert scan completed with preset
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "exit-code: $EXIT_CODE"
+          echo "sarif-file: $SARIF_FILE"
+
+          # All outputs must be set
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output was not set"
+            exit 1
+          fi
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output was not set"
+            exit 1
+          fi
+
+          # exit-code should be 0 with fail-on=none
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+
+          echo "PASS: preset scan completed successfully"

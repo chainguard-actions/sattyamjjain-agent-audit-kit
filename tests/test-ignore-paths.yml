@@ -1,0 +1,71 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Scan without ignore-paths
+        id: scan-full
+        uses: .
+        with:
+          path: '.'
+          format: 'sarif'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Scan with ignore-paths (ignore tests directory)
+        id: scan-filtered
+        uses: .
+        with:
+          path: '.'
+          format: 'sarif'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert both scans completed successfully
+        env:
+          FULL_FINDINGS: ${{ steps.scan-full.outputs.findings-count }}
+          FULL_EXIT: ${{ steps.scan-full.outputs.exit-code }}
+          FILTERED_FINDINGS: ${{ steps.scan-filtered.outputs.findings-count }}
+          FILTERED_EXIT: ${{ steps.scan-filtered.outputs.exit-code }}
+        run: |
+          echo "Full scan findings: $FULL_FINDINGS (exit: $FULL_EXIT)"
+          echo "Filtered scan findings: $FILTERED_FINDINGS (exit: $FILTERED_EXIT)"
+
+          # Both scans must produce numeric findings counts
+          if ! echo "$FULL_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: full scan findings-count is not numeric: $FULL_FINDINGS"
+            exit 1
+          fi
+          if ! echo "$FILTERED_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: filtered scan findings-count is not numeric: $FILTERED_FINDINGS"
+            exit 1
+          fi
+
+          # Both exit codes should be 0 with fail-on=none
+          if [ "$FULL_EXIT" != "0" ]; then
+            echo "FAIL: full scan exit-code should be 0, got $FULL_EXIT"
+            exit 1
+          fi
+          if [ "$FILTERED_EXIT" != "0" ]; then
+            echo "FAIL: filtered scan exit-code should be 0, got $FILTERED_EXIT"
+            exit 1
+          fi
+
+          # Filtered scan should have <= findings than full scan
+          if [ "$FILTERED_FINDINGS" -gt "$FULL_FINDINGS" ]; then
+            echo "FAIL: filtered scan ($FILTERED_FINDINGS) has more findings than full scan ($FULL_FINDINGS)"
+            exit 1
+          fi
+
+          echo "PASS: ignore-paths working correctly"
