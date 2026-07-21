@@ -1,0 +1,53 @@
+name: Test console output format
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert exit-code output is valid
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if ! echo "$EXIT_CODE" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: exit-code is not a valid integer: '$EXIT_CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code is valid"
+
+      - name: Assert findings-count output is a number
+        env:
+          FINDINGS_COUNT: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS_COUNT"
+          if ! echo "$FINDINGS_COUNT" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS_COUNT'"
+            exit 1
+          fi
+          echo "PASS: findings-count is a valid number"
+
+      - name: Assert critical-count output is a number
+        env:
+          CRITICAL_COUNT: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "critical-count: $CRITICAL_COUNT"
+          if ! echo "$CRITICAL_COUNT" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a non-negative integer: '$CRITICAL_COUNT'"
+            exit 1
+          fi
+          echo "PASS: critical-count is a valid number"

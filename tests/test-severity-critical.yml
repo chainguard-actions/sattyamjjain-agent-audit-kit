@@ -1,0 +1,58 @@
+name: Test critical severity filter
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert exit-code is 0 (fail-on=none)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 when fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code is 0"
+
+      - name: Assert findings-count is a non-negative integer
+        env:
+          FINDINGS_COUNT: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS_COUNT"
+          if ! echo "$FINDINGS_COUNT" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS_COUNT'"
+            exit 1
+          fi
+          echo "PASS: findings-count='$FINDINGS_COUNT' is a valid number"
+
+      - name: Assert critical-count does not exceed findings-count
+        env:
+          FINDINGS_COUNT: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL_COUNT: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "findings-count: $FINDINGS_COUNT"
+          echo "critical-count: $CRITICAL_COUNT"
+          if ! echo "$CRITICAL_COUNT" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a valid integer: '$CRITICAL_COUNT'"
+            exit 1
+          fi
+          if [ "$CRITICAL_COUNT" -gt "$FINDINGS_COUNT" ]; then
+            echo "FAIL: critical-count ($CRITICAL_COUNT) exceeds findings-count ($FINDINGS_COUNT)"
+            exit 1
+          fi
+          echo "PASS: critical-count ($CRITICAL_COUNT) <= findings-count ($FINDINGS_COUNT)"
