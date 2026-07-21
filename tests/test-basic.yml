@@ -1,0 +1,81 @@
+name: Test basic scan with default settings
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert findings-count output is set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "exit-code: $EXIT_CODE"
+          echo "sarif-file: $SARIF_FILE"
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output was not set"
+            exit 1
+          fi
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output was not set"
+            exit 1
+          fi
+          echo "PASS: all outputs are set"
+
+      - name: Assert sarif-file output value is correct
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "sarif-file: $SARIF_FILE"
+          if [ "$SARIF_FILE" != "agent-audit-results.sarif" ]; then
+            echo "FAIL: expected sarif-file='agent-audit-results.sarif', got '$SARIF_FILE'"
+            exit 1
+          fi
+          echo "PASS"
+
+      - name: Assert SARIF file was copied to workspace
+        run: |
+          if [ ! -f "$GITHUB_WORKSPACE/agent-audit-results.sarif" ]; then
+            echo "FAIL: SARIF file not found in workspace"
+            exit 1
+          fi
+          echo "PASS: SARIF file exists at $GITHUB_WORKSPACE/agent-audit-results.sarif"
+
+      - name: Assert SARIF file is valid JSON
+        run: |
+          python3 -c "
+          import json
+          with open('$GITHUB_WORKSPACE/agent-audit-results.sarif') as f:
+              sarif = json.load(f)
+          assert 'runs' in sarif, 'SARIF missing runs key'
+          print('PASS: SARIF is valid JSON with runs key')
+          "

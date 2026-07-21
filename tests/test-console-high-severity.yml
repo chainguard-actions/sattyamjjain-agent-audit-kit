@@ -1,0 +1,38 @@
+name: Test console format with high severity filter
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'high'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+      - name: Assert findings-count output is set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output was not set"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
+      - name: Assert exit-code output is set
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
