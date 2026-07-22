@@ -25,11 +25,11 @@ jobs:
       - name: Update GitHub repo description
         env:
           GH_TOKEN: ${{ secrets.METADATA_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
-          GH_REPOSITORY: ${{ github.repository }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           desc="$(python scripts/sync_repo_metadata.py --description)"
           if [ -n "${GH_TOKEN:-}" ]; then
-            gh repo edit "$GH_REPOSITORY" --description "$desc" || true
+            gh repo edit "$REPOSITORY" --description "$desc" || true
           else
             echo "no GH_TOKEN available, skipping repo-edit"
           fi

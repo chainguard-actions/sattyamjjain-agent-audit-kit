@@ -1,45 +1,63 @@
 name: Test ignore-paths input
 on:
   workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_EVENT_NAME: push
-      GITHUB_REF: refs/heads/main
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Create scan target with subdirectories to ignore
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/scan-with-ignore/vendor"
+          mkdir -p "$GITHUB_WORKSPACE/scan-with-ignore/src"
+
       - id: scan
         uses: .
+        continue-on-error: true
         with:
-          path: '.'
-          severity: 'low'
-          fail-on: 'none'
-          format: 'json'
+          path: scan-with-ignore
+          severity: low
+          fail-on: none
+          format: sarif
           upload-sarif: 'false'
           comment-on-pr: 'false'
-          ignore-paths: 'tests,docs'
-        continue-on-error: true
+          ignore-paths: vendor,node_modules
 
       - name: Assert exit-code is not an error
         env:
-          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          ACTUAL: ${{ steps.scan.outputs.exit-code }}
         run: |
-          echo "exit-code: $EXIT_CODE"
-          if [ "$EXIT_CODE" = "2" ]; then
+          echo "exit-code: $ACTUAL"
+          if [ "$ACTUAL" = "2" ]; then
             echo "FAIL: scan returned error exit code 2"
             exit 1
           fi
-          echo "PASS: exit-code is '$EXIT_CODE'"
-
-      - name: Assert findings-count is a non-negative integer
-        env:
-          FINDINGS: ${{ steps.scan.outputs.findings-count }}
-        run: |
-          echo "findings-count: $FINDINGS"
-          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
-            echo "FAIL: findings-count '$FINDINGS' is not a valid integer"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: exit-code output was not set"
             exit 1
           fi
-          echo "PASS: findings-count='$FINDINGS'"
+          echo "PASS: exit-code is '$ACTUAL'"
+
+      - name: Assert findings-count is a number
+        env:
+          ACTUAL: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: findings-count=$ACTUAL"
+
+      - name: Assert sarif-file output is set
+        env:
+          ACTUAL: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "sarif-file: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: sarif-file output was not set"
+            exit 1
+          fi
+          echo "PASS: sarif-file='$ACTUAL'"

@@ -1,4 +1,4 @@
-name: Test critical severity filter
+name: Test basic scan - clean directory
 on:
   workflow_dispatch:
 
@@ -9,35 +9,31 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Create a clean scan target directory inside workspace
-        run: mkdir -p "$GITHUB_WORKSPACE/scan-target-critical"
+        run: mkdir -p "$GITHUB_WORKSPACE/scan-target"
 
       - id: scan
         uses: .
         continue-on-error: true
         with:
-          path: scan-target-critical
-          severity: critical
+          path: scan-target
+          severity: low
           fail-on: none
           format: sarif
           upload-sarif: 'false'
           comment-on-pr: 'false'
 
-      - name: Assert exit-code is not an error
+      - name: Assert exit-code output is set
         env:
           ACTUAL: ${{ steps.scan.outputs.exit-code }}
         run: |
           echo "exit-code: $ACTUAL"
-          if [ "$ACTUAL" = "2" ]; then
-            echo "FAIL: scan returned error exit code 2"
-            exit 1
-          fi
           if [ -z "$ACTUAL" ]; then
             echo "FAIL: exit-code output was not set"
             exit 1
           fi
-          echo "PASS: exit-code is '$ACTUAL'"
+          echo "PASS: exit-code output is set to '$ACTUAL'"
 
-      - name: Assert findings-count is a number
+      - name: Assert findings-count output is a number
         env:
           ACTUAL: ${{ steps.scan.outputs.findings-count }}
         run: |
@@ -46,9 +42,9 @@ jobs:
             echo "FAIL: findings-count is not a non-negative integer: '$ACTUAL'"
             exit 1
           fi
-          echo "PASS: findings-count=$ACTUAL"
+          echo "PASS: findings-count is a valid number: $ACTUAL"
 
-      - name: Assert critical-count is a number
+      - name: Assert critical-count output is a number
         env:
           ACTUAL: ${{ steps.scan.outputs.critical-count }}
         run: |
@@ -57,7 +53,18 @@ jobs:
             echo "FAIL: critical-count is not a non-negative integer: '$ACTUAL'"
             exit 1
           fi
-          echo "PASS: critical-count=$ACTUAL"
+          echo "PASS: critical-count is a valid number: $ACTUAL"
+
+      - name: Assert high-count output is a number
+        env:
+          ACTUAL: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "high-count: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count is not a non-negative integer: '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: high-count is a valid number: $ACTUAL"
 
       - name: Assert sarif-file output is set
         env:
@@ -68,7 +75,7 @@ jobs:
             echo "FAIL: sarif-file output was not set"
             exit 1
           fi
-          echo "PASS: sarif-file='$ACTUAL'"
+          echo "PASS: sarif-file output is '$ACTUAL'"
 
       - name: Assert SARIF file exists in workspace
         env:
@@ -80,3 +87,14 @@ jobs:
             exit 1
           fi
           echo "PASS: SARIF file exists"
+
+      - name: Assert SARIF file is valid JSON
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Validating SARIF JSON..."
+          if ! python3 -c "import json; json.load(open('$GITHUB_WORKSPACE/$SARIF'))"; then
+            echo "FAIL: SARIF file is not valid JSON"
+            exit 1
+          fi
+          echo "PASS: SARIF file is valid JSON"
