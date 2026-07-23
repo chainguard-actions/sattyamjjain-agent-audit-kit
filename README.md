@@ -17,6 +17,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v0.3.50 | [`v0.3.50`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.50) | [`4c7a4ce`](https://github.com/sattyamjjain/agent-audit-kit/commit/4c7a4ce127150afb3079cabd92dc11c9da033e45) |
 | v0.3.56 | [`v0.3.56`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.56) | [`6e31355`](https://github.com/sattyamjjain/agent-audit-kit/commit/6e31355694774d9f3ba7d41aaa7b67812900d103) |
 | v0.3.57 | [`v0.3.57`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.57) | [`74ece7b`](https://github.com/sattyamjjain/agent-audit-kit/commit/74ece7b9d245364f5f3824442ae9bae0b5fcb4a2) |
+| v0.3.58 | [`v0.3.58`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.58) | [`d103e32`](https://github.com/sattyamjjain/agent-audit-kit/commit/d103e32804c79ac65b4251042eb23c92014e0f97) |
 
 ## Privacy
 
