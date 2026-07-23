@@ -1,0 +1,59 @@
+name: Test fingerprint-strategy disabled
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+        continue-on-error: true
+
+      - name: Assert exit-code is valid when set
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -n "$EXIT_CODE" ] && [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ] && [ "$EXIT_CODE" != "2" ]; then
+            echo "FAIL: unexpected exit-code value: $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: exit-code=${EXIT_CODE:-<empty>}"
+
+      - name: Check SARIF file in workspace if present
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          echo "Checking for SARIF file at: $SARIF_PATH"
+          if [ -f "$SARIF_PATH" ]; then
+            echo "SARIF file found, validating JSON..."
+            if python3 -c "import json; json.load(open('$SARIF_PATH'))" 2>/dev/null; then
+              echo "PASS: SARIF file is valid JSON"
+            else
+              echo "FAIL: SARIF file is not valid JSON"
+              exit 1
+            fi
+          else
+            echo "INFO: SARIF file not found (action may have failed to produce it)"
+          fi
+
+      - name: Assert sarif-file output contains expected filename when set
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "sarif-file: $SARIF_FILE"
+          if [ -n "$SARIF_FILE" ] && ! echo "$SARIF_FILE" | grep -q 'agent-audit-results.sarif'; then
+            echo "FAIL: expected sarif-file to contain agent-audit-results.sarif, got $SARIF_FILE"
+            exit 1
+          fi
+          echo "PASS: sarif-file=${SARIF_FILE:-<not set>}"

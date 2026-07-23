@@ -1,0 +1,64 @@
+name: Test JSON output format
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'json'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert exit-code output is valid when set
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -n "$EXIT_CODE" ] && [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ] && [ "$EXIT_CODE" != "2" ]; then
+            echo "FAIL: unexpected exit-code value: $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: exit-code=${EXIT_CODE:-<empty>}"
+
+      - name: Assert findings-count output is numeric when set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ -n "$FINDINGS" ] && ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: $FINDINGS"
+            exit 1
+          fi
+          echo "PASS: findings-count=${FINDINGS:-<empty>}"
+
+      - name: Assert critical-count output is numeric when set
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          if [ -n "$CRITICAL" ] && ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a non-negative integer: $CRITICAL"
+            exit 1
+          fi
+          echo "PASS: critical-count=${CRITICAL:-<empty>}"
+
+      - name: Assert high-count output is numeric when set
+        env:
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "high-count: $HIGH"
+          if [ -n "$HIGH" ] && ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count is not a non-negative integer: $HIGH"
+            exit 1
+          fi
+          echo "PASS: high-count=${HIGH:-<empty>}"

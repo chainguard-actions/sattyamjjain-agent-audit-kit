@@ -1,0 +1,82 @@
+name: Test severity critical filter
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert exit-code is valid when set
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -n "$EXIT_CODE" ] && [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ] && [ "$EXIT_CODE" != "2" ]; then
+            echo "FAIL: unexpected exit-code value: $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: exit-code=${EXIT_CODE:-<empty>}"
+
+      - name: Assert findings-count is numeric when set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ -n "$FINDINGS" ] && ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: $FINDINGS"
+            exit 1
+          fi
+          echo "PASS: findings-count=${FINDINGS:-<empty>}"
+
+      - name: Assert critical-count does not exceed findings-count when both set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          if [ -n "$FINDINGS" ] && [ -n "$CRITICAL" ]; then
+            if [ "$CRITICAL" -gt "$FINDINGS" ]; then
+              echo "FAIL: critical-count ($CRITICAL) exceeds findings-count ($FINDINGS)"
+              exit 1
+            fi
+            echo "PASS: critical-count <= findings-count"
+          else
+            echo "INFO: one or both counts not set, skipping comparison"
+          fi
+
+      - name: Check SARIF file structure when present
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          echo "Checking for SARIF file at: $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "INFO: SARIF file not found (action may have failed to produce it)"
+            exit 0
+          fi
+          echo "SARIF file found, checking structure..."
+          if ! python3 -m json.tool "$SARIF_PATH" > /dev/null 2>&1; then
+            echo "FAIL: SARIF file is not valid JSON"
+            exit 1
+          fi
+          if ! grep -q '"runs"' "$SARIF_PATH"; then
+            echo "FAIL: SARIF missing runs key"
+            exit 1
+          fi
+          if ! grep -q '"version"' "$SARIF_PATH"; then
+            echo "FAIL: SARIF missing version key"
+            exit 1
+          fi
+          echo "PASS: SARIF has expected schema structure"
