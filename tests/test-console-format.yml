@@ -1,0 +1,54 @@
+name: Test console output format
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'high'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert scan completed with console format
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          # With fail-on=none, exit code must be 0
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          # All count outputs must be non-negative integers
+          for val in "$FINDINGS" "$CRITICAL" "$HIGH"; do
+            if ! echo "$val" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: count output is not a non-negative integer: '$val'"
+              exit 1
+            fi
+          done
+          echo "PASS: console format scan completed, exit-code=0, all counts are valid integers"

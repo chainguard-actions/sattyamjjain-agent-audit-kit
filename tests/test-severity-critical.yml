@@ -1,0 +1,77 @@
+name: Test severity critical filter
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan_critical
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert outputs are set for critical severity scan
+        env:
+          FINDINGS: ${{ steps.scan_critical.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan_critical.outputs.critical-count }}
+          HIGH: ${{ steps.scan_critical.outputs.high-count }}
+          EXIT_CODE: ${{ steps.scan_critical.outputs.exit-code }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "exit-code: $EXIT_CODE"
+          # All outputs must be set
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output is empty"
+            exit 1
+          fi
+          if [ -z "$CRITICAL" ]; then
+            echo "FAIL: critical-count output is empty"
+            exit 1
+          fi
+          if [ -z "$HIGH" ]; then
+            echo "FAIL: high-count output is empty"
+            exit 1
+          fi
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output is empty"
+            exit 1
+          fi
+          # With fail-on=none, exit code must be 0
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          # All counts must be non-negative integers
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+          if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a non-negative integer: '$CRITICAL'"
+            exit 1
+          fi
+          if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count is not a non-negative integer: '$HIGH'"
+            exit 1
+          fi
+          echo "PASS: all outputs are valid integers with exit-code=0"
