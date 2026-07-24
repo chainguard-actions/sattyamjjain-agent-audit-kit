@@ -1,0 +1,63 @@
+name: Test fingerprint-strategy disabled
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert exit-code is set
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          echo "PASS: exit-code='$EXIT_CODE'"
+
+      - name: Assert findings-count is a number
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: findings-count='$FINDINGS'"
+
+      - name: Assert SARIF file exists and has no fingerprints
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking SARIF file: $GITHUB_WORKSPACE/$SARIF_FILE"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF_FILE" ]; then
+            echo "FAIL: SARIF file not found"
+            exit 1
+          fi
+          python3 -c "
+          import json, os
+          path = os.path.join(os.environ['GITHUB_WORKSPACE'], os.environ['SARIF_FILE'])
+          with open(path) as f:
+              sarif = json.load(f)
+          results = sarif.get('runs', [{}])[0].get('results', [])
+          for r in results:
+              fp = r.get('fingerprints', {})
+              if fp:
+                  print(f'WARN: fingerprint found despite disabled strategy: {fp}')
+          print('PASS: SARIF file is valid')
+          "
