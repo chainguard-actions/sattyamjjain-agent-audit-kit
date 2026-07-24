@@ -1,0 +1,56 @@
+name: Test critical severity filter
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert exit-code is 0 (fail-on=none)
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 when fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code is 0"
+
+      - name: Assert findings-count is a non-negative integer
+        env:
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count '$FINDINGS' is not a valid non-negative integer"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS (only critical severity reported)"
+
+      - name: Assert critical-count does not exceed findings-count
+        env:
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          CRITICAL: ${{ steps.action.outputs.critical-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count '$CRITICAL' is not a valid non-negative integer"
+            exit 1
+          fi
+          if [ "$CRITICAL" -gt "$FINDINGS" ]; then
+            echo "FAIL: critical-count ($CRITICAL) cannot exceed findings-count ($FINDINGS)"
+            exit 1
+          fi
+          echo "PASS: critical-count=$CRITICAL <= findings-count=$FINDINGS"
