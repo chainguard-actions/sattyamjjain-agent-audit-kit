@@ -8,6 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
+| v0.3.23 | [`v0.3.23`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.23) | [`f78eb8c`](https://github.com/sattyamjjain/agent-audit-kit/commit/f78eb8c49516b437fcf6d9d02684ae147b21d6f1) |
 | v0.3.24 | [`v0.3.24`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.24) | [`c29c46b`](https://github.com/sattyamjjain/agent-audit-kit/commit/c29c46b7c919e567a1581d00aefe4f0ab859c596) |
 | v0.3.25 | [`v0.3.25`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.25) | [`692c8f6`](https://github.com/sattyamjjain/agent-audit-kit/commit/692c8f6fafd49ef8c284d26fa2917a49bcdfe626) |
 | v0.3.26 | [`v0.3.26`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.26) | [`b95cb29`](https://github.com/sattyamjjain/agent-audit-kit/commit/b95cb29eef2c1e71f93ecde2f242341740a9dbcf) |
