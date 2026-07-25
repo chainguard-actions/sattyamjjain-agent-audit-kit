@@ -1,0 +1,41 @@
+name: Test console format output
+on:
+  workflow_dispatch:
+
+jobs:
+  test-console-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert exit-code is 0 (no findings exceed threshold with fail-on=none)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: exit-code=0"
+
+      - name: Assert findings-count is a number
+        env:
+          FINDINGS_COUNT: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS_COUNT"
+          if ! echo "$FINDINGS_COUNT" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count '$FINDINGS_COUNT' is not a non-negative integer"
+            exit 1
+          fi
+          echo "PASS: findings-count is a valid number"
