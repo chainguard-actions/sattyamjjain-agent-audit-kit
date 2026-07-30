@@ -1,0 +1,78 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - name: Create a clean directory with no agent configs to scan
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/clean-dir"
+          echo "# empty project" > "$GITHUB_WORKSPACE/tests/fixtures/clean-dir/README.md"
+
+      - id: scan
+        uses: .
+        with:
+          path: 'tests/fixtures/clean-dir'
+          severity: 'low'
+          fail-on: 'high'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert exit-code is 0 for clean directory (no findings)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 for clean directory, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: exit-code=0 for clean directory"
+
+      - name: Assert findings-count is 0 for clean directory
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ "$FINDINGS" != "0" ]; then
+            echo "FAIL: expected 0 findings for clean directory, got $FINDINGS"
+            exit 1
+          fi
+          echo "PASS: findings-count=0 for clean directory"
+
+      - name: Assert critical-count is 0 for clean directory
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          if [ "$CRITICAL" != "0" ]; then
+            echo "FAIL: expected 0 critical findings for clean directory, got $CRITICAL"
+            exit 1
+          fi
+          echo "PASS: critical-count=0 for clean directory"
+
+      - name: Assert high-count is 0 for clean directory
+        env:
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "high-count: $HIGH"
+          if [ "$HIGH" != "0" ]; then
+            echo "FAIL: expected 0 high findings for clean directory, got $HIGH"
+            exit 1
+          fi
+          echo "PASS: high-count=0 for clean directory"
