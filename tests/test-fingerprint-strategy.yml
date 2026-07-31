@@ -1,0 +1,75 @@
+name: Test fingerprint-strategy options
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan-disabled
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+        continue-on-error: true
+
+      - name: Assert scan with fingerprint-strategy=disabled did not error
+        env:
+          EXIT_CODE: ${{ steps.scan-disabled.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2 with fingerprint-strategy=disabled"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
+
+      - name: Assert SARIF file is valid JSON with fingerprint-strategy=disabled
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          echo "Checking for SARIF file at: $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found at $SARIF_PATH"
+            exit 1
+          fi
+          python3 -c "import json; data=json.load(open('$SARIF_PATH')); print('runs:', len(data.get('runs', [])))" \
+            && echo "PASS: SARIF is valid JSON" \
+            || { echo "FAIL: SARIF is not valid JSON"; exit 1; }
+
+      - id: scan-line-hash
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'line-hash'
+        continue-on-error: true
+
+      - name: Assert scan with fingerprint-strategy=line-hash did not error
+        env:
+          EXIT_CODE: ${{ steps.scan-line-hash.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2 with fingerprint-strategy=line-hash"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"

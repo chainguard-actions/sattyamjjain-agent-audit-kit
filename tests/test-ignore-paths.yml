@@ -1,0 +1,58 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan-ignore
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs,examples'
+        continue-on-error: true
+
+      - name: Assert scan with ignore-paths did not error
+        env:
+          EXIT_CODE: ${{ steps.scan-ignore.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2 with ignore-paths"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
+
+      - name: Assert findings-count is a number
+        env:
+          FINDINGS: ${{ steps.scan-ignore.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a number: $FINDINGS"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
+
+      - name: Assert SARIF file is valid JSON
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found at $SARIF_PATH"
+            exit 1
+          fi
+          python3 -c "import json; data=json.load(open('$SARIF_PATH')); runs=data.get('runs',[]); print('SARIF runs:', len(runs))" \
+            && echo "PASS: SARIF is valid JSON" \
+            || { echo "FAIL: SARIF is not valid JSON"; exit 1; }

@@ -1,0 +1,72 @@
+name: Test JSON format output
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'json'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert exit-code output is valid
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
+
+      - name: Assert findings-count output is a number
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output was not set"
+            exit 1
+          fi
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a number: $FINDINGS"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
+
+      - name: Assert critical-count is a number
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a number: $CRITICAL"
+            exit 1
+          fi
+          echo "PASS: critical-count=$CRITICAL"
+
+      - name: Assert high-count is a number
+        env:
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "high-count: $HIGH"
+          if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count is not a number: $HIGH"
+            exit 1
+          fi
+          echo "PASS: high-count=$HIGH"
