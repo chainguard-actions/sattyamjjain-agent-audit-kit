@@ -1,0 +1,73 @@
+name: Test scan with ignore-paths and exclude-rules
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ignore-paths:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'node_modules,.git,venv'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert exit-code is 0 (fail-on none)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: exit-code=0"
+
+      - name: Assert all outputs are numeric
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          for val in "$FINDINGS" "$CRITICAL" "$HIGH"; do
+            if ! echo "$val" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: output '$val' is not a non-negative integer"
+              exit 1
+            fi
+          done
+          echo "PASS: all count outputs are numeric"
+
+      - name: Assert SARIF file exists in workspace
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking for SARIF file: $SARIF"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
+            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF"
+            exit 1
+          fi
+          # Validate it is valid JSON
+          python3 -c "import json; json.load(open('$GITHUB_WORKSPACE/$SARIF'))" && \
+            echo "PASS: SARIF file is valid JSON" || \
+            { echo "FAIL: SARIF file is not valid JSON"; exit 1; }

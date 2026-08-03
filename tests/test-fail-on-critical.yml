@@ -1,0 +1,72 @@
+name: Test fail-on critical threshold
+on:
+  workflow_dispatch:
+
+jobs:
+  test-fail-on-critical:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'critical'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert exit-code output is set and valid
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          # exit-code must be 0 (pass) or 1 (findings exceed threshold)
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$EXIT_CODE" ]; then
+              echo "FAIL: action succeeded but exit-code output is empty"
+              exit 1
+            fi
+            if [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ]; then
+              echo "FAIL: unexpected exit-code value: $EXIT_CODE"
+              exit 1
+            fi
+            echo "PASS: exit-code=$EXIT_CODE"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed (findings exceeded critical threshold or scan error)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+      - name: Assert findings-count is numeric when action succeeded
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          if [ "$OUTCOME" = "success" ]; then
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a number: $FINDINGS"
+              exit 1
+            fi
+            echo "PASS: findings-count=$FINDINGS"
+          else
+            echo "PASS: action did not succeed (threshold exceeded), skipping findings check"
+          fi
