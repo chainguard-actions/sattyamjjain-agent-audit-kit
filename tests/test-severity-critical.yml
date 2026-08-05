@@ -1,0 +1,74 @@
+name: Test severity critical threshold
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'critical'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert scan with critical severity threshold
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "exit-code: $EXIT_CODE"
+          echo "sarif-file: $SARIF_FILE"
+
+          # The action should either succeed (no critical findings) or fail gracefully
+          # with exit code 1 (critical findings found). Exit code 2 would be an error.
+          if [ "$OUTCOME" = "failure" ]; then
+            # Check if it's a scan failure (exit code 1) vs an error (exit code 2)
+            if [ "$EXIT_CODE" = "2" ] || [ -z "$EXIT_CODE" ]; then
+              echo "FAIL: action errored unexpectedly (exit-code=$EXIT_CODE)"
+              exit 1
+            fi
+            echo "PASS: action failed due to critical findings (expected behavior)"
+          else
+            echo "PASS: action succeeded (no critical findings)"
+          fi
+
+          # sarif-file output should be set
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: sarif-file output is '$SARIF_FILE'"
+
+          # findings-count should be a number
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a number: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: findings-count is '$FINDINGS'"
+
+          echo "ALL ASSERTIONS PASSED"
