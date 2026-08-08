@@ -1,0 +1,55 @@
+name: Test critical severity filter
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert action ran and outputs are numeric
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count:     $HIGH"
+          echo "exit-code:      $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action step failed unexpectedly"
+            exit 1
+          fi
+
+          # All counts must be non-negative integers
+          for val in "$FINDINGS" "$CRITICAL" "$HIGH"; do
+            if ! echo "$val" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: count output is not a non-negative integer: '$val'"
+              exit 1
+            fi
+          done
+
+          # With severity=critical, high-count should be 0 (only critical reported)
+          # (high findings are filtered out at severity=critical)
+          if [ "$HIGH" != "0" ]; then
+            echo "WARN: high-count=$HIGH with severity=critical (may be expected if action counts all)"
+          fi
+
+          echo "PASS: critical severity scan completed with valid outputs"

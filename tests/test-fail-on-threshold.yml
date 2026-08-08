@@ -1,0 +1,77 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Scan with fail-on=none — should always exit 0
+      - id: scan-no-fail
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert fail-on=none always exits 0
+        env:
+          OUTCOME: ${{ steps.scan-no-fail.outcome }}
+          EXIT_CODE: ${{ steps.scan-no-fail.outputs.exit-code }}
+        run: |
+          echo "outcome:   $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action step failed unexpectedly with fail-on=none"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: fail-on=none produced exit-code=0"
+
+      # Scan with fail-on=critical — should exit 0 if no critical findings
+      - id: scan-fail-critical
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'critical'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert fail-on=critical produces valid exit code
+        env:
+          OUTCOME: ${{ steps.scan-fail-critical.outcome }}
+          EXIT_CODE: ${{ steps.scan-fail-critical.outputs.exit-code }}
+          CRITICAL: ${{ steps.scan-fail-critical.outputs.critical-count }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "exit-code:      $EXIT_CODE"
+          echo "critical-count: $CRITICAL"
+
+          # exit-code must be 0 or 1 (not 2=error)
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: action returned error exit-code=2"
+            exit 1
+          fi
+
+          # If no critical findings, exit code must be 0
+          if [ "$CRITICAL" = "0" ] && [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: no critical findings but exit-code=$EXIT_CODE (expected 0)"
+            exit 1
+          fi
+
+          echo "PASS: fail-on=critical produced valid exit-code=$EXIT_CODE"
