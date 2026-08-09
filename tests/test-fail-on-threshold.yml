@@ -1,0 +1,77 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Scan with fail-on=none — should always exit 0 regardless of findings
+      - id: scan-none
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert fail-on=none always exits 0
+        env:
+          EXIT_CODE: ${{ steps.scan-none.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-none.outcome }}
+        run: |
+          echo "outcome:   $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action step itself failed unexpectedly with fail-on=none"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on=none, got: '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: fail-on=none correctly exits 0"
+
+      # Scan with fail-on=critical — exit code should be 0 or 1 (valid scan result)
+      - id: scan-critical
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'critical'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert fail-on=critical produces valid exit code
+        env:
+          EXIT_CODE: ${{ steps.scan-critical.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan-critical.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan-critical.outputs.critical-count }}
+          OUTCOME: ${{ steps.scan-critical.outcome }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "exit-code:      $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+
+          # exit-code must be 0 or 1 (not 2 = error)
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2"
+            exit 1
+          fi
+
+          if ! echo "$EXIT_CODE" | grep -qE '^[01]$'; then
+            echo "FAIL: unexpected exit-code: '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: fail-on=critical produced valid exit code $EXIT_CODE"

@@ -1,0 +1,91 @@
+name: Test exclude-rules and severity filtering
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Scan with high severity filter — only report high and above
+      - id: scan-high-severity
+        uses: .
+        with:
+          path: '.'
+          severity: 'high'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert high-severity scan completed
+        env:
+          FINDINGS: ${{ steps.scan-high-severity.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan-high-severity.outputs.critical-count }}
+          HIGH: ${{ steps.scan-high-severity.outputs.high-count }}
+          EXIT_CODE: ${{ steps.scan-high-severity.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-high-severity.outcome }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count:     $HIGH"
+          echo "exit-code:      $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action step itself failed unexpectedly"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on=none, got: '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: high-severity scan completed successfully"
+
+      # Scan with ignore-paths to skip the tests directory
+      - id: scan-ignore-paths
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs'
+        continue-on-error: true
+
+      - name: Assert ignore-paths scan completed
+        env:
+          FINDINGS: ${{ steps.scan-ignore-paths.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan-ignore-paths.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-ignore-paths.outcome }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "exit-code:      $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action step itself failed unexpectedly with ignore-paths"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on=none, got: '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: ignore-paths scan completed successfully"
