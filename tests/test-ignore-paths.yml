@@ -1,0 +1,84 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan-all
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - id: scan-ignore
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs'
+        continue-on-error: true
+
+      - name: Assert both scans completed successfully
+        env:
+          OUTCOME_ALL: ${{ steps.scan-all.outcome }}
+          OUTCOME_IGNORE: ${{ steps.scan-ignore.outcome }}
+          FINDINGS_ALL: ${{ steps.scan-all.outputs.findings-count }}
+          FINDINGS_IGNORE: ${{ steps.scan-ignore.outputs.findings-count }}
+        run: |
+          echo "scan-all outcome: $OUTCOME_ALL"
+          echo "scan-ignore outcome: $OUTCOME_IGNORE"
+          echo "scan-all findings: $FINDINGS_ALL"
+          echo "scan-ignore findings: $FINDINGS_IGNORE"
+
+          # Both scans should succeed with fail-on: none
+          if [ "$OUTCOME_ALL" != "success" ]; then
+            echo "FAIL: scan-all expected success but got '$OUTCOME_ALL'"
+            exit 1
+          fi
+
+          if [ "$OUTCOME_IGNORE" != "success" ]; then
+            echo "FAIL: scan-ignore expected success but got '$OUTCOME_IGNORE'"
+            exit 1
+          fi
+
+          # Both findings counts should be non-negative integers
+          if ! echo "$FINDINGS_ALL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: scan-all findings-count '$FINDINGS_ALL' is not a non-negative integer"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS_IGNORE" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: scan-ignore findings-count '$FINDINGS_IGNORE' is not a non-negative integer"
+            exit 1
+          fi
+
+          # Scan with ignore-paths should have <= findings than full scan
+          if [ "$FINDINGS_IGNORE" -gt "$FINDINGS_ALL" ]; then
+            echo "FAIL: scan with ignore-paths ($FINDINGS_IGNORE) has more findings than full scan ($FINDINGS_ALL)"
+            exit 1
+          fi
+
+          echo "PASS: ignore-paths correctly reduces or maintains finding count"

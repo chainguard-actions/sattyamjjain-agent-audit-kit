@@ -1,0 +1,65 @@
+name: Test JSON output format
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'json'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert scan completed
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+
+          # With fail-on: none, the scan should always succeed
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success with fail-on=none but got '$OUTCOME'"
+            exit 1
+          fi
+
+          # exit-code should be 0 (pass) or 1 (findings) or 2 (error)
+          if ! echo "$EXIT_CODE" | grep -qE '^[0-2]$'; then
+            echo "FAIL: exit-code '$EXIT_CODE' is not 0, 1, or 2"
+            exit 1
+          fi
+
+          echo "PASS: JSON format scan completed successfully"
+
+      - name: Assert findings-count is numeric
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count '$FINDINGS' is not a non-negative integer"
+            exit 1
+          fi
+          echo "PASS: findings-count is numeric"
