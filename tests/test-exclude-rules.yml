@@ -1,0 +1,86 @@
+name: Test exclude-rules input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      # Scan with all rules
+      - id: scan-all
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      # Scan with some rules excluded — findings should be <= all-rules scan
+      - id: scan-excluded
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          exclude-rules: 'MCP-001,MCP-002,MCP-003'
+        continue-on-error: true
+
+      - name: Assert exclude-rules reduces or maintains findings count
+        env:
+          ALL_FINDINGS: ${{ steps.scan-all.outputs.findings-count }}
+          EXCL_FINDINGS: ${{ steps.scan-excluded.outputs.findings-count }}
+          ALL_EXIT: ${{ steps.scan-all.outputs.exit-code }}
+          EXCL_EXIT: ${{ steps.scan-excluded.outputs.exit-code }}
+          ALL_OUTCOME: ${{ steps.scan-all.outcome }}
+          EXCL_OUTCOME: ${{ steps.scan-excluded.outcome }}
+        run: |
+          echo "all-rules outcome:      $ALL_OUTCOME"
+          echo "excluded-rules outcome: $EXCL_OUTCOME"
+          echo "all-rules findings:     $ALL_FINDINGS"
+          echo "excluded findings:      $EXCL_FINDINGS"
+          echo "all-rules exit-code:    $ALL_EXIT"
+          echo "excluded exit-code:     $EXCL_EXIT"
+
+          # Both scans should complete (success or failure due to findings threshold)
+          if [ "$ALL_OUTCOME" != "success" ] && [ "$ALL_OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected all-rules outcome '$ALL_OUTCOME'"
+            exit 1
+          fi
+          if [ "$EXCL_OUTCOME" != "success" ] && [ "$EXCL_OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected excluded-rules outcome '$EXCL_OUTCOME'"
+            exit 1
+          fi
+
+          # Both should produce numeric findings counts
+          if ! echo "$ALL_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: all-rules findings-count is not numeric: '$ALL_FINDINGS'"
+            exit 1
+          fi
+          if ! echo "$EXCL_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: excluded findings-count is not numeric: '$EXCL_FINDINGS'"
+            exit 1
+          fi
+
+          # Excluded scan should have <= findings than all-rules scan
+          if [ "$EXCL_FINDINGS" -gt "$ALL_FINDINGS" ]; then
+            echo "FAIL: excluded-rules scan ($EXCL_FINDINGS) has more findings than all-rules scan ($ALL_FINDINGS)"
+            exit 1
+          fi
+          echo "PASS: excluded-rules findings ($EXCL_FINDINGS) <= all-rules findings ($ALL_FINDINGS)"

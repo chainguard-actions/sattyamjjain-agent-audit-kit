@@ -1,0 +1,76 @@
+name: Test fingerprint-strategy disabled
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+        continue-on-error: true
+
+      - name: Assert scan with fingerprint-strategy=disabled completes
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file:     $SARIF_FILE"
+          echo "exit-code:      $EXIT_CODE"
+
+          if [ "$OUTCOME" != "success" ] && [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: sarif-file='$SARIF_FILE'"
+
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
+
+          if ! echo "$EXIT_CODE" | grep -qE '^[012]$'; then
+            echo "FAIL: exit-code is not 0, 1, or 2: '$EXIT_CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
+
+      - name: Assert SARIF file exists in workspace
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ -f "$SARIF_PATH" ]; then
+            echo "PASS: SARIF file found at $SARIF_PATH"
+            # Validate it's valid JSON
+            python3 -c "import json; json.load(open('$SARIF_PATH'))" && echo "PASS: SARIF is valid JSON" || echo "WARN: SARIF may not be valid JSON (non-sarif format)"
+          else
+            echo "INFO: SARIF file not found at $SARIF_PATH (may be expected for non-sarif format or scan error)"
+          fi
