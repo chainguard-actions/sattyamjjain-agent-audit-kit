@@ -1,0 +1,45 @@
+name: Test fail-on none (never fail)
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert step succeeded (fail-on=none means never fail)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+
+          # With fail-on=none, the action should always exit 0
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: action exited with 0 as expected with fail-on=none"

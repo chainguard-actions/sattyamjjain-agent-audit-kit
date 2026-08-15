@@ -1,0 +1,100 @@
+name: Test basic SARIF scan
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert outputs are set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF_FILE"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: scan step failed unexpectedly"
+            exit 1
+          fi
+
+          # findings-count should be a non-negative integer
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+
+          # critical-count should be a non-negative integer
+          if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a non-negative integer: '$CRITICAL'"
+            exit 1
+          fi
+
+          # high-count should be a non-negative integer
+          if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count is not a non-negative integer: '$HIGH'"
+            exit 1
+          fi
+
+          # sarif-file output should be set
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: sarif-file output is '$SARIF_FILE'"
+
+          # exit-code should be 0 (pass) or 1 (findings) since fail-on=none
+          if [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ]; then
+            echo "FAIL: unexpected exit-code '$EXIT_CODE' (expected 0 or 1)"
+            exit 1
+          fi
+
+          echo "PASS: all outputs are set correctly"
+
+      - name: Assert SARIF file exists in workspace
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          echo "Checking for SARIF file at: $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found at $SARIF_PATH"
+            exit 1
+          fi
+          echo "PASS: SARIF file exists"
+
+          # Validate it's valid JSON
+          python3 -c "import json; json.load(open('$SARIF_PATH'))" && echo "PASS: SARIF is valid JSON" || {
+            echo "FAIL: SARIF file is not valid JSON"
+            exit 1
+          }

@@ -1,0 +1,89 @@
+name: Test exclude-rules input
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      # First scan: full scan (no exclusions)
+      - id: scan-full
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      # Second scan: with some rules excluded
+      - id: scan-excluded
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          exclude-rules: 'MCP-001,MCP-002'
+        continue-on-error: true
+
+      - name: Assert both scans ran and exclusion had effect or no error
+        env:
+          FULL_FINDINGS: ${{ steps.scan-full.outputs.findings-count }}
+          EXCLUDED_FINDINGS: ${{ steps.scan-excluded.outputs.findings-count }}
+          FULL_OUTCOME: ${{ steps.scan-full.outcome }}
+          EXCLUDED_OUTCOME: ${{ steps.scan-excluded.outcome }}
+          FULL_EXIT: ${{ steps.scan-full.outputs.exit-code }}
+          EXCLUDED_EXIT: ${{ steps.scan-excluded.outputs.exit-code }}
+        run: |
+          echo "full scan outcome: $FULL_OUTCOME"
+          echo "excluded scan outcome: $EXCLUDED_OUTCOME"
+          echo "full findings: $FULL_FINDINGS"
+          echo "excluded findings: $EXCLUDED_FINDINGS"
+          echo "full exit-code: $FULL_EXIT"
+          echo "excluded exit-code: $EXCLUDED_EXIT"
+
+          if [ "$FULL_OUTCOME" = "failure" ]; then
+            echo "FAIL: full scan step failed unexpectedly"
+            exit 1
+          fi
+
+          if [ "$EXCLUDED_OUTCOME" = "failure" ]; then
+            echo "FAIL: excluded scan step failed unexpectedly"
+            exit 1
+          fi
+
+          # Both should produce non-negative integer findings
+          if ! echo "$FULL_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: full findings-count is not a non-negative integer: '$FULL_FINDINGS'"
+            exit 1
+          fi
+
+          if ! echo "$EXCLUDED_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: excluded findings-count is not a non-negative integer: '$EXCLUDED_FINDINGS'"
+            exit 1
+          fi
+
+          # Excluded scan should have <= findings than full scan
+          if [ "$EXCLUDED_FINDINGS" -gt "$FULL_FINDINGS" ] 2>/dev/null; then
+            echo "FAIL: excluded scan ($EXCLUDED_FINDINGS) has more findings than full scan ($FULL_FINDINGS)"
+            exit 1
+          fi
+
+          echo "PASS: exclude-rules works correctly (full=$FULL_FINDINGS, excluded=$EXCLUDED_FINDINGS)"
