@@ -1,0 +1,100 @@
+name: Test fail-on high threshold
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      # Run with fail-on=high (the default). The action may exit 0 or 1 depending
+      # on whether findings exceed the threshold. We allow both but not exit 2 (error).
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'high'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert exit-code is 0 or 1 (not an error)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          # exit-code=2 means a scan error; we should never see that
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit-code=2"
+            exit 1
+          fi
+          # outcome must be success or failure (not skipped)
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: unexpected outcome 'skipped'"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE (0=pass, 1=findings exceed threshold)"
+
+      - name: Assert all outputs are set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF"
+          echo "exit-code: $EXIT_CODE"
+          FAIL=0
+          [ -z "$FINDINGS" ] && echo "FAIL: findings-count is empty" && FAIL=1
+          [ -z "$CRITICAL" ] && echo "FAIL: critical-count is empty" && FAIL=1
+          [ -z "$HIGH" ] && echo "FAIL: high-count is empty" && FAIL=1
+          [ -z "$SARIF" ] && echo "FAIL: sarif-file is empty" && FAIL=1
+          [ -z "$EXIT_CODE" ] && echo "FAIL: exit-code is empty" && FAIL=1
+          if [ "$FAIL" -eq 1 ]; then
+            exit 1
+          fi
+          echo "PASS: all outputs are set"
+
+      - name: Assert SARIF file exists in workspace
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking for SARIF file: $GITHUB_WORKSPACE/$SARIF"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
+            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF"
+            exit 1
+          fi
+          echo "PASS: SARIF file exists"
+
+      - name: Assert SARIF is valid JSON
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          python3 -c "
+          import json, os
+          sarif_path = os.path.join(os.environ['GITHUB_WORKSPACE'], os.environ['SARIF'])
+          with open(sarif_path) as f:
+              sarif = json.load(f)
+          assert 'runs' in sarif, 'SARIF missing runs key'
+          results = sarif.get('runs', [{}])[0].get('results', [])
+          print('PASS: SARIF valid, result count:', len(results))
+          "
