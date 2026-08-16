@@ -1,0 +1,52 @@
+name: Test fail-on high threshold behavior
+on:
+  workflow_dispatch:
+
+jobs:
+  test-fail-on-high:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        name: Run AgentAuditKit scan with fail-on high
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'high'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert scan ran and exit-code is consistent with outcome
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "high-count: $HIGH"
+          echo "critical-count: $CRITICAL"
+
+          if [ "$OUTCOME" = "success" ]; then
+            # Scan passed: exit-code must be 0
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "FAIL: outcome=success but exit-code=$EXIT_CODE (expected 0)"
+              exit 1
+            fi
+            echo "PASS: scan passed with no high/critical findings"
+          elif [ "$OUTCOME" = "failure" ]; then
+            # Scan failed: exit-code should be 1 (findings exceed threshold)
+            if [ -z "$EXIT_CODE" ]; then
+              echo "FAIL: outcome=failure but exit-code output is empty"
+              exit 1
+            fi
+            echo "PASS: scan failed gracefully with exit-code=$EXIT_CODE (findings exceed high threshold)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

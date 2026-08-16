@@ -1,0 +1,86 @@
+name: Test basic scan with default settings
+on:
+  workflow_dispatch:
+
+jobs:
+  test-basic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        name: Run AgentAuditKit scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert findings-count output is set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output is empty"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
+
+      - name: Assert critical-count output is set
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          if [ -z "$CRITICAL" ]; then
+            echo "FAIL: critical-count output is empty"
+            exit 1
+          fi
+          echo "PASS: critical-count=$CRITICAL"
+
+      - name: Assert high-count output is set
+        env:
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "high-count: $HIGH"
+          if [ -z "$HIGH" ]; then
+            echo "FAIL: high-count output is empty"
+            exit 1
+          fi
+          echo "PASS: high-count=$HIGH"
+
+      - name: Assert sarif-file output is set
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "sarif-file: $SARIF"
+          if [ -z "$SARIF" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: sarif-file=$SARIF"
+
+      - name: Assert exit-code output is set
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output is empty"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
+
+      - name: Assert SARIF file exists in workspace
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking for SARIF file: $GITHUB_WORKSPACE/$SARIF"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
+            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF"
+            exit 1
+          fi
+          echo "PASS: SARIF file exists"

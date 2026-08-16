@@ -1,0 +1,60 @@
+name: Test critical severity filter
+on:
+  workflow_dispatch:
+
+jobs:
+  test-severity-critical:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        name: Run AgentAuditKit scan with critical severity only
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert outputs are set and valid
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF"
+          echo "exit-code: $EXIT_CODE"
+
+          # All outputs must be set
+          for name_val in "findings-count:$FINDINGS" "critical-count:$CRITICAL" "high-count:$HIGH" "sarif-file:$SARIF" "exit-code:$EXIT_CODE"; do
+            name="${name_val%%:*}"
+            val="${name_val#*:}"
+            if [ -z "$val" ]; then
+              echo "FAIL: output '$name' is empty"
+              exit 1
+            fi
+          done
+
+          # Counts must be non-negative integers
+          for val in "$FINDINGS" "$CRITICAL" "$HIGH"; do
+            if ! echo "$val" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: count '$val' is not a non-negative integer"
+              exit 1
+            fi
+          done
+
+          # With severity=critical, findings-count should be >= critical-count
+          if [ "$FINDINGS" -lt "$CRITICAL" ]; then
+            echo "FAIL: findings-count ($FINDINGS) < critical-count ($CRITICAL)"
+            exit 1
+          fi
+
+          echo "PASS: all outputs valid for critical severity filter"
