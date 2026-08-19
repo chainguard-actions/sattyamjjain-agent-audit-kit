@@ -1,0 +1,65 @@
+name: Test ignore-paths and exclude-rules inputs
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'node_modules,.git,vendor'
+          exclude-rules: ''
+
+      - name: Assert scan completed with ignore-paths set
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output is empty"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output is empty"
+            exit 1
+          fi
+          echo "PASS: scan completed with ignore-paths, exit-code=$EXIT_CODE, findings=$FINDINGS"
+
+      - name: Assert SARIF file is valid JSON with runs key
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found at $SARIF_PATH"
+            exit 1
+          fi
+          if ! python3 -c "import json,sys; d=json.load(open('$SARIF_PATH')); sys.exit(0 if 'runs' in d else 1)"; then
+            echo "FAIL: SARIF file is not valid JSON or missing runs key"
+            exit 1
+          fi
+          echo "PASS: SARIF file is valid JSON with runs key"
