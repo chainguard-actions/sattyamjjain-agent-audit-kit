@@ -40,6 +40,8 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v0.3.78 | [`v0.3.78`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.78) | [`598f6f5`](https://github.com/sattyamjjain/agent-audit-kit/commit/598f6f55b8ba6f85c40c484caa8175a28bef7598) |
 | v0.3.79 | [`v0.3.79`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.79) | [`197ec05`](https://github.com/sattyamjjain/agent-audit-kit/commit/197ec05e7ef6fecabbf7611cf7c85d9dc536861f) |
 | v0.3.80 | [`v0.3.80`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.80) | [`a56ce38`](https://github.com/sattyamjjain/agent-audit-kit/commit/a56ce38f52ef8a5af0ded7ad24741087bbe56ef1) |
+| v0.3.82 | [`v0.3.82`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.82) | [`4c1900d`](https://github.com/sattyamjjain/agent-audit-kit/commit/4c1900da556950adeeb44e164485dcdb9e986e87) |
+| v0.3.83 | [`v0.3.83`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.83) | [`f178091`](https://github.com/sattyamjjain/agent-audit-kit/commit/f178091f35f10735d9dc8403b31f63ab30c3638c) |
 
 ## Privacy
 
