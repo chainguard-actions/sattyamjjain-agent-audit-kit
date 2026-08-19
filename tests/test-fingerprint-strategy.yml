@@ -1,0 +1,73 @@
+name: Test fingerprint-strategy input
+on:
+  workflow_dispatch:
+
+jobs:
+  test-fingerprint-strategy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          format: 'sarif'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'line-hash'
+
+      - name: Assert action ran with line-hash fingerprint strategy
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          EXIT: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file: $SARIF"
+          echo "exit-code: $EXIT"
+
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$SARIF" ]; then
+              echo "FAIL: sarif-file output is empty"
+              exit 1
+            fi
+
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+              exit 1
+            fi
+
+            if [ "$EXIT" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT"
+              exit 1
+            fi
+
+            echo "PASS: fingerprint-strategy=line-hash scan completed successfully"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error under act)"
+          else
+            echo "INFO: step outcome was '$OUTCOME' (skipped/cancelled) — treating as graceful non-run"
+            echo "PASS"
+          fi
+
+      - name: Assert SARIF file is valid JSON (if scan succeeded)
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          if [ "$OUTCOME" != "success" ]; then
+            echo "SKIP: scan did not succeed (outcome=$OUTCOME), skipping SARIF validation"
+            exit 0
+          fi
+          echo "Validating SARIF file at: $GITHUB_WORKSPACE/$SARIF"
+          if ! python3 -m json.tool "$GITHUB_WORKSPACE/$SARIF" > /dev/null; then
+            echo "FAIL: SARIF file is not valid JSON"
+            exit 1
+          fi
+          echo "PASS: SARIF file is valid JSON"

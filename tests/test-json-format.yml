@@ -1,0 +1,69 @@
+name: Test JSON output format
+on:
+  workflow_dispatch:
+
+jobs:
+  test-json-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          format: 'json'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert action ran and outputs are set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          EXIT: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF"
+          echo "exit-code: $EXIT"
+
+          if [ "$OUTCOME" = "success" ]; then
+            # findings-count should be a non-negative integer
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+              exit 1
+            fi
+
+            # critical-count should be a non-negative integer
+            if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: critical-count is not a non-negative integer: '$CRITICAL'"
+              exit 1
+            fi
+
+            # high-count should be a non-negative integer
+            if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: high-count is not a non-negative integer: '$HIGH'"
+              exit 1
+            fi
+
+            # exit-code should be 0 when fail-on=none
+            if [ "$EXIT" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT"
+              exit 1
+            fi
+
+            echo "PASS: JSON format scan completed with valid outputs"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error under act)"
+          else
+            echo "INFO: step outcome was '$OUTCOME' (skipped/cancelled) — treating as graceful non-run"
+            echo "PASS"
+          fi

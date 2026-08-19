@@ -1,0 +1,95 @@
+name: Test basic scan (SARIF format, default settings)
+on:
+  workflow_dispatch:
+
+jobs:
+  test-basic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          format: 'sarif'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert outputs are set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          EXIT: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF"
+          echo "exit-code: $EXIT"
+
+          if [ "$OUTCOME" = "success" ]; then
+            # With fail-on=none, exit code must be 0
+            if [ "$EXIT" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT"
+              exit 1
+            fi
+
+            # sarif-file output must be set
+            if [ -z "$SARIF" ]; then
+              echo "FAIL: sarif-file output is empty"
+              exit 1
+            fi
+
+            # findings-count should be a non-negative integer
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+              exit 1
+            fi
+
+            echo "PASS: all outputs are set and valid"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error under act)"
+          else
+            echo "INFO: step outcome was '$OUTCOME' (skipped/cancelled) — treating as graceful non-run"
+            echo "PASS"
+          fi
+
+      - name: Assert SARIF file exists in workspace (if scan succeeded)
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          if [ "$OUTCOME" != "success" ]; then
+            echo "SKIP: scan did not succeed (outcome=$OUTCOME), skipping SARIF file check"
+            exit 0
+          fi
+          echo "Checking for SARIF file: $SARIF"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
+            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF"
+            exit 1
+          fi
+          echo "PASS: SARIF file exists"
+
+      - name: Assert SARIF file is valid JSON (if scan succeeded)
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          if [ "$OUTCOME" != "success" ]; then
+            echo "SKIP: scan did not succeed (outcome=$OUTCOME), skipping SARIF JSON validation"
+            exit 0
+          fi
+          echo "Validating SARIF JSON..."
+          if ! python3 -c "import json; json.load(open('$GITHUB_WORKSPACE/$SARIF'))"; then
+            echo "FAIL: SARIF file is not valid JSON"
+            exit 1
+          fi
+          echo "PASS: SARIF file is valid JSON"

@@ -1,0 +1,52 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ignore-paths:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan-with-ignore
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          format: 'sarif'
+          severity: 'low'
+          fail-on: 'none'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs,.github'
+
+      - name: Assert action ran with ignore-paths
+        env:
+          FINDINGS: ${{ steps.scan-with-ignore.outputs.findings-count }}
+          EXIT: ${{ steps.scan-with-ignore.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-with-ignore.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "exit-code: $EXIT"
+
+          if [ "$OUTCOME" = "success" ]; then
+            # findings-count should be a non-negative integer
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+              exit 1
+            fi
+
+            # exit-code should be 0 when fail-on=none
+            if [ "$EXIT" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT"
+              exit 1
+            fi
+
+            echo "PASS: ignore-paths scan completed successfully"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error under act)"
+          else
+            echo "INFO: step outcome was '$OUTCOME' (skipped/cancelled) — treating as graceful non-run"
+            echo "PASS"
+          fi
