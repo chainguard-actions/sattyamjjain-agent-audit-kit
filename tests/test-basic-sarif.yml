@@ -1,0 +1,93 @@
+name: Test basic SARIF scan
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert outputs are set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF_FILE"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed (fail-on=none), got outcome=$OUTCOME"
+            exit 1
+          fi
+
+          # findings-count must be a non-negative integer
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+
+          # critical-count must be a non-negative integer
+          if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-count is not a non-negative integer: '$CRITICAL'"
+            exit 1
+          fi
+
+          # high-count must be a non-negative integer
+          if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count is not a non-negative integer: '$HIGH'"
+            exit 1
+          fi
+
+          # sarif-file output must be set
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+
+          # exit-code must be 0 when fail-on=none
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: all outputs are set correctly"
+
+      - name: Assert SARIF file exists in workspace
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking for SARIF file: $SARIF_FILE"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF_FILE" ]; then
+            echo "FAIL: SARIF file not found at $GITHUB_WORKSPACE/$SARIF_FILE"
+            exit 1
+          fi
+          echo "PASS: SARIF file exists"
+
+      - name: Assert SARIF file is valid JSON with runs key
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Validating SARIF JSON structure..."
+          SARIF_PATH="$GITHUB_WORKSPACE/$SARIF_FILE"
+          export SARIF_PATH
+          python3 -c "import json,sys,os; sarif=json.load(open(os.environ['SARIF_PATH'])); assert 'runs' in sarif, 'Missing runs key'; assert isinstance(sarif['runs'], list), 'runs must be a list'; print('PASS: SARIF is valid JSON with runs key')"

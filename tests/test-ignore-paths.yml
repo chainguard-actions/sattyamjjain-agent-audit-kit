@@ -1,0 +1,84 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Scan with some paths ignored
+      - id: scan-with-ignore
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs,examples'
+
+      - name: Assert scan with ignore-paths succeeds
+        env:
+          FINDINGS: ${{ steps.scan-with-ignore.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan-with-ignore.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-with-ignore.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed (fail-on=none), got outcome=$OUTCOME"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: ignore-paths scan completed with findings-count=$FINDINGS"
+
+      # Scan without ignore-paths for comparison
+      - id: scan-without-ignore
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert scan without ignore-paths also succeeds
+        env:
+          FINDINGS_IGNORED: ${{ steps.scan-with-ignore.outputs.findings-count }}
+          FINDINGS_ALL: ${{ steps.scan-without-ignore.outputs.findings-count }}
+          OUTCOME: ${{ steps.scan-without-ignore.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings with ignore-paths: $FINDINGS_IGNORED"
+          echo "findings without ignore-paths: $FINDINGS_ALL"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed (fail-on=none), got outcome=$OUTCOME"
+            exit 1
+          fi
+
+          # Scan with ignored paths should have <= findings than full scan
+          if [ "$FINDINGS_IGNORED" -gt "$FINDINGS_ALL" ]; then
+            echo "FAIL: scan with ignore-paths ($FINDINGS_IGNORED) has more findings than full scan ($FINDINGS_ALL)"
+            exit 1
+          fi
+
+          echo "PASS: ignore-paths correctly reduces or maintains finding count"

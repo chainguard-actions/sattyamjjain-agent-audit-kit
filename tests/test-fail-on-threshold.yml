@@ -1,0 +1,81 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Test 1: fail-on=none should always pass regardless of findings
+      - id: scan-none
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert fail-on=none always passes
+        env:
+          EXIT_CODE: ${{ steps.scan-none.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-none.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed with fail-on=none, got outcome=$OUTCOME"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: fail-on=none correctly always passes"
+
+      # Test 2: fail-on=high with severity=low — action may pass or fail depending on findings
+      - id: scan-high
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'high'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert fail-on=high produces valid exit code
+        env:
+          EXIT_CODE: ${{ steps.scan-high.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan-high.outputs.findings-count }}
+          HIGH: ${{ steps.scan-high.outputs.high-count }}
+          CRITICAL: ${{ steps.scan-high.outputs.critical-count }}
+          OUTCOME: ${{ steps.scan-high.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "high-count: $HIGH"
+          echo "critical-count: $CRITICAL"
+
+          # exit-code must be 0 or 1 (0=pass, 1=findings exceed threshold)
+          if [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ]; then
+            echo "FAIL: expected exit-code 0 or 1, got '$EXIT_CODE'"
+            exit 1
+          fi
+
+          # findings-count must be a non-negative integer
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+
+          echo "PASS: fail-on=high produced valid exit code $EXIT_CODE"
