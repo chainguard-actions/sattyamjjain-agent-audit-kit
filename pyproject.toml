@@ -1,0 +1,107 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-audit-kit"
+version = "0.3.82"
+description = "Security scanner for MCP-connected AI agent pipelines"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "AgentAuditKit Contributors"}
+]
+keywords = ["mcp", "security", "scanner", "ai-agents", "claude-code"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "click>=8.1",
+    "pyyaml>=6.0",
+    "tomli>=2.0; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+# Data-flow analysis for AAK-MCP-STDIO-CMD-INJ-002 (TS/JS). Strictly optional:
+# the scanner lazy-imports these and falls back to its proximity heuristic when
+# they are absent, so the default install stays dependency-light and offline.
+#   pip install "agent-audit-kit[taint]"
+taint = [
+    "tree-sitter>=0.21",
+    "tree-sitter-typescript>=0.21",
+]
+
+dev = [
+    # Pulls in the optional taint extra so CI exercises the tree-sitter
+    # data-flow path, not only the proximity fallback. Without it the 18
+    # grammar-gated tests skip on every runner and the analysis would ship with
+    # no CI coverage at all — the fallback tests would be the only thing green.
+    "agent-audit-kit[taint]",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "mypy>=1.0",
+    # The cap used to sit below 0.16 because that release expanded ruff's default
+    # rule set and turned CI red on ~281 pre-existing style issues. The real
+    # problem was that the repo had no explicit rule selection, so CI enforced
+    # whatever ruff happened to ship. `[tool.ruff.lint] select` now pins that set,
+    # which makes the bound safe to widen — see the note there before touching it.
+    "ruff>=0.15,<0.17",
+    "types-PyYAML>=6.0",
+]
+
+[project.scripts]
+agent-audit-kit = "agent_audit_kit.cli:cli"
+# `aak` is the shorthand the docs, changelogs and release notes have used for
+# many releases (`aak scan`, `aak score`, `aak watch-cve`, ...) without ever
+# being installable, so every one of those snippets exits 127 when copied.
+# Same entry point, so the two names cannot drift.
+aak = "agent_audit_kit.cli:cli"
+
+[project.urls]
+Homepage = "https://github.com/sattyamjjain/agent-audit-kit"
+Repository = "https://github.com/sattyamjjain/agent-audit-kit"
+Issues = "https://github.com/sattyamjjain/agent-audit-kit/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["agent_audit_kit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+# CVE fixtures contain intentionally broken / vulnerable code; they are
+# scanner INPUT, not library code, so lint them loosely.
+extend-exclude = ["tests/fixtures/cves"]
+
+[tool.ruff.lint]
+# Pin the rule set explicitly. Without this, the repo lints against whatever
+# ruff ships as its default, so a ruff release can silently change what CI
+# enforces: 0.16 expanded the defaults from these 59 rules to a set that flags
+# 314 findings here (148 I001 import-order, 40 SIM102, 16 UP045, ...) — none of
+# them regressions, just rules this project never opted into. That is what broke
+# the `ruff>=0.15,<0.17` bump.
+#
+# These four selectors reproduce ruff 0.15's default set exactly (verified rule
+# for rule: 59 enabled either way, no additions, no removals), so pinning them
+# changes nothing about what is enforced today and makes the bound safe to widen.
+#
+# Adopting any of the newly-default rules is a separate, deliberate choice —
+# add the selector here and fix the findings in its own change, not as a side
+# effect of a dependency bump.
+select = ["E4", "E7", "E9", "F"]
+
+[[tool.mypy.overrides]]
+# reportlab is used only in output/pdf_report.py; it has no py.typed marker.
+module = ["reportlab", "reportlab.*", "sigstore", "sigstore.*"]
+ignore_missing_imports = true
