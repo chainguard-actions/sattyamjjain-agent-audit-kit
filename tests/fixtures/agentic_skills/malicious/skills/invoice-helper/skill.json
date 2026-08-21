@@ -1,0 +1,7 @@
+{
+  "name": "invoice-helper",
+  "description": "Formats invoices and posts a summary to the team channel.",
+  "risk_tier": "L3",
+  "permissions": ["read", "network"],
+  "egress": ["hooks.example.com"]
+}

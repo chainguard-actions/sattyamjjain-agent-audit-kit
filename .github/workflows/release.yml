@@ -1,0 +1,457 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  # --------------------------------------------------------------------------
+  # 0. Gate: refuse to release while any cve-response issue is open.
+  #    Implements CLAUDE_PROMPT.md §5(1) — "blocks release until the issue
+  #    is closed". (C14). Keys off the `cve-response` label; the old `sla-48h`
+  #    label was retired with the 48h SLA (PR #432).
+  # --------------------------------------------------------------------------
+  # --------------------------------------------------------------------------
+  # 0b. Gate: the full CI suite, on the tagged commit, before anything publishes.
+  #
+  #     Until v0.3.86 `pypi` depended on `cve-response-gate` alone, so a red
+  #     build could and did publish: main's CI was red across four consecutive
+  #     releases while every one of them shipped to PyPI. The failure was always
+  #     the same test, and it was real -- the README's Action pin did not resolve
+  #     yet -- but nothing stopped the release.
+  #
+  #     Runs here rather than via `workflow_run` because this workflow triggers
+  #     on a tag push, and a workflow_run gate would test whatever CI last ran on
+  #     a branch rather than the exact tree being published. Running it in-line
+  #     also means HEAD carries the tag, so the newest-tag guard in
+  #     tests/test_version_consistency.py runs at full strength -- its
+  #     release-in-flight skip cannot apply here, which is the point.
+  # --------------------------------------------------------------------------
+  test:
+    name: Test suite (tagged commit)
+    runs-on: ubuntu-latest
+    strategy:
+      # No fail-fast: when a release is blocked, the maintainer wants every
+      # version's result in one run, not the first failure and three cancels.
+      # Chasing that pattern is what made the earlier failures look
+      # 3.12-specific when they were not.
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The pin guard compares against the tag list, and `--points-at HEAD`
+          # needs the tag that triggered this run to be present.
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run linting
+        run: ruff check agent_audit_kit/ tests/
+
+      - name: Run type checking
+        run: mypy agent_audit_kit/ --ignore-missing-imports
+
+      - name: Run tests
+        run: pytest -v --tb=short
+
+      - name: Repo-wide count check
+        run: python scripts/check_counts.py
+
+      - name: Self-scan (verify CLI works)
+        run: agent-audit-kit scan . --format json --score --fail-on none --ignore-paths tests/fixtures,benchmarks/sample_configs
+
+  cve-response-gate:
+    name: CVE-response gate
+    runs-on: ubuntu-latest
+    permissions:
+      issues: read
+      contents: read
+    steps:
+      - name: Block release if open cve-response issues exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          open=$(gh issue list --repo "$GITHUB_REPOSITORY" --label cve-response --state open --json number,title)
+          count=$(echo "$open" | jq length)
+          if [ "$count" != "0" ]; then
+            echo "::error ::cve-response gate: $count open cve-response issue(s) block this tag. Triage + close them (pin or disposition) before tagging:"
+            # Print the issue number, the CVE id parsed from the title, and the full
+            # title for each blocker, so the fix is obvious from the failed run itself
+            # instead of requiring a trip to the issue list.
+            echo "$open" | jq -r '.[] | "  #\(.number)  \(([.title | scan("CVE-[0-9]{4}-[0-9]+")] | first) // "no-CVE-id")  \(.title)"'
+            exit 1
+          fi
+          echo "cve-response gate: clean — 0 open cve-response issues."
+
+  # --------------------------------------------------------------------------
+  # 0b. Loud, non-gating check: the live github.com description must byte-match
+  #     the description rendered from RULE_COUNT. GitHub's description is not
+  #     writable from a CI token, so this cannot fix it; it FAILS LOUDLY so a
+  #     stale count (e.g. "271 rules" while the code says 274) is impossible to
+  #     miss at release time. Deliberately NOT a dependency of the publish jobs
+  #     (fixing it unblocks nothing; the cve-response gate is the real gate).
+  #     Release-only so it never flakes on a fork that can't read the description.
+  # --------------------------------------------------------------------------
+  description-liveness:
+    name: Repo description liveness
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Live github.com description must match the rendered template
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # PYTHONPATH=. so the render script can import agent_audit_kit from the
+          # checkout (the package is not installed in this job). Without it the
+          # step died with ModuleNotFoundError *before* the byte-compare, which is
+          # why a stale description survived three release cycles undetected.
+          expected="$(PYTHONPATH=. python scripts/render_repo_metadata.py)"
+          live="$(gh api "repos/$GITHUB_REPOSITORY" --jq '.description // ""')"
+          if [ "$live" != "$expected" ]; then
+            echo "::error title=Repo description is stale::Paste this into repo Settings > About (a CI token cannot set it): ${expected}"
+            echo "expected: ${expected}"
+            echo "live:     ${live}"
+            {
+              echo "### Repo description is stale — paste this into Settings > About"
+              echo ""
+              echo '```'
+              echo "${expected}"
+              echo '```'
+              echo ""
+              echo "live now: \`${live}\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "repo description liveness: live == rendered."
+
+  # --------------------------------------------------------------------------
+  # Repo-wide count liveness (v0.3.72): the sibling of description-liveness for
+  # in-repo prose. Every current-state "N rules / N scanner modules / N CLI
+  # commands / N frameworks / N agent platforms" claim in any tracked markdown
+  # (minus the changelogs and a small dated-artifact exclusion list) must equal
+  # the live registry. Same posture: FAILS LOUDLY, prints the offending file:line,
+  # and is deliberately NOT a dependency of the publish jobs (a stale doc count
+  # blocks nothing but is impossible to miss at release time).
+  # --------------------------------------------------------------------------
+  count-liveness:
+    name: Repo-wide count liveness
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Install the package (check_counts imports agent_audit_kit)
+        run: pip install -e .
+
+      - name: No stale rule/scanner count in any tracked markdown
+        run: |
+          set -euo pipefail
+          # check_counts computes the canonical counts by importing agent_audit_kit
+          # (cli needs click, etc.), so the package + its runtime deps must be
+          # installed first — PYTHONPATH alone is not enough.
+          python scripts/check_counts.py
+
+  cve-latency:
+    name: CVE-to-rule latency doc
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Regenerate docs/cve-latency.md from the ledger
+        run: |
+          set -euo pipefail
+          # Offline and deterministic: reads only CHANGELOG.cves.md and the
+          # committed docs/data/cve-published.json, so an unchanged ledger
+          # regenerates byte-identically. Refreshing published dates from NVD
+          # is a separate, opt-in step (scripts/cve_latency.py --refresh) and is
+          # deliberately not run here.
+          python scripts/cve_latency.py
+
+      - name: Fail if the committed doc drifted from the ledger
+        run: |
+          set -euo pipefail
+          python scripts/cve_latency.py --check
+
+  # --------------------------------------------------------------------------
+  # 1. Publish to PyPI using trusted publishing (OIDC)
+  # --------------------------------------------------------------------------
+  pypi:
+    needs: [cve-response-gate, test]
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/agent-audit-kit
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Install build tools
+        run: python -m pip install --upgrade pip build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+
+  # --------------------------------------------------------------------------
+  # 2. Build, scan, and push Docker image to GHCR
+  # --------------------------------------------------------------------------
+  docker:
+    name: Push Docker image to GHCR
+    needs: [cve-response-gate, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build image for scanning
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          load: true
+          tags: agent-audit-kit:scan
+
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297 # master
+        with:
+          image-ref: agent-audit-kit:scan
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/sattyamjjain/agent-audit-kit:${{ steps.version.outputs.version }}
+            ghcr.io/sattyamjjain/agent-audit-kit:latest
+          labels: |
+            org.opencontainers.image.title=AgentAuditKit
+            org.opencontainers.image.description=Security scanner for MCP-connected AI agent pipelines
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.source=https://github.com/sattyamjjain/agent-audit-kit
+            org.opencontainers.image.licenses=MIT
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Generate SLSA provenance attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-name: ghcr.io/sattyamjjain/agent-audit-kit
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+  # --------------------------------------------------------------------------
+  # 3. Sign the rule bundle + SBOMs with Sigstore (keyless OIDC)
+  # --------------------------------------------------------------------------
+  bundle-and-sign:
+    name: Rule bundle + SBOM (Sigstore)
+    needs: [cve-response-gate, test]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Install agent-audit-kit
+        run: pip install -e .
+
+      - name: Export rule bundle + compute digest
+        run: |
+          agent-audit-kit export-rules --out rules.json
+          sha256sum rules.json > rules.json.sha256
+          cat rules.json.sha256
+
+      - name: Emit SBOMs (CycloneDX + SPDX)
+        run: |
+          agent-audit-kit sbom . --format cyclonedx --output sbom.cdx.json
+          agent-audit-kit sbom . --format spdx      --output sbom.spdx.json
+
+      - name: Sigstore keyless sign
+        uses: sigstore/gh-action-sigstore-python@790bc6befb9d733738f18d8f895854b453640ec9 # v3.5.0
+        with:
+          inputs: |
+            rules.json
+            sbom.cdx.json
+            sbom.spdx.json
+          # Keep sigs in the workflow; we attach them ourselves in github-release.
+          release-signing-artifacts: false
+          upload-signing-artifacts: true
+
+      - name: Verify sigstore outputs landed
+        run: |
+          ls -la ./*.sigstore* || true
+          ls -la ./rules.json ./sbom.cdx.json ./sbom.spdx.json
+
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: signed-bundle
+          path: |
+            rules.json
+            rules.json.sha256
+            sbom.cdx.json
+            sbom.spdx.json
+            *.sigstore
+            *.sigstore.json
+            *.sig
+          if-no-files-found: warn
+
+  # --------------------------------------------------------------------------
+  # 4. Create GitHub Release with auto-generated notes + signed bundle
+  # --------------------------------------------------------------------------
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [pypi, docker, bundle-and-sign]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download signed artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: signed-bundle
+          path: signed
+
+      - name: Create release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
+        with:
+          generate_release_notes: true
+          files: |
+            signed/rules.json
+            signed/rules.json.sha256
+            signed/sbom.cdx.json
+            signed/sbom.spdx.json
+            signed/*.sigstore
+            signed/*.sigstore.json
+            signed/*.sig
+          body: |
+            ## Installation
+
+            **pip:**
+            ```bash
+            pip install agent-audit-kit==${{ github.ref_name }}
+            ```
+
+            **Docker:**
+            ```bash
+            docker pull ghcr.io/sattyamjjain/agent-audit-kit:${{ github.ref_name }}
+            ```
+
+            **GitHub Action:**
+            ```yaml
+            - uses: sattyamjjain/agent-audit-kit@${{ github.ref_name }}
+              with:
+                fail-on: high
+            ```
+
+            ## Supply chain
+
+            - `rules.json` — deterministic rule bundle
+            - `rules.json.sha256` — trusted digest
+            - `sbom.cdx.json` / `sbom.spdx.json` — CycloneDX + SPDX SBOM
+            - `*.sigstore` — Sigstore keyless signatures (verify with `agent-audit-kit verify-bundle`)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # The repo `description` cannot be written from a CI token (needs repo-admin),
+      # so the paste is a manual step. Print it here, at the very end of the release
+      # run, so it is impossible to forget rather than merely detectable afterwards
+      # by the (non-gating) description-liveness job.
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Print repo description to paste (rendered from RULE_COUNT)
+        run: |
+          set -euo pipefail
+          desc="$(PYTHONPATH=. python scripts/render_repo_metadata.py)"
+          echo "::notice title=Paste repo description into Settings > About::$desc"
+          {
+            echo "### Repo description — paste into Settings > About"
+            echo ""
+            echo "GitHub's \`description\` is not writable from a CI token. Paste this line in by hand so the highest-traffic surface stops drifting from RULE_COUNT:"
+            echo ""
+            echo '```'
+            echo "$desc"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

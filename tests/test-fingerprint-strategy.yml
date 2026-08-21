@@ -1,0 +1,92 @@
+name: Test fingerprint-strategy input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan-auto
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'auto'
+
+      - name: Assert auto fingerprint scan succeeded
+        env:
+          EXIT_CODE: ${{ steps.scan-auto.outputs.exit-code }}
+          SARIF_FILE: ${{ steps.scan-auto.outputs.sarif-file }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "sarif-file: $SARIF_FILE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: auto fingerprint scan succeeded"
+
+      - name: Assert SARIF file from auto strategy is valid
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found"
+            exit 1
+          fi
+          python3 -c "
+          import json, sys
+          with open('$SARIF_PATH') as f:
+              sarif = json.load(f)
+          runs = sarif.get('runs', [])
+          if not runs:
+              print('FAIL: SARIF has no runs')
+              sys.exit(1)
+          print('PASS: SARIF valid, runs:', len(runs))
+          "
+
+      - id: scan-disabled
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert disabled fingerprint scan succeeded
+        env:
+          EXIT_CODE: ${{ steps.scan-disabled.outputs.exit-code }}
+          SARIF_FILE: ${{ steps.scan-disabled.outputs.sarif-file }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "sarif-file: $SARIF_FILE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: disabled fingerprint scan succeeded"

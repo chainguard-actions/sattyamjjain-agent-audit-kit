@@ -1,0 +1,82 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      # First scan with fail-on=none to get baseline findings count
+      - id: baseline
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert baseline scan succeeded with exit-code=0
+        env:
+          EXIT_CODE: ${{ steps.baseline.outputs.exit-code }}
+          FINDINGS: ${{ steps.baseline.outputs.findings-count }}
+        run: |
+          echo "baseline exit-code: $EXIT_CODE"
+          echo "baseline findings-count: $FINDINGS"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: baseline scan with fail-on=none should exit 0, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: baseline scan passed with exit-code=0, findings=$FINDINGS"
+
+      # Second scan with fail-on=high — may exit 0 (no high findings) or 1 (has high findings)
+      - id: threshold
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'high'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert threshold scan exit-code is consistent with outcome
+        env:
+          EXIT_CODE: ${{ steps.threshold.outputs.exit-code }}
+          OUTCOME: ${{ steps.threshold.outcome }}
+          HIGH: ${{ steps.threshold.outputs.high-count }}
+          CRITICAL: ${{ steps.threshold.outputs.critical-count }}
+        run: |
+          echo "threshold scan outcome: $OUTCOME"
+          echo "threshold exit-code: $EXIT_CODE"
+          echo "high-count: $HIGH"
+          echo "critical-count: $CRITICAL"
+          # exit-code must be set
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output is empty"
+            exit 1
+          fi
+          # exit-code must be 0 or 1 (not 2=error)
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit-code=2"
+            exit 1
+          fi
+          # outcome must be success or failure (not skipped)
+          if [ "$OUTCOME" != "success" ] && [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: threshold scan completed with exit-code=$EXIT_CODE, outcome=$OUTCOME"
