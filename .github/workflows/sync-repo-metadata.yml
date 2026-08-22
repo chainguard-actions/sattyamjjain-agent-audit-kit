@@ -1,0 +1,110 @@
+name: Sync repo metadata
+
+# WHY THIS NEVER RAN, AND WHAT CHANGED (v0.3.87)
+#
+# This workflow existed from early on and had never executed once. Three
+# independent reasons, each of which alone was enough:
+#
+#   1. `release: published` does not fire here. The release is created by
+#      release.yml using GITHUB_TOKEN, and GitHub deliberately does not trigger
+#      workflows from events raised by GITHUB_TOKEN (loop prevention). So the
+#      only automatic trigger could never fire. It is now also `workflow_call`,
+#      and release.yml invokes it directly.
+#   2. `gh repo edit ... || true` swallowed its own failure, so even a run that
+#      did nothing reported success.
+#   3. `git commit ... || true` and `git push || true` did the same.
+#
+# Net effect: the repo description drifted every release, the
+# `description-liveness` gate in release.yml caught it every time, and a human
+# pasted the string by hand -- while this file sat here looking like the problem
+# was already automated.
+#
+# Editing a repository description needs admin rights that GITHUB_TOKEN does not
+# have. Without a METADATA_SYNC_TOKEN secret this job can still do the README and
+# docs pin rewrite, and it now says plainly that it could not do the description
+# rather than exiting 0 in silence.
+
+on:
+  release:
+    types: [published]
+  workflow_call: {}
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Sync repo metadata
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+          token: ${{ secrets.METADATA_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Rewrite README + docs pins
+        run: python scripts/sync_repo_metadata.py --write
+
+      - name: Update GitHub repo description
+        env:
+          # Distinguished deliberately: the fallback is what cannot edit a
+          # description, so the step needs to know which one it got.
+          ADMIN_TOKEN: ${{ secrets.METADATA_SYNC_TOKEN }}
+          GH_TOKEN: ${{ secrets.METADATA_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          desc="$(python scripts/sync_repo_metadata.py --description)"
+          live="$(gh api "/repos/${GITHUB_REPOSITORY}" --jq '.description' || echo '')"
+
+          if [ "$live" = "$desc" ]; then
+            echo "repo description already matches; nothing to do."
+            exit 0
+          fi
+
+          if [ -z "${ADMIN_TOKEN:-}" ]; then
+            {
+              echo "### Repo description NOT updated"
+              echo ""
+              echo "\`METADATA_SYNC_TOKEN\` is not configured, and \`GITHUB_TOKEN\`"
+              echo "cannot edit a repository description. Paste this into"
+              echo "Settings > About:"
+              echo ""
+              echo '```'
+              echo "${desc}"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning ::repo description is stale and no admin token is configured; see the job summary for the string to paste"
+            # Not a failure: release.yml's `description-liveness` job is the gate
+            # that blocks on this. Failing here too would report one problem twice.
+            exit 0
+          fi
+
+          if gh repo edit "${GITHUB_REPOSITORY}" --description "${desc}"; then
+            echo "repo description updated."
+          else
+            echo "::error ::admin token present but the description edit failed; check METADATA_SYNC_TOKEN scopes"
+            exit 1
+          fi
+
+      - name: Commit drift fixes
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "no drift to commit"
+            exit 0
+          fi
+          git add README.md docs
+          git commit -m "chore(sync): refresh README + docs pins for ${GITHUB_REF_NAME}"
+          # No `|| true`: a push that cannot land is the failure this workflow
+          # spent its whole life hiding.
+          git push

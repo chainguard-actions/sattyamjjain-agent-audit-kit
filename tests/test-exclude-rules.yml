@@ -1,0 +1,89 @@
+name: Test exclude-rules and ignore-paths
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan-full
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - id: scan-filtered
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'node_modules,.git,vendor'
+        continue-on-error: true
+
+      - name: Assert both scans produced valid outputs
+        env:
+          FULL_FINDINGS: ${{ steps.scan-full.outputs.findings-count }}
+          FULL_EXIT: ${{ steps.scan-full.outputs.exit-code }}
+          FULL_OUTCOME: ${{ steps.scan-full.outcome }}
+          FILTERED_FINDINGS: ${{ steps.scan-filtered.outputs.findings-count }}
+          FILTERED_EXIT: ${{ steps.scan-filtered.outputs.exit-code }}
+          FILTERED_OUTCOME: ${{ steps.scan-filtered.outcome }}
+        run: |
+          echo "full scan outcome: $FULL_OUTCOME"
+          echo "full scan findings: $FULL_FINDINGS"
+          echo "full scan exit-code: $FULL_EXIT"
+          echo "filtered scan outcome: $FILTERED_OUTCOME"
+          echo "filtered scan findings: $FILTERED_FINDINGS"
+          echo "filtered scan exit-code: $FILTERED_EXIT"
+
+          # Both scans should complete (success or failure, not skipped)
+          if [ "$FULL_OUTCOME" != "success" ] && [ "$FULL_OUTCOME" != "failure" ]; then
+            echo "FAIL: full scan had unexpected outcome '$FULL_OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: full scan completed with outcome '$FULL_OUTCOME'"
+
+          if [ "$FILTERED_OUTCOME" != "success" ] && [ "$FILTERED_OUTCOME" != "failure" ]; then
+            echo "FAIL: filtered scan had unexpected outcome '$FILTERED_OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: filtered scan completed with outcome '$FILTERED_OUTCOME'"
+
+          # Both findings-count outputs should be numeric
+          if ! echo "$FULL_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: full scan findings-count is not a number: '$FULL_FINDINGS'"
+            exit 1
+          fi
+          if ! echo "$FILTERED_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: filtered scan findings-count is not a number: '$FILTERED_FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: both scans produced numeric findings-count"
+
+          # Filtered scan should have <= findings than full scan
+          if [ "$FILTERED_FINDINGS" -gt "$FULL_FINDINGS" ]; then
+            echo "WARN: filtered scan ($FILTERED_FINDINGS) has more findings than full scan ($FULL_FINDINGS) — unexpected but not fatal"
+          else
+            echo "PASS: filtered scan findings ($FILTERED_FINDINGS) <= full scan findings ($FULL_FINDINGS)"
+          fi
