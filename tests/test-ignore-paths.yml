@@ -1,0 +1,52 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs,site'
+
+      - name: Assert findings-count is a number
+        env:
+          COUNT: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $COUNT"
+          if ! echo "$COUNT" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$COUNT'"
+            exit 1
+          fi
+          echo "PASS: findings-count=$COUNT"
+
+      - name: Assert exit-code is 0 with fail-on none
+        env:
+          CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $CODE"
+          if [ "$CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on=none, got '$CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code=0"
+
+      - name: Assert SARIF file exists in workspace
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          echo "Checking for SARIF at: $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found at $SARIF_PATH"
+            exit 1
+          fi
+          echo "PASS: SARIF file exists"

@@ -1,0 +1,52 @@
+name: Test JSON format scan
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'json'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert findings-count is a number
+        env:
+          COUNT: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $COUNT"
+          if ! echo "$COUNT" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$COUNT'"
+            exit 1
+          fi
+          echo "PASS: findings-count=$COUNT"
+
+      - name: Assert exit-code is 0 or 1 (not error)
+        env:
+          CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $CODE"
+          if [ "$CODE" != "0" ] && [ "$CODE" != "1" ]; then
+            echo "FAIL: expected exit-code 0 or 1, got '$CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code=$CODE"
+
+      - name: Assert sarif-file output is set
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "sarif-file: $SARIF"
+          if [ -z "$SARIF" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: sarif-file=$SARIF"
