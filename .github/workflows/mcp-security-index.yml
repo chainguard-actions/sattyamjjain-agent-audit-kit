@@ -1,0 +1,162 @@
+name: MCP Security Index — weekly snapshot
+
+# Closes B4 / #25: MkDocs docs live at gh-pages/docs/, MCP Security
+# Index at gh-pages/. Replaces the broken .github/workflows/docs.yml
+# (stale deploy-pages SHA) with a single deploy pipeline.
+
+on:
+  schedule:
+    - cron: "11 7 * * 1"   # Mondays, 07:11 UTC
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - ".github/workflows/mcp-security-index.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    # Backstop under the crawl's own 1500s budget plus build/publish. Without
+    # it a rate-limited crawl could grind against the 6-hour default and be
+    # killed with no artifact -- the original failure, slower.
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Install agent-audit-kit + MkDocs
+        run: |
+          pip install -e .
+          pip install mkdocs mkdocs-material
+
+      # ---- MCP Security Index (only on schedule / manual dispatch) ----
+      # --limit was 500. Every scheduled run from 2026-06-15 failed except one
+      # (2026-07-20), which is exactly why data/history.json held a single
+      # snapshot while the site rendered "not enough snapshots yet for a trend
+      # chart". The cause is the crawl asking for more than the throttled
+      # `secrets.GITHUB_TOKEN` search budget allows, and a rate-limit wall used
+      # to be fatal, so a week's data point was lost rather than shortened.
+      #
+      # 150 is sized to finish inside the budget. The crawler now also keeps a
+      # partial crawl and records `partial: true` with the reason, so an overrun
+      # produces a shorter snapshot rather than a gap -- and nothing downstream
+      # can mistake it for a full one.
+      - name: Crawl public MCP servers
+        if: github.event_name != 'push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p benchmarks/data
+          python benchmarks/crawler.py --limit 150 --max-seconds 1500 \
+            --output benchmarks/results.json
+
+      # Moved ABOVE the index build. It used to run after it, which meant
+      # index_builder never saw the previously published history: --clean removes
+      # site_dir, the history read found nothing, and every run appended one entry
+      # to an empty list. Every published history.json in this project's life has
+      # held exactly one snapshot (2026-04-18, then 2026-04-18, then 2026-08-21),
+      # which is why the site said "not enough snapshots yet for a trend chart
+      # (need >= 2)" even after a run succeeded. gh-pages is force-pushed as an
+      # orphan each time, so nothing else preserved it either.
+      - name: Fetch prior gh-pages state (index preservation + history seed)
+        run: |
+          git fetch origin gh-pages:gh-pages-remote || echo "no existing gh-pages branch"
+          mkdir -p pages_staging
+          if git show-ref --verify --quiet refs/heads/gh-pages-remote; then
+            git --work-tree=pages_staging checkout gh-pages-remote -- . || true
+          fi
+
+      - name: Build MCP Security Index site
+        if: github.event_name != 'push'
+        run: |
+          python benchmarks/index_builder.py \
+            --input benchmarks/results.json \
+            --site-dir benchmarks/site \
+            --clean \
+            --history pages_staging/data/history.json
+
+      # ---- MkDocs ----
+      - name: Build MkDocs
+        run: mkdocs build -d docs_build
+
+      # ---- Assemble gh-pages payload: index/ at root, docs at /docs/ ----
+      - name: Stage payload
+        run: |
+          # docs always rebuilt from latest main
+          rm -rf pages_staging/docs
+          mv docs_build pages_staging/docs
+          # index only refreshed on schedule / dispatch
+          if [ -d benchmarks/site ]; then
+            cp -r benchmarks/site/. pages_staging/
+          fi
+          # .nojekyll so GitHub Pages serves the raw HTML
+          touch pages_staging/.nojekyll
+
+      - name: Publish to gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd pages_staging
+          git init -q
+          git config user.name 'mcp-security-index'
+          git config user.email 'mcp-security-index@users.noreply.github.com'
+          git checkout -b gh-pages
+          git add .
+          git commit -q -m "snapshot: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
+
+      # ------------------------------------------------------------------
+      # A scheduled workflow that fails silently is worse than one that does
+      # not exist: the README keeps making the claim while nothing runs. This
+      # workflow failed every Monday from 2026-06-15 bar one and nobody was
+      # told. Files (or reuses) one issue so the next failure is visible.
+      # ------------------------------------------------------------------
+      - name: Report scheduled failure
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const label = 'scheduled-failure';
+            const title = `Scheduled workflow failing: ${context.workflow}`;
+            const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              `\`${context.workflow}\` failed on its schedule.`,
+              ``,
+              `- Run: ${url}`,
+              `- Commit: ${context.sha}`,
+              ``,
+              `This issue is reused for repeat failures -- check the run log above for`,
+              `the current cause. Close it once a scheduled run goes green.`,
+            ].join('\n');
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: label,
+            });
+            const match = existing.data.find(i => i.title === title);
+            if (match) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: match.number,
+                body: `Failed again: ${url}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: [label],
+              });
+            }
