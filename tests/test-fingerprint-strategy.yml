@@ -1,0 +1,97 @@
+name: Test fingerprint-strategy input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Test with fingerprint-strategy=disabled
+      - id: scan-disabled
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert scan with fingerprint-strategy=disabled ran correctly
+        env:
+          FINDINGS: ${{ steps.scan-disabled.outputs.findings-count }}
+          SARIF_FILE: ${{ steps.scan-disabled.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan-disabled.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-disabled.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file: $SARIF_FILE"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action step failed unexpectedly with fingerprint-strategy=disabled"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ]; then
+            echo "FAIL: unexpected exit-code '$EXIT_CODE' (expected 0 or 1)"
+            exit 1
+          fi
+
+          echo "PASS: fingerprint-strategy=disabled scan completed with valid outputs"
+
+      # Test with fingerprint-strategy=line-hash
+      - id: scan-linehash
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'line-hash'
+
+      - name: Assert scan with fingerprint-strategy=line-hash ran correctly
+        env:
+          FINDINGS: ${{ steps.scan-linehash.outputs.findings-count }}
+          SARIF_FILE: ${{ steps.scan-linehash.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan-linehash.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-linehash.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file: $SARIF_FILE"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action step failed unexpectedly with fingerprint-strategy=line-hash"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ]; then
+            echo "FAIL: unexpected exit-code '$EXIT_CODE' (expected 0 or 1)"
+            exit 1
+          fi
+
+          echo "PASS: fingerprint-strategy=line-hash scan completed with valid outputs"

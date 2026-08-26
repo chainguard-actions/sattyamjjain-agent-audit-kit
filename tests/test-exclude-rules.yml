@@ -1,0 +1,81 @@
+name: Test exclude-rules input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Run a baseline scan with all rules
+      - id: scan-all
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert baseline scan ran
+        env:
+          FINDINGS_ALL: ${{ steps.scan-all.outputs.findings-count }}
+          OUTCOME: ${{ steps.scan-all.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count (all rules): $FINDINGS_ALL"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: baseline scan failed unexpectedly"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS_ALL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS_ALL'"
+            exit 1
+          fi
+
+          echo "PASS: baseline scan completed"
+
+      # Run a scan with some rules excluded (using a common rule prefix)
+      - id: scan-excluded
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          exclude-rules: 'MCP-001,MCP-002,MCP-003'
+
+      - name: Assert excluded-rules scan ran with valid outputs
+        env:
+          FINDINGS_EXCLUDED: ${{ steps.scan-excluded.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan-excluded.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-excluded.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count (excluded rules): $FINDINGS_EXCLUDED"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: excluded-rules scan failed unexpectedly"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS_EXCLUDED" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS_EXCLUDED'"
+            exit 1
+          fi
+
+          # exit-code must be 0 or 1 since fail-on=none
+          if [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ]; then
+            echo "FAIL: unexpected exit-code '$EXIT_CODE' (expected 0 or 1)"
+            exit 1
+          fi
+
+          echo "PASS: exclude-rules scan completed with valid outputs"
