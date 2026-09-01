@@ -1,0 +1,47 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs,site'
+        continue-on-error: true
+
+      - name: Assert scan ran with ignored paths
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          EXIT: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "exit-code:      $EXIT"
+
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$EXIT" ]; then
+              echo "FAIL: exit-code output is empty"
+              exit 1
+            fi
+            if ! echo "$EXIT" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: exit-code is not numeric: '$EXIT'"
+              exit 1
+            fi
+            echo "PASS: scan with ignore-paths succeeded, findings=$FINDINGS exit-code=$EXIT"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

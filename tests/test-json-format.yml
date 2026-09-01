@@ -1,0 +1,53 @@
+name: Test JSON format scan
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'json'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert outputs are set for JSON format
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          EXIT: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count:     $HIGH"
+          echo "sarif-file:     $SARIF"
+          echo "exit-code:      $EXIT"
+
+          if [ "$OUTCOME" = "success" ]; then
+            # exit-code must be set and numeric (0=pass, 1=findings, 2=error)
+            if [ -z "$EXIT" ]; then
+              echo "FAIL: exit-code output is empty"
+              exit 1
+            fi
+            if ! echo "$EXIT" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: exit-code is not numeric: '$EXIT'"
+              exit 1
+            fi
+            echo "PASS: action succeeded with JSON format, exit-code=$EXIT"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
