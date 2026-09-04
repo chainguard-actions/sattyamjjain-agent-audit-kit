@@ -1,0 +1,67 @@
+# Citation metadata for AgentAuditKit.
+#
+# GitHub renders this as the "Cite this repository" widget. `preferred-citation`
+# points at The State of MCP Security, 2026 rather than the software, because that
+# report is what people actually cite — it carries the measurements. The two
+# identities are kept deliberately consistent: the report's own
+# "How to cite this report" section states the same version, date and corpus size,
+# so a reader cannot get two different answers depending on where they looked.
+#
+# `version` and `date-released` are GENERATED — do not hand-edit them. They are
+# written by `scripts/sync_repo_metadata.py --write` from pyproject's version and
+# the CHANGELOG heading for that version, and `--check` fails the build when they
+# drift. This comment used to read "bump them with each release", which is an
+# instruction to a human and was duly obeyed until it wasn't: the file sat at
+# 0.3.83 / 2026-08-17 while the repo shipped 0.3.93.
+#
+# The report's `preferred-citation.version` below is NOT generated and stays
+# hand-managed: it moves only when a number in the report changes, which is a
+# different event from shipping software.
+cff-version: 1.2.0
+message: >-
+  If you use AgentAuditKit or cite its measurements, please cite the
+  State of MCP Security 2026 report (see preferred-citation).
+title: "AgentAuditKit"
+abstract: >-
+  Security scanner for MCP-connected AI agent pipelines. Offline and
+  deterministic: the default scan path makes zero network calls and the same
+  input always yields the same finding set, with no model in the loop.
+type: software
+authors:
+  - family-names: "Jain"
+    given-names: "Sattyam"
+    alias: "sattyamjjain"
+repository-code: "https://github.com/sattyamjjain/agent-audit-kit"
+url: "https://github.com/sattyamjjain/agent-audit-kit"
+license: MIT
+version: "0.3.94"
+date-released: "2026-09-04"
+keywords:
+  - model-context-protocol
+  - mcp
+  - ai-agent-security
+  - static-analysis
+  - supply-chain-security
+  - owasp-agentic
+preferred-citation:
+  type: report
+  title: "The State of MCP Security, 2026"
+  authors:
+    - family-names: "Jain"
+      given-names: "Sattyam"
+      alias: "sattyamjjain"
+  institution:
+    name: "AgentAuditKit"
+  year: 2026
+  month: 8
+  version: "1.0"
+  license: MIT
+  url: "https://github.com/sattyamjjain/agent-audit-kit/blob/main/research/state-of-mcp-2026/REPORT.md"
+  abstract: >-
+    A static scan of 2,303 distinct public Model Context Protocol server
+    configurations, collected 2026-07-26 from GitHub-crawled .mcp.json files and
+    the official MCP Registry. Findings include 0 of 2,303 configs serving RFC 9728
+    Protected Resource Metadata discovery, 52.1% (1,200) declaring a remote server
+    with no authentication, and 100% (424 of 424) of inline-auth remote configs
+    hardcoding a static credential. Offline and deterministic; reproducible from the
+    committed corpus manifest with `make report`.

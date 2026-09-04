@@ -1,0 +1,56 @@
+name: Test scan with ignore-paths input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs,site'
+
+      - name: Assert all outputs are set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF"
+          echo "exit-code: $EXIT_CODE"
+
+          FAILED=0
+          if [ -z "$FINDINGS" ]; then echo "FAIL: findings-count is empty"; FAILED=1; fi
+          if [ -z "$CRITICAL" ]; then echo "FAIL: critical-count is empty"; FAILED=1; fi
+          if [ -z "$HIGH" ]; then echo "FAIL: high-count is empty"; FAILED=1; fi
+          if [ -z "$SARIF" ]; then echo "FAIL: sarif-file is empty"; FAILED=1; fi
+          if [ -z "$EXIT_CODE" ]; then echo "FAIL: exit-code is empty"; FAILED=1; fi
+
+          if [ "$FAILED" = "1" ]; then
+            exit 1
+          fi
+          echo "PASS: all outputs are set"
+
+      - name: Assert exit-code is 0 with fail-on=none
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code=0 as expected"
