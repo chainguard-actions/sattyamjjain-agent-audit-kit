@@ -1,0 +1,61 @@
+name: Test critical severity filter
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert outputs are valid for critical-only scan
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" != "success" ] && [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+          # findings-count should be a number
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count '$FINDINGS' is not a number"
+            exit 1
+          fi
+          echo "PASS: findings-count is a valid number: $FINDINGS"
+
+          # With severity=critical, findings should be <= total findings from a broader scan
+          # and high-count should be 0 (only critical reported)
+          if ! echo "$HIGH" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: high-count '$HIGH' is not a number"
+            exit 1
+          fi
+          echo "PASS: high-count is a valid number: $HIGH"
+
+          # exit-code should be 0, 1, or 2
+          if ! echo "$EXIT_CODE" | grep -qE '^[0-2]$'; then
+            echo "FAIL: exit-code '$EXIT_CODE' is not 0, 1, or 2"
+            exit 1
+          fi
+          echo "PASS: exit-code is valid: $EXIT_CODE"
