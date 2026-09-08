@@ -1,0 +1,87 @@
+name: Test severity filter input
+on:
+  workflow_dispatch:
+
+jobs:
+  test-severity-filter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create minimal scan target
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/scan-target"
+          echo "# Test project" > "$GITHUB_WORKSPACE/scan-target/README.md"
+
+      - id: scan-critical
+        uses: .
+        with:
+          path: 'scan-target'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert critical-only scan ran successfully
+        env:
+          OUTCOME: ${{ steps.scan-critical.outcome }}
+          FINDINGS: ${{ steps.scan-critical.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan-critical.outputs.exit-code }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "exit-code:      $EXIT_CODE"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed (fail-on=none), got outcome=$OUTCOME"
+            exit 1
+          fi
+
+          # exit-code must not be 2 (error)
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned exit-code=2 (error)"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
+
+          # findings-count must be a non-negative integer
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS (critical-only filter applied)"
+
+      - id: scan-low
+        uses: .
+        with:
+          path: 'scan-target'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert low-severity scan ran successfully
+        env:
+          OUTCOME: ${{ steps.scan-low.outcome }}
+          FINDINGS_LOW: ${{ steps.scan-low.outputs.findings-count }}
+          FINDINGS_CRITICAL: ${{ steps.scan-critical.outputs.findings-count }}
+        run: |
+          echo "outcome:              $OUTCOME"
+          echo "findings (low+):      $FINDINGS_LOW"
+          echo "findings (critical):  $FINDINGS_CRITICAL"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed (fail-on=none), got outcome=$OUTCOME"
+            exit 1
+          fi
+
+          # Low severity scan should find >= critical-only scan findings
+          if [ "$FINDINGS_LOW" -lt "$FINDINGS_CRITICAL" ] 2>/dev/null; then
+            echo "FAIL: low-severity scan ($FINDINGS_LOW) found fewer findings than critical-only ($FINDINGS_CRITICAL)"
+            exit 1
+          fi
+          echo "PASS: low-severity scan ($FINDINGS_LOW) >= critical-only scan ($FINDINGS_CRITICAL)"

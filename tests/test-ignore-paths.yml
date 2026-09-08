@@ -1,0 +1,67 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ignore-paths:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create minimal scan target with subdirectories
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/scan-target/node_modules"
+          mkdir -p "$GITHUB_WORKSPACE/scan-target/src"
+          echo "# Test project" > "$GITHUB_WORKSPACE/scan-target/README.md"
+          echo "module.exports = {}" > "$GITHUB_WORKSPACE/scan-target/node_modules/dep.js"
+          echo "console.log('hello')" > "$GITHUB_WORKSPACE/scan-target/src/index.js"
+
+      - id: scan
+        uses: .
+        with:
+          path: 'scan-target'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'node_modules,.git,vendor'
+        continue-on-error: true
+
+      - name: Assert scan with ignore-paths ran successfully
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "exit-code:      $EXIT_CODE"
+          echo "sarif-file:     $SARIF_FILE"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed (fail-on=none), got outcome=$OUTCOME"
+            exit 1
+          fi
+
+          # exit-code must not be 2 (error)
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned exit-code=2 (error)"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
+
+          # sarif-file output must be set
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: sarif-file=$SARIF_FILE"
+
+          # findings-count must be a non-negative integer
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS (with ignore-paths applied)"

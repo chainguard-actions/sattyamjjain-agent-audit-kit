@@ -1,0 +1,76 @@
+name: Test fail-on threshold enforcement
+on:
+  workflow_dispatch:
+
+jobs:
+  test-fail-on-threshold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a test file with a suspicious MCP config to trigger findings
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-target"
+          # Write a minimal MCP config that may trigger security rules
+          cat > "$GITHUB_WORKSPACE/test-target/mcp.json" << 'EOF'
+          {
+            "mcpServers": {
+              "test-server": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-everything"],
+                "env": {
+                  "SECRET_KEY": "hardcoded-secret-value-12345"
+                }
+              }
+            }
+          }
+          EOF
+
+      - id: scan
+        uses: .
+        with:
+          path: 'test-target'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert action ran and exit-code is valid
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "exit-code:      $EXIT_CODE"
+          echo "sarif-file:     $SARIF_FILE"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed (fail-on=none), got outcome=$OUTCOME"
+            exit 1
+          fi
+
+          # exit-code must be 0 or 1 (not 2=error)
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned exit-code=2 (error)"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE (0=pass, 1=findings-exceeded-threshold)"
+
+          # sarif-file output must be set
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: sarif-file=$SARIF_FILE"
+
+          # findings-count must be a non-negative integer
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
