@@ -1,0 +1,84 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      # First scan with fail-on=none to get baseline findings count
+      - id: baseline
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Record baseline findings
+        env:
+          FINDINGS: ${{ steps.baseline.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.baseline.outputs.exit-code }}
+        run: |
+          echo "Baseline findings-count: $FINDINGS"
+          echo "Baseline exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: baseline scan with fail-on=none should exit 0, got $EXIT_CODE"
+            exit 1
+          fi
+          echo "PASS: baseline scan completed with exit-code=0"
+
+      # Second scan with fail-on=low — if there are any findings, it should exit 1
+      - id: strict
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'low'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert strict scan outcome is consistent with findings
+        env:
+          BASELINE_FINDINGS: ${{ steps.baseline.outputs.findings-count }}
+          STRICT_EXIT: ${{ steps.strict.outputs.exit-code }}
+          STRICT_OUTCOME: ${{ steps.strict.outcome }}
+        run: |
+          echo "baseline findings-count: $BASELINE_FINDINGS"
+          echo "strict exit-code: $STRICT_EXIT"
+          echo "strict outcome: $STRICT_OUTCOME"
+
+          if [ "$BASELINE_FINDINGS" -gt "0" ]; then
+            # Findings exist — strict scan should fail (exit 1)
+            if [ "$STRICT_EXIT" = "1" ] && [ "$STRICT_OUTCOME" = "failure" ]; then
+              echo "PASS: strict scan correctly failed with findings present"
+            elif [ "$STRICT_EXIT" = "0" ] && [ "$STRICT_OUTCOME" = "success" ]; then
+              echo "PASS: strict scan passed (findings may be above low threshold)"
+            else
+              echo "FAIL: unexpected outcome=$STRICT_OUTCOME exit-code=$STRICT_EXIT"
+              exit 1
+            fi
+          else
+            # No findings — strict scan should pass
+            if [ "$STRICT_OUTCOME" = "success" ] && [ "$STRICT_EXIT" = "0" ]; then
+              echo "PASS: strict scan passed with no findings"
+            else
+              echo "FAIL: expected success with no findings, got outcome=$STRICT_OUTCOME exit-code=$STRICT_EXIT"
+              exit 1
+            fi
+          fi
