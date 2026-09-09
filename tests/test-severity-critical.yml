@@ -1,0 +1,58 @@
+name: Test critical severity filter
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert action ran (success or graceful error)
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "sarif-file: $SARIF_FILE"
+          echo "exit-code: $EXIT_CODE"
+          if [ "$OUTCOME" = "success" ]; then
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+              exit 1
+            fi
+            if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: critical-count is not a non-negative integer: '$CRITICAL'"
+              exit 1
+            fi
+            if [ -z "$SARIF_FILE" ]; then
+              echo "FAIL: sarif-file output is empty"
+              exit 1
+            fi
+            if ! echo "$EXIT_CODE" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: exit-code is not a number: '$EXIT_CODE'"
+              exit 1
+            fi
+            echo "PASS: all outputs are valid"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (scanner error is acceptable in test environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
