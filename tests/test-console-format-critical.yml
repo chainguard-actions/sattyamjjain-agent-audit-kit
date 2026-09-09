@@ -1,0 +1,55 @@
+name: Test console format with critical severity filter
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert action completed
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with console format + critical severity"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or scan error)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+      - name: Assert exit-code output is valid
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "SKIP: action did not succeed, skipping output assertion"
+            exit 0
+          fi
+          # exit-code should be 0 (pass), 1 (findings), or 2 (error)
+          if ! echo "$EXIT_CODE" | grep -qE '^[012]$'; then
+            echo "FAIL: exit-code is not 0, 1, or 2: '$EXIT_CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"

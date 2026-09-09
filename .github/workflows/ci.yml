@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Fetch tags so test_version_consistency's newest-tag guard can verify
+          # the README's Action pin resolves to a real released tag.
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run linting
+        run: ruff check agent_audit_kit/ tests/
+
+      - name: Run type checking
+        run: mypy agent_audit_kit/ --ignore-missing-imports
+
+      - name: Run tests
+        # GH_TOKEN so the cve-deferred gate tests in
+        # tests/test_cve_watcher_backpressure.py can actually read the tracker.
+        # Without it they skip, and a check that only runs where somebody
+        # remembered to export a token protects nothing -- which is the same
+        # mistake as writing the rule in prose in RELEASING.md and calling it
+        # enforced. They skip (never fail) when the API is unreachable, so an
+        # outage or a fork with no issue access degrades to "not checked"
+        # rather than to a red build.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pytest -v --tb=short
+
+      - name: Self-scan (verify CLI works)
+        run: agent-audit-kit scan . --format json --score --fail-on none --ignore-paths tests/fixtures,benchmarks/sample_configs
+
+      - name: Self-scan SARIF
+        run: agent-audit-kit scan . --format sarif -o self-scan.sarif --fail-on none --ignore-paths tests/fixtures,benchmarks/sample_configs
+
+      - name: Verify OWASP report
+        run: agent-audit-kit scan . --owasp-report --fail-on none --ignore-paths tests/fixtures,benchmarks/sample_configs
+
+      - name: Verify discovery
+        run: agent-audit-kit discover
+
+      - name: Verify score
+        run: agent-audit-kit score .
+
+  counts:
+    name: Rendered counts match the registry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      # The matrix job above already runs these via pytest. This job exists so a
+      # count failure is legible: "Rendered counts match the registry" names the
+      # problem, where a red 4-way matrix does not. Same reason link-check is its
+      # own job rather than a pytest case.
+      #
+      # Both guards run, because each alone gives a false all-clear:
+      # check_counts.py reads unmarked prose and has no pattern for the shields
+      # badge; sync_rule_count.py --check owns the badge, the anchors and the
+      # generated docs but never looks at free prose.
+      - name: Counts (prose + generated surfaces)
+        run: make count-check
+
+      # The scanner constant must equal the real registry size, not the number of
+      # files in scanners/. Cheap, and it is the invariant that decoupled once.
+      - name: Scanner count matches the registry
+        run: python scripts/sync_scanner_count.py --check
+
+      # The published coverage page states when its CVE-latency figure was
+      # computed. This fails once that date is more than a week old, which is
+      # the only way a stalled nightly workflow announces itself -- the same
+      # instrument the README's MCP Security Index line uses, so the two
+      # surfaces cannot disagree about what "current" means.
+      - name: Coverage page CVE-latency figure is not stale
+        run: python scripts/build_coverage_page.py --check

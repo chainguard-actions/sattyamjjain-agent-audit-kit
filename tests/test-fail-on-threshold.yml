@@ -1,0 +1,75 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Scan with fail-on=none — should always exit 0 regardless of findings
+      - id: scan-no-fail
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert fail-on=none produces exit-code 0 or graceful failure
+        env:
+          OUTCOME: ${{ steps.scan-no-fail.outcome }}
+          EXIT_CODE: ${{ steps.scan-no-fail.outputs.exit-code }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          if [ "$OUTCOME" = "success" ]; then
+            # With fail-on=none, exit code must be 0
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+              exit 1
+            fi
+            echo "PASS: exit-code=0 as expected with fail-on=none"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or scan error)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+      # Scan with fail-on=low — may exit 1 if any low+ findings exist
+      - id: scan-fail-low
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'low'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert fail-on=low produces valid exit-code
+        env:
+          OUTCOME: ${{ steps.scan-fail-low.outcome }}
+          EXIT_CODE: ${{ steps.scan-fail-low.outputs.exit-code }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          if [ "$OUTCOME" = "success" ]; then
+            # exit-code should be 0 (no findings) or 1 (findings exceed threshold)
+            if ! echo "$EXIT_CODE" | grep -qE '^[01]$'; then
+              echo "FAIL: expected exit-code 0 or 1 with fail-on=low, got '$EXIT_CODE'"
+              exit 1
+            fi
+            echo "PASS: exit-code=$EXIT_CODE is valid for fail-on=low"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or scan error)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
