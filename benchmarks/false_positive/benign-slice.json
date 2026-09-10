@@ -1,0 +1,5379 @@
+{
+  "auth_mode_distribution": {
+    "header-nonsecret": 1,
+    "local-stdio": 135,
+    "static-credential": 400
+  },
+  "n": 536,
+  "predicate": "official MCP Registry latest-version server AND status=active AND auth_mode in {static-credential, header-nonsecret, local-stdio} AND not in AAK's shipped CVE/advisory feed (vuln_db.json + CVE-pin package names)",
+  "servers": [
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.adadvisor/mcp-server",
+      "published_at": "2026-02-28T13:09:52.236521Z",
+      "registry_status": "active",
+      "source_url": "https://api.adadvisor.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.adeu/adeu",
+      "published_at": "2026-05-16T13:54:48.18266Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.adeu/adeu",
+      "transport": "stdio",
+      "version": "1.7.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.adside/adside",
+      "published_at": "2026-07-16T19:48:48.148514Z",
+      "registry_status": "active",
+      "source_url": "https://api.adside.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentdm/agentdm",
+      "published_at": "2026-05-10T02:12:16.907792Z",
+      "registry_status": "active",
+      "source_url": "https://api.agentdm.ai/mcp/v1/grid",
+      "transport": "streamable-http",
+      "version": "2.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agenttrust/mcp-server",
+      "published_at": "2026-03-06T11:23:10.721165Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agenttrust/mcp-server",
+      "transport": "stdio",
+      "version": "1.1.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-agentops",
+      "published_at": "2026-07-14T21:10:14.904919Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-agentops",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-bestiary",
+      "published_at": "2026-07-14T21:10:15.433564Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-bestiary",
+      "transport": "stdio",
+      "version": "0.1.3"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-browser-workflow",
+      "published_at": "2026-07-14T21:10:15.897391Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-browser-workflow",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-compose",
+      "published_at": "2026-07-14T21:10:16.321193Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-compose",
+      "transport": "stdio",
+      "version": "0.13.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-edge-finance",
+      "published_at": "2026-07-14T21:10:17.095531Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-edge-finance",
+      "transport": "stdio",
+      "version": "0.18.8"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-edge-market",
+      "published_at": "2026-07-14T21:10:17.497855Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-edge-market",
+      "transport": "stdio",
+      "version": "0.15.6"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-locale",
+      "published_at": "2026-07-14T21:10:17.9033Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-locale",
+      "transport": "stdio",
+      "version": "0.8.7"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-matchpoint",
+      "published_at": "2026-07-14T21:10:18.280353Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-matchpoint",
+      "transport": "stdio",
+      "version": "0.1.4"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-mediakit",
+      "published_at": "2026-07-14T21:10:18.653557Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-mediakit",
+      "transport": "stdio",
+      "version": "0.11.9"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-model-router",
+      "published_at": "2026-07-14T21:10:19.082426Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-model-router",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-prooflayer",
+      "published_at": "2026-07-14T21:10:19.560994Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-prooflayer",
+      "transport": "stdio",
+      "version": "0.2.4"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-retail",
+      "published_at": "2026-07-14T21:10:19.946363Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-retail",
+      "transport": "stdio",
+      "version": "0.2.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-rollforge",
+      "published_at": "2026-07-14T21:10:20.41779Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-rollforge",
+      "transport": "stdio",
+      "version": "0.1.5"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-statline",
+      "published_at": "2026-07-14T21:10:20.828032Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-statline",
+      "transport": "stdio",
+      "version": "0.1.3"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-synthforge",
+      "published_at": "2026-07-14T21:10:21.289726Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-synthforge",
+      "transport": "stdio",
+      "version": "0.8.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-web-probe",
+      "published_at": "2026-07-14T21:10:21.796993Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-web-probe",
+      "transport": "stdio",
+      "version": "0.32.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.agentutility/mcp-wordmint",
+      "published_at": "2026-07-14T21:10:22.302521Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.agentutility/mcp-wordmint",
+      "transport": "stdio",
+      "version": "0.16.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.aisecuritygateway/mcp-gateway",
+      "published_at": "2026-07-08T23:23:14.982464Z",
+      "registry_status": "active",
+      "source_url": "https://api.aisecuritygateway.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.aliengiraffe/spotdb",
+      "published_at": "2025-10-09T17:05:17.793149Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.aliengiraffe/spotdb",
+      "transport": "stdio",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.alphacreek/alphacreek-mcp",
+      "published_at": "2026-06-12T13:01:13.227147Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.alphacreek.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.ankimcp/anki-mcp-server",
+      "published_at": "2026-07-21T18:58:14.907015Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.ankimcp/anki-mcp-server",
+      "transport": "stdio",
+      "version": "0.22.5"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.apithreshold/apithreshold",
+      "published_at": "2026-07-02T22:06:43.451983Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.apithreshold/apithreshold",
+      "transport": "stdio",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.augworlds/travel-world",
+      "published_at": "2026-07-24T22:17:22.125299Z",
+      "registry_status": "active",
+      "source_url": "https://travel.augworlds.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.auralogs/auralogs",
+      "published_at": "2026-06-10T05:44:10.419193Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.auralogs.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.authoryze/authoryze",
+      "published_at": "2026-07-15T01:01:52.175208Z",
+      "registry_status": "active",
+      "source_url": "https://authoryze.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.autoblocks/ctxl",
+      "published_at": "2026-01-12T03:52:12.746584Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.autoblocks/ctxl",
+      "transport": "stdio",
+      "version": "0.0.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.autoblocks/ctxl-mcp",
+      "published_at": "2026-01-12T03:52:19.009876Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.autoblocks/ctxl-mcp",
+      "transport": "stdio",
+      "version": "0.0.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.autonomad/computeback",
+      "published_at": "2026-05-11T23:17:51.160439Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.autonomad/computeback",
+      "transport": "stdio",
+      "version": "1.1.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.bankee/inferventis-mcp",
+      "published_at": "2026-04-28T09:24:20.898632Z",
+      "registry_status": "active",
+      "source_url": "https://mcp-server-295985738387.europe-west1.run.app/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.bareun/bareun",
+      "published_at": "2026-06-09T06:04:45.980117Z",
+      "registry_status": "active",
+      "source_url": "https://api.bareun.ai/mcp",
+      "transport": "streamable-http",
+      "version": "3.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.baselight/baselight",
+      "published_at": "2026-04-30T15:33:16.859356Z",
+      "registry_status": "active",
+      "source_url": "https://api.baselight.app/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.benroberts/b4-index",
+      "published_at": "2026-07-03T23:52:40.30259Z",
+      "registry_status": "active",
+      "source_url": "https://b4-index.vercel.app/mcp",
+      "transport": "streamable-http",
+      "version": "3.3.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.bizmuse/bizmuse",
+      "published_at": "2026-07-20T13:46:35.915847Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.bizmuse/bizmuse",
+      "transport": "stdio",
+      "version": "0.1.6"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.boundaryai/boundaryai",
+      "published_at": "2026-07-25T16:21:56.590296Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.boundaryai.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.7.31"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.bourdon/bourdon",
+      "published_at": "2026-07-15T05:46:35.916984Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.bourdon/bourdon",
+      "transport": "stdio",
+      "version": "0.12.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.bowmark/bowmark",
+      "published_at": "2026-07-26T03:15:21.248425Z",
+      "registry_status": "active",
+      "source_url": "https://api.bowmark.ai/mcp?s=r",
+      "transport": "streamable-http",
+      "version": "3.106.10"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.buywhere/buywhere-mcp",
+      "published_at": "2026-05-03T21:45:08.750713Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.buywhere/buywhere-mcp",
+      "transport": "stdio",
+      "version": "0.3.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.calendarmcp/server",
+      "published_at": "2026-05-20T07:09:04.298867Z",
+      "registry_status": "active",
+      "source_url": "https://calendarmcp.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.calfeed/calfeed",
+      "published_at": "2026-06-05T19:00:28.019015Z",
+      "registry_status": "active",
+      "source_url": "https://calfeed.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.callmcp/server",
+      "published_at": "2026-07-10T00:53:26.478263Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.callmcp/server",
+      "transport": "stdio",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.canaryusers/canaryusers",
+      "published_at": "2026-06-13T18:31:58.336704Z",
+      "registry_status": "active",
+      "source_url": "https://www.canaryusers.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.2.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.circulara/plugin",
+      "published_at": "2026-07-09T11:54:08.843062Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.circulara/plugin",
+      "transport": "stdio",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.clawterminal/markets",
+      "published_at": "2026-06-23T15:44:31.957977Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.clawterminal.ai",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.clize/clize",
+      "published_at": "2026-07-17T06:17:17.687832Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.clize/clize",
+      "transport": "stdio",
+      "version": "0.23.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.com.mcp/contabo",
+      "published_at": "2026-01-08T13:19:46.430479Z",
+      "registry_status": "active",
+      "source_url": "https://contabo.run.mcp.com.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.6.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.com.mcp/openai-tools",
+      "published_at": "2026-01-22T02:35:00.021804Z",
+      "registry_status": "active",
+      "source_url": "https://openai-tools.run.mcp.com.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.6.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.compeller/compel",
+      "published_at": "2026-05-05T03:21:40.918318Z",
+      "registry_status": "active",
+      "source_url": "https://compeller.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "0.5.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.craneledger/crane-ledger",
+      "published_at": "2026-06-25T16:03:19.605397Z",
+      "registry_status": "active",
+      "source_url": "https://api.craneledger.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.creativescope/creative-intelligence",
+      "published_at": "2026-07-22T09:51:05.050177Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.creativescope.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.d50/d50-platform",
+      "published_at": "2026-06-14T08:27:04.313042Z",
+      "registry_status": "active",
+      "source_url": "https://app.d50.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.deinai/creator-skill",
+      "published_at": "2026-06-05T10:16:43.633426Z",
+      "registry_status": "active",
+      "source_url": "https://deinai.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.deinai/creator-skill-v2",
+      "published_at": "2026-06-30T11:27:51.123362Z",
+      "registry_status": "active",
+      "source_url": "https://skill.deinai.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/apprise-rmcp",
+      "published_at": "2026-07-12T11:58:27.866195Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/apprise-rmcp",
+      "transport": "stdio",
+      "version": "0.1.3"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/arcane-rmcp",
+      "published_at": "2026-07-12T11:58:28.276344Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/arcane-rmcp",
+      "transport": "stdio",
+      "version": "0.4.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/cortex-rmcp",
+      "published_at": "2026-07-12T11:58:28.58298Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/cortex-rmcp",
+      "transport": "stdio",
+      "version": "3.9.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/gotify-rmcp",
+      "published_at": "2026-07-12T11:58:28.849931Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/gotify-rmcp",
+      "transport": "stdio",
+      "version": "0.1.3"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/labby",
+      "published_at": "2026-07-13T04:02:29.258343Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/labby",
+      "transport": "stdio",
+      "version": "1.3.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/soma",
+      "published_at": "2026-07-26T01:47:05.818138Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/soma",
+      "transport": "stdio",
+      "version": "0.6.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/synapse-rmcp",
+      "published_at": "2026-07-12T12:00:37.079017Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/synapse-rmcp",
+      "transport": "stdio",
+      "version": "0.5.4"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/tailscale-rmcp",
+      "published_at": "2026-07-12T12:00:37.314618Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/tailscale-rmcp",
+      "transport": "stdio",
+      "version": "0.1.3"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/unifi-rmcp",
+      "published_at": "2026-07-12T12:00:37.570413Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/unifi-rmcp",
+      "transport": "stdio",
+      "version": "0.2.4"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/unraid-rmcp",
+      "published_at": "2026-07-12T12:00:37.970335Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/unraid-rmcp",
+      "transport": "stdio",
+      "version": "0.2.3"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/yarr-mcp",
+      "published_at": "2026-07-12T12:00:38.673496Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/yarr-mcp",
+      "transport": "stdio",
+      "version": "1.1.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dinglebear/ytdl-rmcp",
+      "published_at": "2026-07-12T12:00:38.93391Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dinglebear/ytdl-rmcp",
+      "transport": "stdio",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.drillr/drillr",
+      "published_at": "2026-06-04T12:38:06.605598Z",
+      "registry_status": "active",
+      "source_url": "https://gateway.drillr.ai/mcp/data",
+      "transport": "streamable-http",
+      "version": "2.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.duvera/gateway",
+      "published_at": "2026-06-11T19:25:28.904765Z",
+      "registry_status": "active",
+      "source_url": "https://app.duvera.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.dynsoft/sac",
+      "published_at": "2026-05-24T02:09:53.574937Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.dynsoft/sac",
+      "transport": "stdio",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.featureboard/featureboard",
+      "published_at": "2026-07-24T05:43:14.453244Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.featureboard/featureboard",
+      "transport": "stdio",
+      "version": "0.7.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.filtrix.mcp/filtrix-ai",
+      "published_at": "2026-03-15T17:09:25.330187Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.filtrix.ai/",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.finestructure/fine-structure",
+      "published_at": "2026-07-17T22:09:33.664242Z",
+      "registry_status": "active",
+      "source_url": "https://finestructure.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.flowcastle/flowcastle",
+      "published_at": "2026-07-14T13:54:22.253093Z",
+      "registry_status": "active",
+      "source_url": "https://api.flowcastle.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.fodda/mcp-server",
+      "published_at": "2026-07-03T14:25:57.93371Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.fodda/mcp-server",
+      "transport": "stdio",
+      "version": "1.32.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.getoptimal/optibot",
+      "published_at": "2026-06-04T15:48:15.016308Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.getoptimal/optibot",
+      "transport": "stdio",
+      "version": "1.4.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.gossiper/shopify-admin-mcp",
+      "published_at": "2026-01-06T18:20:42.175634Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.gossiper.io/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.haymon/dbmcp",
+      "published_at": "2026-05-29T17:10:15.064945Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.haymon/dbmcp",
+      "transport": "stdio",
+      "version": "0.13.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.imboard/dossier",
+      "published_at": "2026-03-07T09:20:43.263852Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.imboard/dossier",
+      "transport": "stdio",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.iturri/market-data",
+      "published_at": "2026-07-13T02:31:38.876373Z",
+      "registry_status": "active",
+      "source_url": "https://iturri.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.joinmultiplayer/gpu",
+      "published_at": "2026-06-10T21:42:20.612154Z",
+      "registry_status": "active",
+      "source_url": "https://joinmultiplayer.ai/mcp",
+      "transport": "streamable-http",
+      "version": "2026.06.10"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.kavel/kavel-mcp",
+      "published_at": "2026-07-15T08:07:56.211621Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.kavel/kavel-mcp",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.keenable/web-search",
+      "published_at": "2026-06-26T14:00:39.740011Z",
+      "registry_status": "active",
+      "source_url": "https://api.keenable.ai/mcp?keenable_title=mcp-registry",
+      "transport": "streamable-http",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.lattiq/x402-trading-signals",
+      "published_at": "2026-03-26T21:58:49.321402Z",
+      "registry_status": "active",
+      "source_url": "https://api.lattiq.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.limitguard.api/trust-intelligence",
+      "published_at": "2026-02-24T13:42:25.987571Z",
+      "registry_status": "active",
+      "source_url": "https://api.limitguard.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.linkguard/linkguard-mcp",
+      "published_at": "2026-05-21T19:57:16.953951Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.linkguard/linkguard-mcp",
+      "transport": "stdio",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.lithtrix/lithtrix-mcp",
+      "published_at": "2026-06-20T07:55:20.564771Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.lithtrix/lithtrix-mcp",
+      "transport": "stdio",
+      "version": "0.20.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.ludo/game-assets",
+      "published_at": "2026-01-30T17:59:40.034021Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.ludo.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.9.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.lumify/sports-intelligence",
+      "published_at": "2026-07-20T17:01:48.656618Z",
+      "registry_status": "active",
+      "source_url": "https://lumify.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.magicinsights/insights",
+      "published_at": "2026-06-25T14:40:26.188033Z",
+      "registry_status": "active",
+      "source_url": "https://app.magicinsights.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.maguyva/maguyva",
+      "published_at": "2026-07-20T16:11:17.48051Z",
+      "registry_status": "active",
+      "source_url": "https://maguyva.tools/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.marchward/mcp-server",
+      "published_at": "2026-06-24T18:26:08.462318Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.marchward/mcp-server",
+      "transport": "stdio",
+      "version": "0.2.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.marketintell/marketintell",
+      "published_at": "2026-06-01T22:07:15.763336Z",
+      "registry_status": "active",
+      "source_url": "https://api.marketintell.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.3.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.maximem/synap",
+      "published_at": "2026-07-22T06:30:15.069666Z",
+      "registry_status": "active",
+      "source_url": "https://synap-mcp.maximem.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.mcpcap/mcpcap",
+      "published_at": "2026-03-17T05:29:03.951926Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.mcpcap/mcpcap",
+      "transport": "stdio",
+      "version": "0.9.6"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.meacheal/mrc-data",
+      "published_at": "2026-04-07T18:31:28.329956Z",
+      "registry_status": "active",
+      "source_url": "https://api.meacheal.ai/mcp",
+      "transport": "streamable-http",
+      "version": "2.2.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.meminal/meminal",
+      "published_at": "2025-10-12T23:40:10.473855Z",
+      "registry_status": "active",
+      "source_url": "https://meminal.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.moxt/mcp-workspace",
+      "published_at": "2026-05-13T11:19:51.786051Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.moxt.ai/openapi/v1/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.multi-turn/enacta",
+      "published_at": "2026-07-02T10:08:30.999963Z",
+      "registry_status": "active",
+      "source_url": "https://api.multi-turn.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.nauro/nauro",
+      "published_at": "2026-07-23T07:24:43.916431Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.nauro/nauro",
+      "transport": "stdio",
+      "version": "1.9.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.nefesh/human-state",
+      "published_at": "2026-04-03T19:42:18.337564Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.nefesh.ai/mcp",
+      "transport": "streamable-http",
+      "version": "4.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.nexustoken/nexustoken-sdk",
+      "published_at": "2026-04-24T15:11:58.794139Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.nexustoken/nexustoken-sdk",
+      "transport": "stdio",
+      "version": "0.6.5"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.nocturnus/logic-server",
+      "published_at": "2026-04-16T01:50:31.889198Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.nocturnus/logic-server",
+      "transport": "stdio",
+      "version": "0.3.11"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.onzero/creative-studio",
+      "published_at": "2026-07-15T08:12:39.26379Z",
+      "registry_status": "active",
+      "source_url": "https://onzero.ai/mcp",
+      "transport": "streamable-http",
+      "version": "2.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.orggen/orggen",
+      "published_at": "2026-05-17T19:54:05.296818Z",
+      "registry_status": "active",
+      "source_url": "https://www.orggen.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.packmind/mcp-server",
+      "published_at": "2025-11-24T15:23:52.365339Z",
+      "registry_status": "active",
+      "source_url": "https://app.packmind.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.painspotter/painspotter",
+      "published_at": "2026-06-02T06:30:40.797521Z",
+      "registry_status": "active",
+      "source_url": "https://painspotter.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.perplexity/mcp-server",
+      "published_at": "2026-03-23T19:39:48.003259Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.perplexity/mcp-server",
+      "transport": "stdio",
+      "version": "0.9.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.physea/liminality",
+      "published_at": "2026-07-06T01:02:37.781217Z",
+      "registry_status": "active",
+      "source_url": "https://liminality.physea.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.ponlo/server",
+      "published_at": "2026-03-04T21:01:15.992017Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.ponlo/server",
+      "transport": "stdio",
+      "version": "1.13.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.positif/positif",
+      "published_at": "2026-07-14T23:19:23.238169Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.positif/positif",
+      "transport": "stdio",
+      "version": "0.2.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.preclick/preclick-mcp",
+      "published_at": "2026-04-03T15:48:04.727414Z",
+      "registry_status": "active",
+      "source_url": "https://preclick.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.3.6"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.proofslip/mcp-server",
+      "published_at": "2026-04-05T07:54:11.612339Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.proofslip/mcp-server",
+      "transport": "stdio",
+      "version": "0.2.3"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.proxyllm/proxyllm-mcp",
+      "published_at": "2026-07-15T04:43:32.640064Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.proxyllm/proxyllm-mcp",
+      "transport": "stdio",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.qr-manager/qr-manager",
+      "published_at": "2026-06-17T05:06:20.934627Z",
+      "registry_status": "active",
+      "source_url": "https://qr-manager.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.quotefirst/quotefirst",
+      "published_at": "2026-07-19T22:22:23.55229Z",
+      "registry_status": "active",
+      "source_url": "https://quotefirst.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.rams/rams",
+      "published_at": "2026-07-18T19:39:51.561841Z",
+      "registry_status": "active",
+      "source_url": "https://worker.rams.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.rapay/mcp-server",
+      "published_at": "2026-02-09T18:54:17.964435Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.rapay/mcp-server",
+      "transport": "stdio",
+      "version": "1.2.5"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.readypermit/geo",
+      "published_at": "2026-04-28T16:43:57.168584Z",
+      "registry_status": "active",
+      "source_url": "https://rnfonkwthefktfvfwypr.supabase.co/functions/v1/mcp-server",
+      "transport": "streamable-http",
+      "version": "1.2.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.retrodiffusion/pixel-art",
+      "published_at": "2026-07-10T16:06:45.185326Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.retrodiffusion.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.rfp/rfp-ai",
+      "published_at": "2026-06-11T09:23:51.525839Z",
+      "registry_status": "active",
+      "source_url": "https://rfp.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.rockmoon/financial-data",
+      "published_at": "2026-06-14T05:10:09.036143Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.rockmoon.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.roopslaw/legalsearch",
+      "published_at": "2026-05-25T07:11:07.724108Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.roopslaw.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.router/ai-gateway",
+      "published_at": "2026-06-10T10:17:38.65273Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.router.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.roxels/roxels-mcp",
+      "published_at": "2026-04-08T22:42:57.358698Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.roxels/roxels-mcp",
+      "transport": "stdio",
+      "version": "0.5.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.satoshidata/wallet-intelligence",
+      "published_at": "2026-06-27T22:29:47.985759Z",
+      "registry_status": "active",
+      "source_url": "https://satoshidata.ai/mcp/v1/",
+      "transport": "streamable-http",
+      "version": "1.0.6"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.secapi/secapi",
+      "published_at": "2026-07-13T08:44:53.0965Z",
+      "registry_status": "active",
+      "source_url": "https://api.secapi.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.3.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.seltz/seltz-ai-seltz-mcp",
+      "published_at": "2025-12-05T09:24:21.447908Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.seltz.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.sendfast/sendfast",
+      "published_at": "2026-05-21T14:43:52.651223Z",
+      "registry_status": "active",
+      "source_url": "https://sendfast.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.sendinel/mcp-server",
+      "published_at": "2026-07-03T04:53:14.945762Z",
+      "registry_status": "active",
+      "source_url": "https://sendinel.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.sig.foodlog/food-logger",
+      "published_at": "2026-06-12T07:20:41.152771Z",
+      "registry_status": "active",
+      "source_url": "https://foodlog.sig.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/222wcnm-bilistalkermcp",
+      "published_at": "2025-10-02T06:57:33.936879Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@222wcnm/bilistalkermcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Aman-Amith-Shastry-scientific_computation_mcp",
+      "published_at": "2025-09-12T01:14:07.07827Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Aman-Amith-Shastry/scientific_computation_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Artin0123-gemini-image-mcp-server",
+      "published_at": "2025-10-08T06:18:22.754577Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Artin0123/gemini-image-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.4.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/BadRooBot-my_test_mcp",
+      "published_at": "2025-09-14T14:25:46.094496Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@BadRooBot/my_test_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/BadRooBot-test_m",
+      "published_at": "2025-09-20T14:41:53.772797Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@BadRooBot/test_m/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/BigVik193-reddit-ads-mcp",
+      "published_at": "2025-09-14T22:00:51.726311Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@BigVik193/reddit-ads-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/BigVik193-reddit-ads-mcp-api",
+      "published_at": "2025-09-14T22:40:30.852738Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@BigVik193/reddit-ads-mcp-api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/BigVik193-reddit-ads-mcp-test",
+      "published_at": "2025-09-14T21:38:57.984339Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@BigVik193/reddit-ads-mcp-test/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/BigVik193-reddit-user-mcp",
+      "published_at": "2025-09-14T21:19:18.64908Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@BigVik193/reddit-user-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/BowenXU0126-aistudio_hw3",
+      "published_at": "2025-10-03T00:54:01.690641Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@BowenXU0126/aistudio_hw3/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/ChiR24-unreal_mcp",
+      "published_at": "2025-10-05T05:30:22.169534Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@ChiR24/unreal_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.4.6"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/ChiR24-unreal_mcp_server",
+      "published_at": "2025-10-03T07:12:00.299485Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@ChiR24/unreal_mcp_server/mcp",
+      "transport": "streamable-http",
+      "version": "0.4.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/CollectiveSpend-collectivespend-smithery-mcp",
+      "published_at": "2025-09-10T17:03:02.996325Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@CollectiveSpend/collectivespend-smithery-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/CryptoCultCurt-appfolio-mcp-server",
+      "published_at": "2025-09-11T00:42:54.555978Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@CryptoCultCurt/appfolio-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Danushkumar-V-mcp-discord",
+      "published_at": "2025-09-13T22:54:39.805525Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Danushkumar-V/mcp-discord/mcp",
+      "transport": "streamable-http",
+      "version": "1.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/DynamicEndpoints-autogen_mcp",
+      "published_at": "2025-09-11T13:57:38.18553Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@DynamicEndpoints/autogen_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.3.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/DynamicEndpoints-m365-core-mcp",
+      "published_at": "2025-09-11T13:58:16.278261Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@DynamicEndpoints/m365-core-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/DynamicEndpoints-powershell-exec-mcp-server",
+      "published_at": "2025-09-11T13:54:30.703395Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@DynamicEndpoints/powershell-exec-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/FelixYifeiWang-felix-mcp-smithery",
+      "published_at": "2025-10-02T07:15:10.498525Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@FelixYifeiWang/felix-mcp-smithery/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Funding-Machine-ghl-mcp-fundingmachine",
+      "published_at": "2025-10-07T21:20:15.688859Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Funding-Machine/ghl-mcp-fundingmachine/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/HARJAP-SINGH-3105-splitwise_mcp",
+      "published_at": "2025-09-18T18:42:59.470988Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@HARJAP-SINGH-3105/splitwise_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Hint-Services-obsidian-github-mcp",
+      "published_at": "2025-09-14T15:20:36.371442Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Hint-Services/obsidian-github-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.4.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/IlyaGusev-academia_mcp",
+      "published_at": "2025-10-02T18:00:50.572805Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@IlyaGusev/academia_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/ImRonAI-mcp-server-browserbase",
+      "published_at": "2025-09-16T06:05:33.453619Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@ImRonAI/mcp-server-browserbase/mcp",
+      "transport": "streamable-http",
+      "version": "2.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/IndianAppGuy-magicslide-mcp",
+      "published_at": "2025-10-08T05:29:39.856257Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@IndianAppGuy/magicslide-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/IndianAppGuy-magicslide-mcp-actual-test",
+      "published_at": "2025-10-07T12:06:34.023568Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@IndianAppGuy/magicslide-mcp-actual-test/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/JMoak-chrono-mcp",
+      "published_at": "2025-09-17T02:23:35.312972Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@JMoak/chrono-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/JunoJunHyun-festival-finder-mcp",
+      "published_at": "2025-10-06T09:40:14.759675Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@JunoJunHyun/festival-finder-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Kim-soung-won-mcp-smithery-exam",
+      "published_at": "2025-09-16T06:32:38.498462Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Kim-soung-won/mcp-smithery-exam/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Kryptoskatt-mcp-server",
+      "published_at": "2025-09-17T10:41:17.402979Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Kryptoskatt/mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Leghis-smart-thinking",
+      "published_at": "2025-09-29T14:04:13.933299Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Leghis/smart-thinking/mcp",
+      "transport": "streamable-http",
+      "version": "0.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/LinkupPlatform-linkup-mcp-server",
+      "published_at": "2025-10-27T11:25:12.402429Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@LinkupPlatform/linkup-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/MetehanGZL-pokemcp",
+      "published_at": "2025-09-15T17:56:16.25232Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@MetehanGZL/pokemcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/MisterSandFR-supabase-mcp-selfhosted",
+      "published_at": "2025-09-18T14:42:06.197815Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@MisterSandFR/supabase-mcp-selfhosted/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Nekzus-npm-sentinel-mcp",
+      "published_at": "2025-09-20T23:26:41.744482Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Nekzus/npm-sentinel-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.11.8"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Open-Scout-mcp",
+      "published_at": "2025-09-30T15:08:39.247411Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Open-Scout/mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/PabloLec-keyprobe-mcp",
+      "published_at": "2025-09-10T18:08:11.479456Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@PabloLec/keyprobe-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Parc-Dev-task-breakdown-server",
+      "published_at": "2025-10-07T18:37:20.988548Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Parc-Dev/task-breakdown-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Phionx-mcp-hello-server",
+      "published_at": "2025-10-03T06:11:06.81562Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Phionx/mcp-hello-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/PixdataOrg-coderide",
+      "published_at": "2025-09-19T14:23:37.184036Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@PixdataOrg/coderide/mcp",
+      "transport": "streamable-http",
+      "version": "0.9.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/Pratiksha-Kanoja-magicslide-mcp-test",
+      "published_at": "2025-10-07T10:10:48.100762Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@Pratiksha-Kanoja/magicslide-mcp-test/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/ProfessionalWiki-mediawiki-mcp-server",
+      "published_at": "2025-09-18T12:49:06.317403Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@ProfessionalWiki/mediawiki-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/RectiFlex-centerassist-mcp",
+      "published_at": "2025-10-03T15:38:17.960766Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@RectiFlex/centerassist-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/RectiFlex-centerassist-mcp-cp",
+      "published_at": "2025-10-07T03:31:56.911791Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@RectiFlex/centerassist-mcp-cp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/RectiFlex-centerassist-mcp-cp1",
+      "published_at": "2025-10-07T03:54:36.038569Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@RectiFlex/centerassist-mcp-cp1/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/RectiFlex-centerassist-mcp1",
+      "published_at": "2025-10-08T05:13:44.681143Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@RectiFlex/centerassist-mcp1/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/STUzhy-py_execute_mcp",
+      "published_at": "2025-09-17T04:55:34.956438Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@STUzhy/py_execute_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/ScrapeGraphAI-scrapegraph-mcp",
+      "published_at": "2025-10-25T21:42:44.755249Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@ScrapeGraphAI/scrapegraph-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/TakoData-tako-mcp",
+      "published_at": "2025-10-07T20:40:52.702786Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@TakoData/tako-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/a-ariff-canvas-instant-mcp",
+      "published_at": "2025-10-05T00:50:43.815585Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@a-ariff/canvas-instant-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "2.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/aamangeldi-dad-jokes-mcp",
+      "published_at": "2025-09-30T00:21:20.72031Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@aamangeldi/dad-jokes-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/adamamer20-paper-search-mcp-openai",
+      "published_at": "2025-09-18T10:21:35.776286Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@adamamer20/paper-search-mcp-openai/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/afgong-sqlite-mcp-server",
+      "published_at": "2025-10-02T21:47:24.293477Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@afgong/sqlite-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/aicastle-school-openai-api-agent-project",
+      "published_at": "2025-10-06T11:12:18.988861Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@aicastle-school/openai-api-agent-project/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/aicastle-school-openai-api-agent-project11",
+      "published_at": "2025-10-06T11:12:19.115931Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@aicastle-school/openai-api-agent-project11/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/airmang-hwpx-mcp",
+      "published_at": "2025-09-18T07:51:38.712981Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@airmang/hwpx-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/akilat-spec-leave-manager-mcp",
+      "published_at": "2025-10-06T10:13:37.506388Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@akilat-spec/leave-manager-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/alex-llm-attack-mcp-server",
+      "published_at": "2025-09-30T17:11:31.060313Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@alex-llm/attack-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "2.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/alphago2580-naramarketmcp",
+      "published_at": "2025-09-19T02:36:55.167644Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@alphago2580/naramarketmcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/anirbanbasu-frankfurtermcp",
+      "published_at": "2025-09-29T11:56:36.086039Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@anirbanbasu/frankfurtermcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/anirbanbasu-pymcp",
+      "published_at": "2025-09-20T05:41:08.153835Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@anirbanbasu/pymcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.7"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-ahoy",
+      "published_at": "2025-09-14T03:11:31.224722Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/ahoy/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-ahoy2",
+      "published_at": "2025-09-18T09:44:13.762613Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/ahoy2/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-boba-tea",
+      "published_at": "2025-10-04T01:51:32.373165Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/boba-tea/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-bobo",
+      "published_at": "2025-09-19T03:28:29.606731Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/bobo/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-brave-search-mcp-server",
+      "published_at": "2025-10-02T06:39:58.418517Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/brave-search-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "2.0.25"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-clock",
+      "published_at": "2025-09-19T08:00:25.675646Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/clock/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-fetch",
+      "published_at": "2025-10-08T02:32:40.481877Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/fetch/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-http-test",
+      "published_at": "2026-01-08T07:46:22.969746Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/arjunkmrm/http-test",
+      "transport": "streamable-http",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-local-test2",
+      "published_at": "2025-09-29T08:52:53.0348Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/local-test2/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-local001",
+      "published_at": "2025-10-03T12:44:39.189348Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/local001/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-local01",
+      "published_at": "2025-10-02T04:20:15.678667Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/local01/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-local02",
+      "published_at": "2025-10-03T09:02:26.911871Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/local02/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-lta-mcp",
+      "published_at": "2025-09-11T16:52:48.059122Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/lta-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-mango-sago",
+      "published_at": "2025-10-04T02:20:25.785458Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/mango-sago/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-perplexity-search",
+      "published_at": "2025-09-10T13:59:26.758557Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/perplexity-search/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-py-test-0",
+      "published_at": "2025-10-04T02:06:51.365096Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/py-test-0/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-py-test-2",
+      "published_at": "2025-10-04T03:00:46.274065Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/py-test-2/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-scrapermcp_el",
+      "published_at": "2025-09-29T12:13:12.824688Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/scrapermcp_el/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-sg-bus-test",
+      "published_at": "2025-10-07T08:54:49.020099Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/sg-bus-test/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-test0",
+      "published_at": "2025-10-03T08:18:08.952463Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/test0/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-test01",
+      "published_at": "2025-10-03T09:01:40.590024Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/test01/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-test2",
+      "published_at": "2025-09-29T10:33:30.587409Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/test2/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-time",
+      "published_at": "2025-10-02T08:35:12.663422Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/time/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-ts-test-2",
+      "published_at": "2025-10-04T02:01:26.06959Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/ts-test-2/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-tutorials",
+      "published_at": "2025-09-29T12:55:16.098975Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/tutorials/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/arjunkmrm-watch2",
+      "published_at": "2025-09-19T08:31:21.361328Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@arjunkmrm/watch2/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/aryankeluskar-poke-video-mcp",
+      "published_at": "2025-09-14T17:42:05.006814Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@aryankeluskar/poke-video-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/bergeramit-bergeramit-hw3-tech",
+      "published_at": "2025-09-29T12:49:39.923485Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@bergeramit/bergeramit-hw3-tech/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/bergeramit-bergeramit-hw3-tech-1",
+      "published_at": "2025-09-29T12:45:13.016748Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@bergeramit/bergeramit-hw3-tech-1/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/bhushangitfull-file-mcp-smith",
+      "published_at": "2025-10-07T07:58:50.393118Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@bhushangitfull/file-mcp-smith/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/bielacki-igdb-mcp-server",
+      "published_at": "2025-09-29T21:24:56.528261Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@bielacki/igdb-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/blacklotusdev8-test_m",
+      "published_at": "2025-09-19T19:12:16.602435Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@blacklotusdev8/test_m/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/blbl147-xhs-mcp",
+      "published_at": "2025-09-15T03:34:24.676763Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@blbl147/xhs-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.6.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/blockscout-mcp-server",
+      "published_at": "2025-09-20T00:50:33.619952Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@blockscout/mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/brandonbosco-sigao-scf-mcp",
+      "published_at": "2025-10-06T17:06:30.80395Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@brandonbosco/sigao-scf-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/brave",
+      "published_at": "2025-10-25T09:09:32.842127Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/brave/mcp",
+      "transport": "streamable-http",
+      "version": "2.0.58"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/browserbasehq-mcp-browserbase",
+      "published_at": "2025-10-16T21:51:16.500712Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@browserbasehq/mcp-browserbase/mcp",
+      "transport": "streamable-http",
+      "version": "2.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/callmybot-cookbook-mcp-server",
+      "published_at": "2025-09-18T09:25:11.477139Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@callmybot/cookbook-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/callmybot-domoticz",
+      "published_at": "2025-09-18T10:31:39.650923Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@callmybot/domoticz/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/callmybot-hello-mcp-server",
+      "published_at": "2025-09-18T07:48:26.611267Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@callmybot/hello-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/cc25a-openai-api-agent-project123123123",
+      "published_at": "2025-09-17T03:32:54.14302Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@cc25a/openai-api-agent-project123123123/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/cindyloo-dropbox-mcp-server",
+      "published_at": "2025-09-30T02:02:08.583268Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@cindyloo/dropbox-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/clpi-clp-mcp",
+      "published_at": "2025-10-08T00:23:04.174735Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@clpi/clp-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/cpretzinger-ai-assistant-simple",
+      "published_at": "2025-09-15T00:26:36.144736Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@cpretzinger/ai-assistant-simple/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/cristianoaredes-mcp-dadosbr",
+      "published_at": "2025-10-03T12:13:44.073155Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@cristianoaredes/mcp-dadosbr/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/ctaylor86-mcp-video-download-server",
+      "published_at": "2025-09-15T11:45:18.173946Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@ctaylor86/mcp-video-download-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/cuongpo-coti-mcp",
+      "published_at": "2025-10-02T07:26:17.819584Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@cuongpo/coti-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/cuongpo-coti-mcp-1",
+      "published_at": "2025-10-02T15:24:18.456616Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@cuongpo/coti-mcp-1/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/data-mindset-sts-google-forms-mcp",
+      "published_at": "2025-10-05T09:13:16.21757Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@data-mindset/sts-google-forms-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/demomagic-duckchain-mcp",
+      "published_at": "2025-09-14T05:32:58.075994Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@demomagic/duckchain-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/devbrother2024-typescript-mcp-server-boilerplate",
+      "published_at": "2025-09-20T16:12:55.711869Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@devbrother2024/typescript-mcp-server-boilerplate/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/docfork-mcp",
+      "published_at": "2025-09-12T18:25:16.049647Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@docfork/mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.7.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/dsharipova-mcp-hw",
+      "published_at": "2025-10-03T13:26:30.70555Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@dsharipova/mcp-hw/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/duvomike-mcp",
+      "published_at": "2025-09-21T03:33:47.332418Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@duvomike/mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/eliu243-oura-mcp-server",
+      "published_at": "2025-10-02T18:41:13.003678Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@eliu243/oura-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/eliu243-oura-mcp-server-2",
+      "published_at": "2025-10-02T18:40:49.71696Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@eliu243/oura-mcp-server-2/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/eliu243-oura-mcp-server-eliu",
+      "published_at": "2025-10-02T18:40:51.593152Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@eliu243/oura-mcp-server-eliu/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/exa-labs-exa-code-mcp",
+      "published_at": "2025-09-17T20:44:09.235886Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@exa-labs/exa-code-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/faithk7-gmail-mcp",
+      "published_at": "2025-09-14T13:42:20.134258Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@faithk7/gmail-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.7.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/feeefapp-mcp",
+      "published_at": "2025-10-03T01:55:09.587519Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@feeefapp/mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/fengyinxia-jimeng-mcp",
+      "published_at": "2025-09-12T13:13:51.711543Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@fengyinxia/jimeng-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/fitaf-ai-fitaf-ai-mcp",
+      "published_at": "2025-09-12T17:59:11.653728Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@fitaf-ai/fitaf-ai-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/fitaf-ai-fitaf-mcp",
+      "published_at": "2025-09-12T20:09:50.974663Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@fitaf-ai/fitaf-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/flight505-mcp_dincoder",
+      "published_at": "2025-10-03T21:53:12.422748Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@flight505/mcp_dincoder/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.15"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/hithereiamaliff-mcp-datagovmy",
+      "published_at": "2025-09-11T05:56:30.06684Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@hithereiamaliff/mcp-datagovmy/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/hithereiamaliff-mcp-nextcloud",
+      "published_at": "2025-09-11T18:40:25.891252Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@hithereiamaliff/mcp-nextcloud/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/hjsh200219-pharminfo-mcp",
+      "published_at": "2025-09-17T06:55:47.401979Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@hjsh200219/pharminfo-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/hollaugo-financial-research-mcp-server",
+      "published_at": "2025-09-29T16:56:54.604903Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@hollaugo/financial-research-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/hustcc-mcp-mermaid",
+      "published_at": "2025-09-13T06:08:16.370383Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@hustcc/mcp-mermaid/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/huuthangntk-claude-vision-mcp-server",
+      "published_at": "2025-10-07T23:20:55.125959Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@huuthangntk/claude-vision-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/infranodus-mcp-server-infranodus",
+      "published_at": "2025-10-04T08:08:11.981455Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@infranodus/mcp-server-infranodus/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/isnow890-data4library-mcp",
+      "published_at": "2025-09-29T10:45:21.467985Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@isnow890/data4library-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.5"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/jekakos-mcp-user-data-enrichment",
+      "published_at": "2025-10-02T12:50:51.350056Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@jekakos/mcp-user-data-enrichment/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/jenniferjiang0511-mit-ai-studio-hw3",
+      "published_at": "2025-10-03T03:01:55.290688Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@jenniferjiang0511/mit-ai-studio-hw3/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/jessicayanwang-test",
+      "published_at": "2025-09-30T02:03:00.046026Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@jessicayanwang/test/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/jirispilka-actors-mcp-server",
+      "published_at": "2025-09-11T11:59:13.452963Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@jirispilka/actors-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/jjlabsio-korea-stock-mcp",
+      "published_at": "2025-09-19T09:01:49.012754Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@jjlabsio/korea-stock-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/jweingardt12-mlb_mcp",
+      "published_at": "2025-10-06T14:52:36.727607Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@jweingardt12/mlb_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kaszek-kaszek-attio-mcp",
+      "published_at": "2025-09-20T23:26:13.627724Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kaszek/kaszek-attio-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/keithah-hostex-mcp",
+      "published_at": "2025-09-30T04:10:38.519183Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@keithah/hostex-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/keithah-tessie-mcp",
+      "published_at": "2025-09-30T04:22:17.289426Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@keithah/tessie-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/keremurat-json",
+      "published_at": "2025-10-03T13:28:40.425657Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@keremurat/json/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/keremurat-jsonmcp",
+      "published_at": "2025-10-03T13:28:42.90749Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@keremurat/jsonmcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/keremurat-mcp",
+      "published_at": "2025-10-03T13:28:45.319778Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@keremurat/mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kesslerio-attio-mcp-server",
+      "published_at": "2025-10-07T01:00:35.437419Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kesslerio/attio-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kesslerio-attio-mcp-server-beta",
+      "published_at": "2025-10-07T04:36:42.08064Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kesslerio/attio-mcp-server-beta/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kirbah-mcp-youtube",
+      "published_at": "2025-10-04T16:31:58.771823Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kirbah/mcp-youtube/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.6"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kkjdaniel-bgg-mcp",
+      "published_at": "2025-09-16T00:14:29.642756Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kkjdaniel/bgg-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.3.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kodey-ai-mapwise-mcp",
+      "published_at": "2025-09-18T21:55:01.522892Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kodey-ai/mapwise-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kodey-ai-salesforce-mcp",
+      "published_at": "2025-10-08T03:10:49.227357Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kodey-ai/salesforce-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kodey-ai-salesforce-mcp-kodey",
+      "published_at": "2025-10-08T03:10:47.790579Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kodey-ai/salesforce-mcp-kodey/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kodey-ai-salesforce-mcp-minimal",
+      "published_at": "2025-10-08T03:10:50.179693Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kodey-ai/salesforce-mcp-minimal/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kodey-ai-salesforce-mcp-server",
+      "published_at": "2025-10-08T03:10:46.917883Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kodey-ai/salesforce-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/kwp-lab-rss-reader-mcp",
+      "published_at": "2025-09-10T17:02:25.896522Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@kwp-lab/rss-reader-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/leandrogavidia-vechain-mcp-server",
+      "published_at": "2025-10-02T18:35:25.040994Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@leandrogavidia/vechain-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/lineex-pubmed-mcp-smithery",
+      "published_at": "2025-09-16T01:10:37.458959Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@lineex/pubmed-mcp-smithery/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/lukaskostka99-marketing-miner-mcp",
+      "published_at": "2025-09-16T19:53:18.718565Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@lukaskostka99/marketing-miner-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/luminati-io-brightdata-mcp",
+      "published_at": "2025-10-06T11:04:51.228096Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@luminati-io/brightdata-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/magenie33-quality-dimension-generator",
+      "published_at": "2025-09-20T15:11:34.739058Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@magenie33/quality-dimension-generator/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/mayla-debug-mcp-google-calendar2",
+      "published_at": "2025-10-07T11:08:53.670394Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@mayla-debug/mcp-google-calendar2/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/mfukushim-map-traveler-mcp",
+      "published_at": "2025-09-29T15:14:24.853367Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@mfukushim/map-traveler-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/miguelgarzons-mcp-cun",
+      "published_at": "2025-09-30T03:30:01.02979Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@miguelgarzons/mcp-cun/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/minionszyw-bazi",
+      "published_at": "2025-09-18T08:13:10.601278Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@minionszyw/bazi/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/mjucius-cozi_mcp",
+      "published_at": "2025-09-13T23:46:02.266315Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@mjucius/cozi_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/morosss-sdfsdf",
+      "published_at": "2025-09-13T17:26:11.859Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@morosss/sdfsdf/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/motorboy1-my-mcp-server",
+      "published_at": "2025-10-05T06:36:24.851605Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@motorboy1/my-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/mrugankpednekar-bill_splitter_mcp",
+      "published_at": "2025-09-30T06:59:08.923806Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@mrugankpednekar/bill_splitter_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/mrugankpednekar-mcp-optimizer",
+      "published_at": "2025-10-07T21:15:31.815401Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@mrugankpednekar/mcp-optimizer/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/neverinfamous-memory-journal-mcp",
+      "published_at": "2025-09-15T03:39:21.90803Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@neverinfamous/memory-journal-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/nickthelegend-test-mcp",
+      "published_at": "2025-10-02T14:15:26.542177Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@nickthelegend/test-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/oxylabs-oxylabs-mcp",
+      "published_at": "2025-09-18T14:22:20.353742Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@oxylabs/oxylabs-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/pinion05-supabase-mcp-lite",
+      "published_at": "2025-09-17T09:26:34.42483Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@pinion05/supabase-mcp-lite/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/pinkpixel-dev-web-scout-mcp",
+      "published_at": "2025-09-20T03:40:04.41882Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@pinkpixel-dev/web-scout-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.5.5"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/plainyogurt21-clintrials-mcp",
+      "published_at": "2025-10-05T12:56:11.696599Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@plainyogurt21/clintrials-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/plainyogurt21-sec-edgar-mcp",
+      "published_at": "2025-09-13T21:20:44.610658Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@plainyogurt21/sec-edgar-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/proflulab-documentassistant",
+      "published_at": "2025-10-06T07:24:02.799169Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@proflulab/documentassistant/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/pythondev-pro-egw_writings_mcp_server",
+      "published_at": "2025-09-11T12:48:16.278544Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@pythondev-pro/egw_writings_mcp_server/mcp",
+      "transport": "streamable-http",
+      "version": "1.12.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/rainbowgore-stealthee-mcp-tools",
+      "published_at": "2025-09-18T08:35:04.917713Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@rainbowgore/stealthee-mcp-tools/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/ramadasmr-networkcalc-mcp",
+      "published_at": "2025-09-20T10:10:47.321873Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@ramadasmr/networkcalc-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/ref-tools-ref-tools-mcp",
+      "published_at": "2025-10-28T04:05:07.66948Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@ref-tools/ref-tools-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "3.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/renCosta2025-context7fork",
+      "published_at": "2025-09-29T10:26:07.372529Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@renCosta2025/context7fork/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.13"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/rfdez-pvpc-mcp-server",
+      "published_at": "2025-09-10T16:57:17.590562Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@rfdez/pvpc-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "3.2.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/sachicali-discordmcp-suite",
+      "published_at": "2025-09-10T18:19:06.201517Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@sachicali/discordmcp-suite/mcp",
+      "transport": "streamable-http",
+      "version": "1.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/saidsef-mcp-github-pr-issue-analyser",
+      "published_at": "2025-10-05T14:58:08.898007Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@saidsef/mcp-github-pr-issue-analyser/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/samihalawa-whatsapp-go-mcp",
+      "published_at": "2025-10-03T00:18:16.874195Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@samihalawa/whatsapp-go-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "v7.5.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/sasabasara-where_is_my_bus_mcp",
+      "published_at": "2025-09-11T03:53:53.151653Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@sasabasara/where_is_my_bus_mcp/mcp",
+      "transport": "streamable-http",
+      "version": "2.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/sebastianall1977-gmail-mcp",
+      "published_at": "2025-09-29T13:55:24.480833Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@sebastianall1977/gmail-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.7.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/serkan-ozal-driflyte-mcp-server",
+      "published_at": "2025-09-30T05:31:42.627664Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@serkan-ozal/driflyte-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.15"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/shoumikdc-arxiv-mcp",
+      "published_at": "2025-10-02T06:59:26.159502Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@shoumikdc/arxiv-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/skr-cloudify-clickup-mcp-server-new",
+      "published_at": "2025-09-21T11:44:55.497079Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@skr-cloudify/clickup-mcp-server-new/mcp",
+      "transport": "streamable-http",
+      "version": "0.8.5"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/slhad-aha-mcp",
+      "published_at": "2025-09-14T21:53:54.664726Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@slhad/aha-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-ai-cookbook-python-quickstart",
+      "published_at": "2025-09-10T16:07:02.461935Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery-ai/cookbook-python-quickstart/mcp",
+      "transport": "streamable-http",
+      "version": "1.13.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-ai-cookbook-ts-smithery-cli",
+      "published_at": "2025-09-13T12:45:28.964188Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery-ai/cookbook-ts-smithery-cli/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-ai-fetch",
+      "published_at": "2025-10-14T03:19:26.387795Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery-ai/fetch/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-ai-github",
+      "published_at": "2025-09-10T18:22:12.930528Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery-ai/github/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-ai-national-weather-service",
+      "published_at": "2025-09-11T02:29:56.928105Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery-ai/national-weather-service/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-ai-slack",
+      "published_at": "2025-09-10T20:56:36.64385Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery-ai/slack/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-notion",
+      "published_at": "2025-09-10T18:26:59.341637Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery/notion/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-toolbox",
+      "published_at": "2025-09-10T20:39:40.188723Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery/toolbox/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/smithery-unicorn",
+      "published_at": "2026-01-09T15:44:17.95936Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@smithery/unicorn",
+      "transport": "streamable-http",
+      "version": "3.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/sunub-obsidian-mcp-server",
+      "published_at": "2025-09-18T13:40:45.500067Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@sunub/obsidian-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/szge-lolwiki-mcp",
+      "published_at": "2025-10-07T01:41:22.282712Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@szge/lolwiki-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/truss44-mcp-crypto-price",
+      "published_at": "2025-10-02T23:25:46.643562Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@truss44/mcp-crypto-price/mcp",
+      "transport": "streamable-http",
+      "version": "2.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/turnono-datacommons-mcp-server",
+      "published_at": "2025-10-03T09:53:14.229429Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@turnono/datacommons-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/wgong-sqlite-mcp-server",
+      "published_at": "2025-10-05T01:52:30.252523Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@wgong/sqlite-mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.16.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/xinkuang-china-stock-mcp",
+      "published_at": "2025-09-30T01:41:03.405268Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@xinkuang/china-stock-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.15.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/yuhuison-mediawiki-mcp-server-auth",
+      "published_at": "2025-09-16T11:19:24.929803Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@yuhuison/mediawiki-mcp-server-auth/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/yuna0x0-anilist-mcp",
+      "published_at": "2025-09-29T12:46:26.531503Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@yuna0x0/anilist-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.3.7"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/yuna0x0-hackmd-mcp",
+      "published_at": "2025-09-29T12:48:21.84888Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@yuna0x0/hackmd-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.5.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/zeta-chain-cli",
+      "published_at": "2025-09-19T16:55:43.436334Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@zeta-chain/cli/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/zhaoganghao-hellomcp",
+      "published_at": "2025-09-30T10:35:36.775049Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@zhaoganghao/hellomcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.smithery/zwldarren-akshare-one-mcp",
+      "published_at": "2025-09-11T19:15:39.84882Z",
+      "registry_status": "active",
+      "source_url": "https://server.smithery.ai/@zwldarren/akshare-one-mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.14.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.social-api/socialapi",
+      "published_at": "2026-05-02T11:22:45.878556Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.social-api/socialapi",
+      "transport": "stdio",
+      "version": "1.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.solenium/netsuite-link",
+      "published_at": "2026-07-03T21:53:15.677361Z",
+      "registry_status": "active",
+      "source_url": "https://netsuite.solenium.ai/api/v1/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0-beta.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.sovantica/engrava",
+      "published_at": "2026-07-09T11:54:02.466666Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.sovantica/engrava",
+      "transport": "stdio",
+      "version": "0.5.1"
+    },
+    {
+      "auth_mode": "header-nonsecret",
+      "fetched_at": "2026-07-26",
+      "name": "ai.spala/public-mcp",
+      "published_at": "2026-07-23T17:06:35.615704Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.spala.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.spideriq/gate",
+      "published_at": "2026-06-19T23:39:43.467752Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.spideriq/gate",
+      "transport": "stdio",
+      "version": "1.3.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.spideriq/mail",
+      "published_at": "2026-06-19T23:39:42.906953Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.spideriq/mail",
+      "transport": "stdio",
+      "version": "1.4.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.spideriq/media",
+      "published_at": "2026-06-19T23:39:44.004773Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.spideriq/media",
+      "transport": "stdio",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.spideriq/publish",
+      "published_at": "2026-06-19T23:39:42.215763Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.spideriq/publish",
+      "transport": "stdio",
+      "version": "1.25.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.spritecook/generate",
+      "published_at": "2026-07-01T19:32:20.774038Z",
+      "registry_status": "active",
+      "source_url": "https://api.spritecook.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.17"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.ssid/ssid-mcp",
+      "published_at": "2026-07-13T09:14:47.363251Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.ssid/ssid-mcp",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.synchronex/mcp-proxy",
+      "published_at": "2026-07-03T03:59:19.084398Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.synchronex/mcp-proxy",
+      "transport": "stdio",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.synlake/synlake",
+      "published_at": "2026-05-27T01:35:27.99319Z",
+      "registry_status": "active",
+      "source_url": "https://api.synlake.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.telbase/deploy",
+      "published_at": "2026-02-23T22:05:13.575274Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.telbase/deploy",
+      "transport": "stdio",
+      "version": "0.14.0-beta.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.tensorfeed/x402-base-mcp",
+      "published_at": "2026-05-28T03:46:35.010007Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.tensorfeed/x402-base-mcp",
+      "transport": "stdio",
+      "version": "0.2.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.tokenarcade/tokenarcade",
+      "published_at": "2026-05-17T04:08:06.857953Z",
+      "registry_status": "active",
+      "source_url": "https://tokenarcade.ai/mcp/",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.tokonomix/council",
+      "published_at": "2026-06-30T01:05:24.79849Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.tokonomix/council",
+      "transport": "stdio",
+      "version": "1.8.4"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.toolprint/hypertool-mcp",
+      "published_at": "2025-09-10T22:05:20.65584Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.toolprint/hypertool-mcp",
+      "transport": "stdio",
+      "version": "0.0.42"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.traderouter/trade-router-mcp",
+      "published_at": "2026-04-27T08:26:46.822524Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.traderouter/trade-router-mcp",
+      "transport": "stdio",
+      "version": "1.0.13"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.tradesearcher/mcp-server",
+      "published_at": "2026-07-23T16:53:23.760246Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.tradesearcher/mcp-server",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.travelminds/concierge",
+      "published_at": "2026-05-30T11:32:18.810727Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.travelminds.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/amazon",
+      "published_at": "2026-06-21T02:08:38.537679Z",
+      "registry_status": "active",
+      "source_url": "https://amazon.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/app-store",
+      "published_at": "2026-06-21T02:08:41.390484Z",
+      "registry_status": "active",
+      "source_url": "https://app-store.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/competitor-tracking",
+      "published_at": "2026-06-21T02:02:18.925493Z",
+      "registry_status": "active",
+      "source_url": "https://competitor-tracking.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/content-strategy",
+      "published_at": "2026-06-21T02:02:20.244589Z",
+      "registry_status": "active",
+      "source_url": "https://content-strategy.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/crypto",
+      "published_at": "2026-06-21T02:02:19.37875Z",
+      "registry_status": "active",
+      "source_url": "https://crypto.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/ecommerce",
+      "published_at": "2026-06-21T02:02:20.683615Z",
+      "registry_status": "active",
+      "source_url": "https://ecommerce.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/google-trends",
+      "published_at": "2026-06-21T02:08:36.623827Z",
+      "registry_status": "active",
+      "source_url": "https://google-trends.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/market-research",
+      "published_at": "2026-06-21T02:02:19.80772Z",
+      "registry_status": "active",
+      "source_url": "https://market-research.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/news-sentiment",
+      "published_at": "2026-06-21T02:08:41.829459Z",
+      "registry_status": "active",
+      "source_url": "https://news-sentiment.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/news-volume",
+      "published_at": "2026-06-21T02:08:42.34865Z",
+      "registry_status": "active",
+      "source_url": "https://news-volume.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/npm",
+      "published_at": "2026-06-21T02:08:40.946908Z",
+      "registry_status": "active",
+      "source_url": "https://npm.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/reddit",
+      "published_at": "2026-06-21T02:08:38.079868Z",
+      "registry_status": "active",
+      "source_url": "https://reddit.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/seo",
+      "published_at": "2026-06-21T02:02:18.370492Z",
+      "registry_status": "active",
+      "source_url": "https://seo.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/social-media",
+      "published_at": "2026-06-21T02:29:27.75421Z",
+      "registry_status": "active",
+      "source_url": "https://social-media.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/spotify",
+      "published_at": "2026-06-21T02:08:40.005805Z",
+      "registry_status": "active",
+      "source_url": "https://spotify.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/steam",
+      "published_at": "2026-06-21T02:08:40.478649Z",
+      "registry_status": "active",
+      "source_url": "https://steam.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/tiktok",
+      "published_at": "2026-06-21T02:08:37.601606Z",
+      "registry_status": "active",
+      "source_url": "https://tiktok.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/trends",
+      "published_at": "2026-06-21T02:10:36.423887Z",
+      "registry_status": "active",
+      "source_url": "https://api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.5"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/wikipedia",
+      "published_at": "2026-06-21T02:08:39.036397Z",
+      "registry_status": "active",
+      "source_url": "https://wikipedia.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/x-twitter",
+      "published_at": "2026-06-21T02:08:39.555965Z",
+      "registry_status": "active",
+      "source_url": "https://x-twitter.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.trendsmcp/youtube",
+      "published_at": "2026-06-21T02:08:37.105703Z",
+      "registry_status": "active",
+      "source_url": "https://youtube.api.trendsmcp.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.unpaper/cli",
+      "published_at": "2026-07-18T08:14:22.854223Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.unpaper/cli",
+      "transport": "stdio",
+      "version": "0.2.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.urlcheck/urlcheck-mcp",
+      "published_at": "2026-03-10T08:44:43.048053Z",
+      "registry_status": "active",
+      "source_url": "https://urlcheck.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.5"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.usestring/web-access",
+      "published_at": "2026-07-14T22:38:34.193861Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.usestring.ai/v1/mcp",
+      "transport": "streamable-http",
+      "version": "1.2.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.uxbert/cms",
+      "published_at": "2026-07-22T11:18:21.351823Z",
+      "registry_status": "active",
+      "source_url": "https://cms-mcp.uxbert.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.v-safe/vsafe-risk",
+      "published_at": "2026-06-20T14:47:56.050866Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.v-safe.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.4.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.variel/mcp-server",
+      "published_at": "2026-07-01T16:28:24.858408Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.variel/mcp-server",
+      "transport": "stdio",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.velarion/company-intelligence",
+      "published_at": "2026-07-14T19:38:10.914662Z",
+      "registry_status": "active",
+      "source_url": "https://velarion-scraper-production.up.railway.app/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.vergio/vergio",
+      "published_at": "2026-07-15T14:39:50.42823Z",
+      "registry_status": "active",
+      "source_url": "https://vergio.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.verifox/email-verifier",
+      "published_at": "2026-07-22T10:38:59.102118Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.verifox.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.2.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.voxell/forge",
+      "published_at": "2026-05-30T17:01:42.294979Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.voxell/forge",
+      "transport": "stdio",
+      "version": "0.1.5"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.webanatomy/webanatomy",
+      "published_at": "2026-06-17T14:37:16.425861Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.webanatomy.ai/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.webmatik/audit",
+      "published_at": "2026-07-06T16:05:54.002149Z",
+      "registry_status": "active",
+      "source_url": "https://webmatik.ai/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.wild-card/deepcontext",
+      "published_at": "2025-09-26T03:44:16.929896Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.wild-card/deepcontext",
+      "transport": "stdio",
+      "version": "0.1.15"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "ai.willform/willform-agent",
+      "published_at": "2026-03-09T05:39:51.653075Z",
+      "registry_status": "active",
+      "source_url": "https://agent.willform.ai/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "ai.zimac/mnema",
+      "published_at": "2026-07-12T03:25:22.614005Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=ai.zimac/mnema",
+      "transport": "stdio",
+      "version": "0.2.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.3dstreet/3dstreet",
+      "published_at": "2026-05-07T16:17:40.226341Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.3dstreet/3dstreet",
+      "transport": "stdio",
+      "version": "0.2.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.asmhunter/asmhunter-mcp",
+      "published_at": "2026-07-08T21:16:18.082803Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.asmhunter/asmhunter-mcp",
+      "transport": "stdio",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.businys/mcp-server",
+      "published_at": "2026-04-02T16:47:23.627321Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.businys/mcp-server",
+      "transport": "stdio",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.cloudmindmaps/mindmaps",
+      "published_at": "2026-07-07T05:53:06.596802Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.cloudmindmaps/mindmaps",
+      "transport": "stdio",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.deviceshelf/deviceshelf-server",
+      "published_at": "2026-07-19T21:06:15.818161Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.deviceshelf/deviceshelf-server",
+      "transport": "streamable-http",
+      "version": "1.6.22"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.goshipyard/shipyard",
+      "published_at": "2026-07-02T00:24:45.690925Z",
+      "registry_status": "active",
+      "source_url": "https://goshipyard.app/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.memol/memol",
+      "published_at": "2026-06-03T08:31:35.985438Z",
+      "registry_status": "active",
+      "source_url": "https://memol.app/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.metadock/metadock",
+      "published_at": "2026-07-16T11:00:30.419325Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.metadock/metadock",
+      "transport": "stdio",
+      "version": "1.3.14"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.novumos/novumos",
+      "published_at": "2026-07-02T22:46:57.822974Z",
+      "registry_status": "active",
+      "source_url": "https://novumos.app/v1/mcp/sse",
+      "transport": "sse",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.odyssey365/mcp-server",
+      "published_at": "2026-07-15T08:40:46.118158Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.odyssey365/mcp-server",
+      "transport": "stdio",
+      "version": "0.6.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.ofia/latex",
+      "published_at": "2026-07-09T15:49:29.554803Z",
+      "registry_status": "active",
+      "source_url": "https://ofia.app/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.peil/peil-mcp",
+      "published_at": "2026-07-24T15:01:06.019167Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.peil/peil-mcp",
+      "transport": "stdio",
+      "version": "0.1.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.potto/potto-japan",
+      "published_at": "2026-07-06T02:36:35.277112Z",
+      "registry_status": "active",
+      "source_url": "https://potto.app/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.scanbim/scanbim-mcp",
+      "published_at": "2026-04-12T22:42:00.420458Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.scanbim/scanbim-mcp",
+      "transport": "streamable-http",
+      "version": "1.0.6"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.scfcontrolsplatform/mcp-server-scf",
+      "published_at": "2026-07-17T15:41:35.354541Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.scfcontrolsplatform/mcp-server-scf",
+      "transport": "stdio",
+      "version": "2.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.sorsa/sorsa",
+      "published_at": "2026-07-10T12:16:18.601774Z",
+      "registry_status": "active",
+      "source_url": "https://sorsa.app/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.steadywrk/mcp-dispatch",
+      "published_at": "2026-07-26T05:59:31.47189Z",
+      "registry_status": "active",
+      "source_url": "https://steadywrk.app/api/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.thoughtspot/mcp-server",
+      "published_at": "2025-09-17T20:15:17.362825Z",
+      "registry_status": "active",
+      "source_url": "https://agent.thoughtspot.app/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.trustrails/server",
+      "published_at": "2026-02-21T18:01:09.883723Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.trustrails/server",
+      "transport": "stdio",
+      "version": "1.0.7"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.twiceshy/twiceshy",
+      "published_at": "2026-07-07T21:06:10.254339Z",
+      "registry_status": "active",
+      "source_url": "https://api.twiceshy.app",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.undisk.mcp/stdio-proxy",
+      "published_at": "2026-04-17T22:02:08.475721Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.undisk.mcp/stdio-proxy",
+      "transport": "stdio",
+      "version": "0.46.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "app.uploadcheck/uploadcheck",
+      "published_at": "2026-06-10T22:24:54.074924Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=app.uploadcheck/uploadcheck",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.web.mindset-502113/mindset",
+      "published_at": "2026-07-20T17:46:00.689608Z",
+      "registry_status": "active",
+      "source_url": "https://mindset-mcp-183316982259.europe-west2.run.app/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.work-handler/work-handler",
+      "published_at": "2026-07-16T14:32:07.02242Z",
+      "registry_status": "active",
+      "source_url": "https://work-handler.app/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "app.zaklad/design-system",
+      "published_at": "2026-06-16T20:03:44.571942Z",
+      "registry_status": "active",
+      "source_url": "https://platform.zaklad.app/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "at.baeck/nginx-proxy-manager",
+      "published_at": "2026-04-23T08:52:04.601905Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=at.baeck/nginx-proxy-manager",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "aws.api.us-east-1.ecs-mcp/server",
+      "published_at": "2026-02-09T23:18:00.777188Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=aws.api.us-east-1.ecs-mcp/server",
+      "transport": "stdio",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "aws.api.us-east-1.eks-mcp/server",
+      "published_at": "2026-01-29T16:45:51.075699Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=aws.api.us-east-1.eks-mcp/server",
+      "transport": "stdio",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "biz.keepingtrack/dejavu",
+      "published_at": "2026-06-29T09:15:01.220719Z",
+      "registry_status": "active",
+      "source_url": "https://dejavu.keepingtrack.biz/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "bot.mailbox/mailbox",
+      "published_at": "2026-05-27T18:43:37.200855Z",
+      "registry_status": "active",
+      "source_url": "https://mailbox.bot/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "br.com.brasilnfe/fiscal",
+      "published_at": "2026-06-12T19:00:21.651652Z",
+      "registry_status": "active",
+      "source_url": "https://api.brasilnfe.com.br/services/Mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "br.com.nvoip/mcp-server",
+      "published_at": "2026-05-04T11:18:23.888276Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.nvoip.com.br/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "br.com.redentia/redentia",
+      "published_at": "2026-07-19T21:28:44.304131Z",
+      "registry_status": "active",
+      "source_url": "https://redentia-api.saraivada.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "br.com.signdocs/mcp-server",
+      "published_at": "2026-06-28T05:20:09.115579Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.signdocs.com.br/mcp",
+      "transport": "streamable-http",
+      "version": "0.3.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "build.arca.mcp/arca-mcp-server",
+      "published_at": "2025-12-15T17:05:06.117783Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.arca.build",
+      "transport": "streamable-http",
+      "version": "0.0.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "capital.hove/read-only-local-mysql-mcp-server",
+      "published_at": "2026-02-17T16:42:54.938922Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=capital.hove/read-only-local-mysql-mcp-server",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "capital.hove/read-only-local-postgres-mcp-server",
+      "published_at": "2026-01-29T08:50:16.035232Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=capital.hove/read-only-local-postgres-mcp-server",
+      "transport": "stdio",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "casa.find-me.sub1/send-email-mcp",
+      "published_at": "2025-11-28T14:02:14.089267Z",
+      "registry_status": "active",
+      "source_url": "https://sub1.find-me.casa",
+      "transport": "streamable-http",
+      "version": "0.0.14"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "cc.operandi/operandi",
+      "published_at": "2026-07-22T16:10:31.969998Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=cc.operandi/operandi",
+      "transport": "stdio",
+      "version": "1.0.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "chat.muro/support",
+      "published_at": "2026-07-08T07:32:26.431125Z",
+      "registry_status": "active",
+      "source_url": "https://muro.chat/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "chat.prowl/prowl-mcp",
+      "published_at": "2026-06-01T10:11:37.155009Z",
+      "registry_status": "active",
+      "source_url": "https://prowl.chat/mcp",
+      "transport": "streamable-http",
+      "version": "1.4.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "city.close/close-api",
+      "published_at": "2026-07-24T05:25:53.548507Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.close.city/mcp",
+      "transport": "streamable-http",
+      "version": "1.2.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "click.tabula.www/tabula-mcp",
+      "published_at": "2026-03-18T23:54:51.599594Z",
+      "registry_status": "active",
+      "source_url": "https://www.tabula.click/api/mcp/stream",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "cloud.agentdomain/agentdomain-mcp",
+      "published_at": "2026-05-24T06:12:17.987845Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=cloud.agentdomain/agentdomain-mcp",
+      "transport": "stdio",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "cloud.anythink/anythink",
+      "published_at": "2026-06-28T11:52:04.917791Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=cloud.anythink/anythink",
+      "transport": "stdio",
+      "version": "0.2.21"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "cloud.factry.portal/historian-mcp-server",
+      "published_at": "2026-05-04T14:42:12.428961Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=cloud.factry.portal/historian-mcp-server",
+      "transport": "stdio",
+      "version": "0.0.5"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "cloud.massdriver/mcp-server",
+      "published_at": "2026-07-21T22:54:55.674888Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=cloud.massdriver/mcp-server",
+      "transport": "stdio",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "cloud.nordicdata/nordic-data",
+      "published_at": "2026-05-24T22:21:28.201757Z",
+      "registry_status": "active",
+      "source_url": "https://api.nordicdata.cloud/mcp",
+      "transport": "streamable-http",
+      "version": "1.2.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "cn.com.grapecity/gcexcel",
+      "published_at": "2026-07-23T02:24:12.350201Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.grapecity.com.cn/mcp/gcexcel",
+      "transport": "streamable-http",
+      "version": "1.0.0-beta.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "cn.com.grapecity/spreadjs",
+      "published_at": "2026-07-23T02:24:12.552921Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.grapecity.com.cn/mcp/spreadjs",
+      "transport": "streamable-http",
+      "version": "1.0.0-beta.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "cn.housingsentinel/housing-sentinel",
+      "published_at": "2026-07-16T08:51:36.251255Z",
+      "registry_status": "active",
+      "source_url": "https://api.housingsentinel.cn/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.curie/commerce",
+      "published_at": "2026-05-20T06:10:54.531321Z",
+      "registry_status": "active",
+      "source_url": "https://chat.curie.app/api/mcp/global",
+      "transport": "sse",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.flyweel/mcp-server",
+      "published_at": "2026-01-15T02:02:08.72561Z",
+      "registry_status": "active",
+      "source_url": "https://api.flyweel.co/functions/v1/mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.gemina/filetag",
+      "published_at": "2026-05-19T15:42:06.477459Z",
+      "registry_status": "active",
+      "source_url": "https://api.gemina.co/api/v1/mcp/",
+      "transport": "streamable-http",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.gleanit/gleanit",
+      "published_at": "2026-05-23T01:39:16.981777Z",
+      "registry_status": "active",
+      "source_url": "https://api.gleanit.co/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.godmodeai/sprites",
+      "published_at": "2026-07-07T03:33:45.416587Z",
+      "registry_status": "active",
+      "source_url": "https://www.godmodeai.co/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.heista/api",
+      "published_at": "2026-05-11T04:18:46.865402Z",
+      "registry_status": "active",
+      "source_url": "https://www.heista.co/api/mcp/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.huggingface/hf-mcp-server",
+      "published_at": "2025-10-22T10:55:52.98995Z",
+      "registry_status": "active",
+      "source_url": "https://huggingface.co/mcp?login",
+      "transport": "streamable-http",
+      "version": "0.2.33"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "co.promptguard/security",
+      "published_at": "2026-04-05T11:45:11.66947Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=co.promptguard/security",
+      "transport": "stdio",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.raisekit/raisekit",
+      "published_at": "2026-05-26T16:21:05.350456Z",
+      "registry_status": "active",
+      "source_url": "https://raisekit.co/api/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.sofya/sofya",
+      "published_at": "2026-05-27T11:51:47.004548Z",
+      "registry_status": "active",
+      "source_url": "https://sofya.co/mcp",
+      "transport": "streamable-http",
+      "version": "1.27.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.thinair/data",
+      "published_at": "2026-05-02T03:16:51.535643Z",
+      "registry_status": "active",
+      "source_url": "https://data.thinair.co/mcp",
+      "transport": "streamable-http",
+      "version": "2.1.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.thinair/geo",
+      "published_at": "2026-05-02T03:19:57.592935Z",
+      "registry_status": "active",
+      "source_url": "https://geo.thinair.co/mcp",
+      "transport": "streamable-http",
+      "version": "2.1.4"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "co.truncus/mcp-server",
+      "published_at": "2026-03-05T11:22:55.500517Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=co.truncus/mcp-server",
+      "transport": "stdio",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "co.ultraprompt/ultra-prompt",
+      "published_at": "2026-06-18T00:02:32.433403Z",
+      "registry_status": "active",
+      "source_url": "https://up-mcp.unpluggedfeed.workers.dev",
+      "transport": "streamable-http",
+      "version": "1.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.52choujiang/douyin-insights",
+      "published_at": "2026-06-25T09:05:42.089014Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.52choujiang.com/douyin/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.52choujiang/kuaishou-insights",
+      "published_at": "2026-06-25T09:05:42.41672Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.52choujiang.com/kuaishou/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.52choujiang/wechat-channels-insights",
+      "published_at": "2026-06-22T08:36:57.350225Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.52choujiang.com/wechat/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.52choujiang/weibo-insights",
+      "published_at": "2026-06-22T08:36:45.446402Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.52choujiang.com/weibo/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.52choujiang/xhs-insights",
+      "published_at": "2026-06-25T09:05:43.829486Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.52choujiang.com/xhs/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.7"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.636865636b73756d/mcp-v1",
+      "published_at": "2026-02-23T08:41:01.175601Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.636865636b73756d/mcp-v1",
+      "transport": "stdio",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.a3eecosystem.neurotrade/signal",
+      "published_at": "2026-04-21T03:20:32.625925Z",
+      "registry_status": "active",
+      "source_url": "https://neurotrade.a3eecosystem.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.acuris-geo/acuris-mcp",
+      "published_at": "2026-07-26T02:03:39.425612Z",
+      "registry_status": "active",
+      "source_url": "https://api.acuris-geo.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.admitbase/admissions",
+      "published_at": "2026-05-15T08:39:22.117679Z",
+      "registry_status": "active",
+      "source_url": "https://admitbase.com/api/mcp",
+      "transport": "streamable-http",
+      "version": "2.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.adrianczuczka/mason",
+      "published_at": "2026-07-22T11:41:43.344657Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.adrianczuczka/mason",
+      "transport": "stdio",
+      "version": "0.6.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.affogata.app/affogata",
+      "published_at": "2026-05-06T12:58:46.901406Z",
+      "registry_status": "active",
+      "source_url": "https://app.affogata.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.agentsconsultants.api/docqa",
+      "published_at": "2026-04-01T08:54:25.858777Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.agentsconsultants.api/docqa",
+      "transport": "stdio",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.ai-rete-rag/ai-rete-rag-mcp",
+      "published_at": "2026-07-23T03:07:42.917442Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.ai-rete-rag/ai-rete-rag-mcp",
+      "transport": "stdio",
+      "version": "0.5.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.ai-rook.agents/trading-mcp",
+      "published_at": "2026-07-23T00:58:48.079601Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.ai-rook.agents/trading-mcp",
+      "transport": "stdio",
+      "version": "1.0.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.aibooma/agent-registry",
+      "published_at": "2026-03-12T00:50:23.092404Z",
+      "registry_status": "active",
+      "source_url": "https://api.aibooma.com/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.aiinfradecoded/mcp-anvil",
+      "published_at": "2026-06-04T01:20:14.592456Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.aiinfradecoded/mcp-anvil",
+      "transport": "stdio",
+      "version": "0.2.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.aioproductos/mcp-studio",
+      "published_at": "2026-07-21T10:19:41.885633Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.aioproductos/mcp-studio",
+      "transport": "stdio",
+      "version": "0.2.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.aleeth/authority-mcp",
+      "published_at": "2026-07-24T11:30:53.198029Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.aleeth.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.allstacks/allstacks-mcp",
+      "published_at": "2025-10-27T19:42:56.515336Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.allstacks/allstacks-mcp",
+      "transport": "stdio",
+      "version": "0.1.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.almured/marketplace",
+      "published_at": "2026-04-30T17:58:51.611465Z",
+      "registry_status": "active",
+      "source_url": "https://api.almured.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.3"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.alpinedataworks/adw-intelligence-server",
+      "published_at": "2026-07-19T05:38:49.555228Z",
+      "registry_status": "active",
+      "source_url": "https://api.alpinedataworks.com/mcp",
+      "transport": "streamable-http",
+      "version": "0.3.6"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.apify/apify-mcp-server",
+      "published_at": "2026-07-23T08:06:35.259871Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.apify.com/",
+      "transport": "streamable-http",
+      "version": "0.12.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.apiscreenshot/screenshot",
+      "published_at": "2026-07-10T20:42:54.615713Z",
+      "registry_status": "active",
+      "source_url": "https://apiscreenshot.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.app-dex/appdex",
+      "published_at": "2026-07-25T13:57:28.542372Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.app-dex/appdex",
+      "transport": "stdio",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.apple-rag/mcp-server",
+      "published_at": "2025-09-21T07:40:13.389326Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.apple-rag.com",
+      "transport": "streamable-http",
+      "version": "2.9.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.arcadedb/mcp-server",
+      "published_at": "2026-03-10T16:22:56.207278Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.arcadedb/mcp-server",
+      "transport": "stdio",
+      "version": "26.4.1-SNAPSHOT"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.arcanum-plus/backlog-forge",
+      "published_at": "2026-06-15T01:22:47.753639Z",
+      "registry_status": "active",
+      "source_url": "https://backlog-forge.arcanum-plus.com/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.arcat/arcat",
+      "published_at": "2026-06-28T12:06:05.314648Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.arcat.com/mcp",
+      "transport": "streamable-http",
+      "version": "0.5.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.arcself/arc-security",
+      "published_at": "2026-02-17T23:43:51.442858Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.arcself/arc-security",
+      "transport": "stdio",
+      "version": "0.5.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.argosvix/server",
+      "published_at": "2026-07-17T01:54:48.869993Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.argosvix/server",
+      "transport": "stdio",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.artifyde/artifyde-mcp",
+      "published_at": "2026-07-11T05:09:57.319608Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.artifyde/artifyde-mcp",
+      "transport": "stdio",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.atagon/kogiqa-mcp",
+      "published_at": "2026-07-02T13:00:34.08591Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.atagon/kogiqa-mcp",
+      "transport": "stdio",
+      "version": "1.3.29"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.automatedclientacquisition.www/aca",
+      "published_at": "2026-04-01T07:15:16.627813Z",
+      "registry_status": "active",
+      "source_url": "https://www.automatedclientacquisition.com/api/mcp",
+      "transport": "sse",
+      "version": "1.0.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.automox/automox-mcp",
+      "published_at": "2026-07-22T01:44:44.40135Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.automox/automox-mcp",
+      "transport": "stdio",
+      "version": "2.2.9"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.axiorank/axiorank",
+      "published_at": "2026-06-08T13:48:31.15406Z",
+      "registry_status": "active",
+      "source_url": "https://app.axiorank.com/api/mcp-server/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.azurecarbon/kodiak",
+      "published_at": "2026-07-24T19:18:32.592008Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.azurecarbon/kodiak",
+      "transport": "stdio",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.backtest360/backtest360",
+      "published_at": "2026-07-13T22:10:02.808709Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.backtest360.com/mcp",
+      "transport": "streamable-http",
+      "version": "0.4.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.basenull/exec-brief",
+      "published_at": "2026-07-04T14:14:45.760883Z",
+      "registry_status": "active",
+      "source_url": "https://exec-brief.basenull.com/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.basenull/polls",
+      "published_at": "2026-07-04T14:14:50.961901Z",
+      "registry_status": "active",
+      "source_url": "https://polls.basenull.com/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.bellwethermetrics/bellwether-mcp",
+      "published_at": "2026-03-06T03:30:12.908023Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.bellwethermetrics/bellwether-mcp",
+      "transport": "stdio",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.benriscore/api",
+      "published_at": "2026-04-24T06:34:18.45126Z",
+      "registry_status": "active",
+      "source_url": "https://api.benriscore.com/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.beycome/listing",
+      "published_at": "2026-06-30T01:30:35.340412Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.beycome.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.bitpoort/on-chain-data",
+      "published_at": "2026-04-05T12:42:48.649681Z",
+      "registry_status": "active",
+      "source_url": "https://bitpoort.com/mcp/sse",
+      "transport": "sse",
+      "version": "3.4.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.bitsbound/contract-analysis",
+      "published_at": "2025-12-22T13:57:28.0431Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.bitsbound/contract-analysis",
+      "transport": "stdio",
+      "version": "1.0.6"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.bitsbound/contract-automation",
+      "published_at": "2025-12-22T14:56:59.448374Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.bitsbound/contract-automation",
+      "transport": "stdio",
+      "version": "1.0.8"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.bitvoya/bitvoya-mcp",
+      "published_at": "2026-04-13T15:11:58.522865Z",
+      "registry_status": "active",
+      "source_url": "https://bitvoya.com/api/mcp",
+      "transport": "streamable-http",
+      "version": "0.3.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.bizgigz/agent-marketplace",
+      "published_at": "2026-02-22T12:06:15.198956Z",
+      "registry_status": "active",
+      "source_url": "https://agents.bizgigz.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.bizgigz/talent-ecosystem",
+      "published_at": "2026-02-22T12:06:18.808214Z",
+      "registry_status": "active",
+      "source_url": "https://bizgigz.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.blackduck/mcp-server",
+      "published_at": "2026-07-17T21:20:00.360611Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.blackduck/mcp-server",
+      "transport": "stdio",
+      "version": "1.1.8"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.blackswancausallabs/dagstudio-mcp",
+      "published_at": "2026-07-20T05:20:21.320784Z",
+      "registry_status": "active",
+      "source_url": "https://dagstudio-mcp.blackswancausallabs.com/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.blackswancausallabs/target-mcp",
+      "published_at": "2026-07-21T06:28:10.599812Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.blackswancausallabs/target-mcp",
+      "transport": "stdio",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.blackwalltier/blackwall",
+      "published_at": "2026-07-05T07:42:42.126675Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.blackwalltier/blackwall",
+      "transport": "stdio",
+      "version": "1.4.1"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.blockventurechaincapital/bvcc-agent-wallet",
+      "published_at": "2026-06-29T19:56:10.555531Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.blockventurechaincapital/bvcc-agent-wallet",
+      "transport": "stdio",
+      "version": "0.1.6"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.boostedchat/travel",
+      "published_at": "2026-03-01T17:36:52.323373Z",
+      "registry_status": "active",
+      "source_url": "https://api.boostedchat.com/mcp",
+      "transport": "streamable-http",
+      "version": "0.1.2"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.braincloudservers/braincloud-mcp-helper",
+      "published_at": "2026-07-10T18:36:13.361428Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.braincloudservers/braincloud-mcp-helper",
+      "transport": "stdio",
+      "version": "6.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.brainiall/tts",
+      "published_at": "2026-07-10T19:14:18.70716Z",
+      "registry_status": "active",
+      "source_url": "https://api.brainiall.com/mcp/tts/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.browser-use/browser-use",
+      "published_at": "2026-07-17T01:17:22.802703Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.browser-use/browser-use",
+      "transport": "stdio",
+      "version": "0.13.5"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.browserssh/browser-ssh",
+      "published_at": "2026-07-21T00:16:20.287691Z",
+      "registry_status": "active",
+      "source_url": "https://api.browserssh.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.cambercloud.camber-mcp/camber-mcp-server",
+      "published_at": "2026-05-28T05:22:23.984337Z",
+      "registry_status": "active",
+      "source_url": "https://camber-mcp.cambercloud.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.chadanalytics/chad",
+      "published_at": "2026-07-21T18:19:42.64812Z",
+      "registry_status": "active",
+      "source_url": "https://chadanalytics.com/api/mcp",
+      "transport": "streamable-http",
+      "version": "0.2.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.chartforgeai/chartforge",
+      "published_at": "2026-06-16T23:48:35.509885Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.chartforgeai/chartforge",
+      "transport": "stdio",
+      "version": "0.1.4"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.cinderfi/retirement-planning",
+      "published_at": "2026-04-14T00:45:06.07236Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.cinderfi.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.citestamp/citestamp",
+      "published_at": "2026-07-15T01:43:41.116546Z",
+      "registry_status": "active",
+      "source_url": "https://mcp.citestamp.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.1"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.claidex/failure-intelligence",
+      "published_at": "2026-05-24T20:01:49.13518Z",
+      "registry_status": "active",
+      "source_url": "https://app.claidex.com/api/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "local-stdio",
+      "fetched_at": "2026-07-26",
+      "name": "com.clauderecall/recall",
+      "published_at": "2026-06-30T19:09:11.690378Z",
+      "registry_status": "active",
+      "source_url": "https://registry.modelcontextprotocol.io/v0/servers?search=com.clauderecall/recall",
+      "transport": "stdio",
+      "version": "0.96.9"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.clauxel.a2adependencyinspector/a2adependencyinspector-mcp",
+      "published_at": "2026-05-20T12:22:51.10522Z",
+      "registry_status": "active",
+      "source_url": "https://a2adependencyinspector.clauxel.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.clauxel.a2aidentitytoll/a2aidentitytoll-mcp",
+      "published_at": "2026-05-20T08:00:30.445666Z",
+      "registry_status": "active",
+      "source_url": "https://a2aidentitytoll.clauxel.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.clauxel.a2areplayreceipt/a2areplayreceipt-mcp",
+      "published_at": "2026-05-20T12:29:08.259947Z",
+      "registry_status": "active",
+      "source_url": "https://a2areplayreceipt.clauxel.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    },
+    {
+      "auth_mode": "static-credential",
+      "fetched_at": "2026-07-26",
+      "name": "com.clauxel.agentdataboundary/agentdataboundary-mcp",
+      "published_at": "2026-05-19T03:39:57.50521Z",
+      "registry_status": "active",
+      "source_url": "https://agentdataboundary.clauxel.com/mcp",
+      "transport": "streamable-http",
+      "version": "1.0.0"
+    }
+  ],
+  "source": "https://registry.modelcontextprotocol.io/v0/servers",
+  "source_fetched_at": "2026-07-26",
+  "transport_distribution": {
+    "sse": 4,
+    "stdio": 133,
+    "streamable-http": 399
+  },
+  "upstream_servers": 1641
+}
