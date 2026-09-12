@@ -1,6 +1,11 @@
 {
   "owner": "sattyamjjain",
   "repo": "agent-audit-kit",
-  "version": "",
-  "url": "https://github.com/sattyamjjain/agent-audit-kit"
+  "version": "v0.5.1",
+  "commit_sha": "128847e2a64ac37fbfee4a087b46874f44d0e722",
+  "url": "https://github.com/sattyamjjain/agent-audit-kit",
+  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
+  "test_agent_version": "2",
+  "harden_agent_version": "2"
 }
