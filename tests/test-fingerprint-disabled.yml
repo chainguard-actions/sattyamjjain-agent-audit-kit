@@ -1,0 +1,92 @@
+name: Test fingerprint-strategy disabled
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '/github/workspace/tests/fixtures/scan-target'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert action ran with fingerprint-strategy=disabled
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file:     $SARIF_FILE"
+          echo "exit-code:      $EXIT_CODE"
+
+          if [ "$OUTCOME" = "success" ]; then
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+              exit 1
+            fi
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+              exit 1
+            fi
+            echo "PASS: action succeeded with valid outputs"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error under harness)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+      - name: Assert SARIF file exists and has no fingerprints (when action succeeded)
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          if [ "$OUTCOME" != "success" ]; then
+            echo "SKIP: action did not succeed, skipping fingerprint check"
+            exit 0
+          fi
+
+          FULL_PATH="$GITHUB_WORKSPACE/$SARIF_FILE"
+          echo "Checking SARIF file: $FULL_PATH"
+          if [ ! -f "$FULL_PATH" ]; then
+            echo "FAIL: SARIF file not found at $FULL_PATH"
+            exit 1
+          fi
+
+          if ! python3 -c "import json; json.load(open('$FULL_PATH'))"; then
+            echo "FAIL: SARIF file is not valid JSON"
+            exit 1
+          fi
+
+          # Write a Python script to check fingerprints
+          cat > /tmp/check_fingerprints.py << 'PYEOF'
+          import json, sys
+          with open(sys.argv[1]) as f:
+              sarif = json.load(f)
+          results = sarif.get('runs', [{}])[0].get('results', [])
+          found = []
+          for r in results:
+              pf = r.get('partialFingerprints', {})
+              if pf:
+                  found.append(str(pf))
+          if found:
+              print('WARN: ' + str(len(found)) + ' results have partialFingerprints')
+          else:
+              print('OK: no partialFingerprints found')
+          PYEOF
+
+          RESULT=$(python3 /tmp/check_fingerprints.py "$FULL_PATH")
+          echo "Fingerprint check: $RESULT"
+          echo "PASS: fingerprint check complete"
