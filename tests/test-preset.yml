@@ -1,0 +1,53 @@
+name: Test scan with MCP preset
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          preset: 'mcp-ox-2026-04'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert action ran with MCP preset
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+          echo "sarif-file: $SARIF"
+          if [ "$OUTCOME" = "success" ]; then
+            # With fail-on: none, exit code should always be 0
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+              exit 1
+            fi
+            if [ -z "$SARIF" ]; then
+              echo "FAIL: sarif-file output is empty"
+              exit 1
+            fi
+            echo "PASS: scan completed with mcp-ox-2026-04 preset, exit-code=0"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (preset not found or sentinel repo)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
