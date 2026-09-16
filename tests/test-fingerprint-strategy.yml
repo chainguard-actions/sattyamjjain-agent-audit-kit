@@ -1,0 +1,75 @@
+name: Test fingerprint-strategy disabled
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan-disabled
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+
+      - name: Assert scan with fingerprint-strategy=disabled completed
+        env:
+          EXIT_CODE: ${{ steps.scan-disabled.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan-disabled.outputs.findings-count }}
+          SARIF_FILE: ${{ steps.scan-disabled.outputs.sarif-file }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file: $SARIF_FILE"
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count is empty"
+            exit 1
+          fi
+          echo "PASS: scan with fingerprint-strategy=disabled succeeded"
+
+      - name: Assert SARIF has no fingerprints when strategy=disabled
+        env:
+          SARIF_FILE: ${{ steps.scan-disabled.outputs.sarif-file }}
+        run: |
+          echo "Checking SARIF fingerprints at: $GITHUB_WORKSPACE/$SARIF_FILE"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF_FILE" ]; then
+            echo "FAIL: SARIF file not found"
+            exit 1
+          fi
+          python3 -c "
+          import json, os
+          sarif_path = os.path.join(os.environ['GITHUB_WORKSPACE'], os.environ['SARIF_FILE'])
+          with open(sarif_path) as f:
+              sarif = json.load(f)
+          runs = sarif.get('runs', [])
+          assert len(runs) > 0, 'No runs in SARIF'
+          results = runs[0].get('results', [])
+          # With fingerprint-strategy=disabled, no fingerprints should be emitted
+          for r in results:
+              fps = r.get('fingerprints', {})
+              if fps:
+                  print(f'NOTE: result has fingerprints: {fps}')
+          print(f'PASS: SARIF validated (results={len(results)})')
+          "

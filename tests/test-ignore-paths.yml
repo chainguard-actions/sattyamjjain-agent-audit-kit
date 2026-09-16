@@ -1,0 +1,76 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'node_modules,vendor,.git'
+
+      - name: Assert action completed successfully
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file: $SARIF_FILE"
+
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output is empty"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+            exit 1
+          fi
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output is empty"
+            exit 1
+          fi
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: action completed with ignore-paths set"
+
+      - name: Assert SARIF file is valid
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "Checking SARIF at: $GITHUB_WORKSPACE/$SARIF_FILE"
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF_FILE" ]; then
+            echo "FAIL: SARIF file not found"
+            exit 1
+          fi
+          python3 -c "
+          import json, os
+          sarif_path = os.path.join(os.environ['GITHUB_WORKSPACE'], os.environ['SARIF_FILE'])
+          with open(sarif_path) as f:
+              sarif = json.load(f)
+          assert 'runs' in sarif, 'Missing runs key in SARIF'
+          print('PASS: SARIF is valid JSON with runs key')
+          "
