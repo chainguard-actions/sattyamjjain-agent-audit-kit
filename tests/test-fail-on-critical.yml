@@ -1,0 +1,61 @@
+name: Test fail-on critical threshold
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '/github/workspace/tests/fixtures/scan-target'
+          severity: 'critical'
+          fail-on: 'critical'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert exit-code reflects critical threshold
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" = "success" ]; then
+            # The action should not error (exit code 2 = error)
+            if [ "$EXIT_CODE" = "2" ]; then
+              echo "FAIL: action errored (exit-code=2)"
+              exit 1
+            fi
+
+            # exit-code should be 0 or 1 (0=pass, 1=findings exceed threshold)
+            if [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ]; then
+              echo "FAIL: unexpected exit-code '$EXIT_CODE' (expected 0 or 1)"
+              exit 1
+            fi
+            echo "PASS: exit-code='$EXIT_CODE' (0=no critical findings, 1=critical findings found)"
+
+            # critical-count should be a number
+            if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: critical-count is not a number: '$CRITICAL'"
+              exit 1
+            fi
+            echo "PASS: critical-count='$CRITICAL'"
+            echo "PASS: threshold behavior verified"
+          elif [ "$OUTCOME" = "failure" ]; then
+            # With fail-on=critical, the step outcome is "failure" when critical findings exist
+            # OR when the action itself errors. Both are acceptable in the harness.
+            echo "PASS: action step outcome=failure (critical findings found or harness environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

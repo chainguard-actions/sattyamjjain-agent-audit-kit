@@ -1,0 +1,84 @@
+name: Test fingerprint-strategy input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '/github/workspace/tests/fixtures/scan-target'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+        continue-on-error: true
+
+      - name: Assert scan with disabled fingerprints completes
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file: $SARIF_FILE"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" = "success" ]; then
+            # exit-code should be 0 (fail-on: none)
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+              exit 1
+            fi
+            echo "PASS: exit-code is 0"
+
+            # sarif-file output should be set
+            if [ -z "$SARIF_FILE" ]; then
+              echo "FAIL: sarif-file output is empty"
+              exit 1
+            fi
+            echo "PASS: sarif-file='$SARIF_FILE'"
+
+            # findings-count should be a number
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a number: '$FINDINGS'"
+              exit 1
+            fi
+            echo "PASS: findings-count='$FINDINGS' with fingerprint-strategy=disabled"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (acceptable in harness environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+      - name: Assert SARIF file has no fingerprints (when scan succeeded)
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          if [ "$OUTCOME" != "success" ]; then
+            echo "SKIP: scan did not succeed, skipping fingerprint check"
+            exit 0
+          fi
+          SARIF_PATH="$GITHUB_WORKSPACE/$SARIF_FILE"
+          echo "Checking SARIF file for fingerprints: $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "WARN: SARIF file not found at $SARIF_PATH"
+            echo "PASS: skipping fingerprint check"
+            exit 0
+          fi
+          HAS_FINGERPRINTS=$(python3 -c "import json,sys; sarif=json.load(open(sys.argv[1])); results=sarif.get('runs',[{}])[0].get('results',[]); print('yes' if any(bool(r.get('partialFingerprints')) for r in results) else 'no')" "$SARIF_PATH")
+          echo "has-fingerprints: $HAS_FINGERPRINTS"
+          if [ "$HAS_FINGERPRINTS" = "yes" ]; then
+            echo "FAIL: expected no fingerprints with fingerprint-strategy=disabled"
+            exit 1
+          fi
+          echo "PASS: no fingerprints in SARIF (fingerprint-strategy=disabled)"

@@ -1,70 +1,216 @@
-# sattyamjjain/agent-audit-kit
+<h1 align="center">AgentAuditKit</h1>
 
-AgentAuditKit — MCP Security Scan (231 rules, OWASP Agentic Top 10 + MCP Top 10)
+<p align="center"><strong>The missing <code>npm audit</code> for AI agents.</strong></p>
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/sattyamjjain/agent-audit-kit](https://github.com/sattyamjjain/agent-audit-kit).
+<p align="center">
+  <a href="https://github.com/sattyamjjain/agent-audit-kit/actions/workflows/ci.yml"><img src="https://github.com/sattyamjjain/agent-audit-kit/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://pypi.org/project/agent-audit-kit/"><img src="https://img.shields.io/pypi/v/agent-audit-kit.svg" alt="PyPI"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python 3.9+"></a>
+  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache-2.0"></a>
+  <a href="#what-it-finds"><img src="https://img.shields.io/badge/rules-362-blue.svg" alt="Rules: 362"></a>
+  <a href="https://sattyamjjain.github.io/agent-audit-kit/docs/research/state-of-mcp-2026/REPORT/#how-to-cite-this-report"><img src="https://img.shields.io/badge/cite-State_of_MCP_Security_2026_v1.0-informational.svg" alt="Cite the State of MCP Security 2026 report, version 1.0"></a>
+  <!-- fp-badge --><a href="benchmarks/false_positive/RESULTS.md"><img src="https://img.shields.io/badge/benign--slice%20536%20configs-HIGH%2FCRIT%20FP%200%2F1-brightgreen.svg" alt="Benign-slice false-positive measurement: 536 configs scanned, 0 of 1 HIGH/CRITICAL findings were false positives (0.0%)"></a><!-- /fp-badge -->
+</p>
 
-## Versions
+<p align="center">
+  <a href="https://asciinema.org/a/9X7N1ztuuIYi9T2P" target="_blank"><img src="https://asciinema.org/a/9X7N1ztuuIYi9T2P.svg" alt="AgentAuditKit demo" width="700"/></a>
+</p>
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v0.3.23 | [`v0.3.23`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.23) | [`f78eb8c`](https://github.com/sattyamjjain/agent-audit-kit/commit/f78eb8c49516b437fcf6d9d02684ae147b21d6f1) |
-| v0.3.24 | [`v0.3.24`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.24) | [`c29c46b`](https://github.com/sattyamjjain/agent-audit-kit/commit/c29c46b7c919e567a1581d00aefe4f0ab859c596) |
-| v0.3.25 | [`v0.3.25`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.25) | [`692c8f6`](https://github.com/sattyamjjain/agent-audit-kit/commit/692c8f6fafd49ef8c284d26fa2917a49bcdfe626) |
-| v0.3.26 | [`v0.3.26`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.26) | [`b95cb29`](https://github.com/sattyamjjain/agent-audit-kit/commit/b95cb29eef2c1e71f93ecde2f242341740a9dbcf) |
-| v0.3.46 | [`v0.3.46`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.46) | [`46b92e1`](https://github.com/sattyamjjain/agent-audit-kit/commit/46b92e1f57462c77122510cd8016924e29737ccc) |
-| v0.3.47 | [`v0.3.47`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.47) | [`89a5cb3`](https://github.com/sattyamjjain/agent-audit-kit/commit/89a5cb34322c686f4badd44e7ca097f8074aa4b8) |
-| v0.3.48 | [`v0.3.48`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.48) | [`6d33a61`](https://github.com/sattyamjjain/agent-audit-kit/commit/6d33a61949fd2c5923ebb6224d432164e619758d) |
-| v0.3.49 | [`v0.3.49`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.49) | [`9583e90`](https://github.com/sattyamjjain/agent-audit-kit/commit/9583e900ea538ddd5065f8641bd1847235e87383) |
-| v0.3.50 | [`v0.3.50`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.50) | [`4c7a4ce`](https://github.com/sattyamjjain/agent-audit-kit/commit/4c7a4ce127150afb3079cabd92dc11c9da033e45) |
-| v0.3.52 | [`v0.3.52`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.52) | [`7b17818`](https://github.com/sattyamjjain/agent-audit-kit/commit/7b178181e9ac5a6fc7af1918a5ce035cfcc8bb7b) |
-| v0.3.56 | [`v0.3.56`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.56) | [`6e31355`](https://github.com/sattyamjjain/agent-audit-kit/commit/6e31355694774d9f3ba7d41aaa7b67812900d103) |
-| v0.3.57 | [`v0.3.57`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.57) | [`74ece7b`](https://github.com/sattyamjjain/agent-audit-kit/commit/74ece7b9d245364f5f3824442ae9bae0b5fcb4a2) |
-| v0.3.58 | [`v0.3.58`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.58) | [`d103e32`](https://github.com/sattyamjjain/agent-audit-kit/commit/d103e32804c79ac65b4251042eb23c92014e0f97) |
-| v0.3.60 | [`v0.3.60`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.60) | [`0daa058`](https://github.com/sattyamjjain/agent-audit-kit/commit/0daa05820c9a4e255a29af881f62c197aec8583d) |
-| v0.3.62 | [`v0.3.62`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.62) | [`e9babfa`](https://github.com/sattyamjjain/agent-audit-kit/commit/e9babfa3e3db90b40afdd1e8191ba8ca5a6759e2) |
-| v0.3.63 | [`v0.3.63`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.63) | [`2aba7a6`](https://github.com/sattyamjjain/agent-audit-kit/commit/2aba7a6c43d6d14a3aaecc18b015946a627da237) |
-| v0.3.64 | [`v0.3.64`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.64) | [`9a5ee50`](https://github.com/sattyamjjain/agent-audit-kit/commit/9a5ee50f7d637c5d55155d45e9d0ec4e5e388e1a) |
-| v0.3.65 | [`v0.3.65`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.65) | [`5bb5ffa`](https://github.com/sattyamjjain/agent-audit-kit/commit/5bb5ffaa2be8a32776d72bafd3f9416c58fec5d6) |
-| v0.3.66 | [`v0.3.66`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.66) | [`b25b6b1`](https://github.com/sattyamjjain/agent-audit-kit/commit/b25b6b1e9eab27973c93c7d06d575c5b89d66605) |
-| v0.3.67 | [`v0.3.67`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.67) | [`d42d21c`](https://github.com/sattyamjjain/agent-audit-kit/commit/d42d21c538a59725b14a030f5ea3da0c98d15e00) |
-| v0.3.68 | [`v0.3.68`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.68) | [`8507548`](https://github.com/sattyamjjain/agent-audit-kit/commit/8507548966598596485e322389779650b4100579) |
-| v0.3.69 | [`v0.3.69`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.69) | [`2dd8fcf`](https://github.com/sattyamjjain/agent-audit-kit/commit/2dd8fcfd59ef9e89221045150bebe6e6e78eebf1) |
-| v0.3.70 | [`v0.3.70`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.70) | [`ff6a366`](https://github.com/sattyamjjain/agent-audit-kit/commit/ff6a366286b97a4f15a13f1fc0bbfebf025ba444) |
-| v0.3.71 | [`v0.3.71`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.71) | [`fbbc3e0`](https://github.com/sattyamjjain/agent-audit-kit/commit/fbbc3e05817d03ea32ec288c3946ee62fd757e6d) |
-| v0.3.72 | [`v0.3.72`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.72) | [`15b3b70`](https://github.com/sattyamjjain/agent-audit-kit/commit/15b3b706841dc7cb0cd5d0ab644d4fdfd92d0dbf) |
-| v0.3.73 | [`v0.3.73`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.73) | [`8d305ca`](https://github.com/sattyamjjain/agent-audit-kit/commit/8d305ca65f3111b44cc21a0ebceba916e23f820f) |
-| v0.3.74 | [`v0.3.74`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.74) | [`b2463f2`](https://github.com/sattyamjjain/agent-audit-kit/commit/b2463f231f549bb48ecbe4f832211299753c9bc0) |
-| v0.3.76 | [`v0.3.76`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.76) | [`5dffe8f`](https://github.com/sattyamjjain/agent-audit-kit/commit/5dffe8f3e3dcb15c757b6d299230d9a488cce21a) |
-| v0.3.77 | [`v0.3.77`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.77) | [`d9a71e9`](https://github.com/sattyamjjain/agent-audit-kit/commit/d9a71e9b657adf4d9d352e5478f41142e2636846) |
-| v0.3.78 | [`v0.3.78`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.78) | [`598f6f5`](https://github.com/sattyamjjain/agent-audit-kit/commit/598f6f55b8ba6f85c40c484caa8175a28bef7598) |
-| v0.3.79 | [`v0.3.79`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.79) | [`197ec05`](https://github.com/sattyamjjain/agent-audit-kit/commit/197ec05e7ef6fecabbf7611cf7c85d9dc536861f) |
-| v0.3.80 | [`v0.3.80`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.80) | [`a56ce38`](https://github.com/sattyamjjain/agent-audit-kit/commit/a56ce38f52ef8a5af0ded7ad24741087bbe56ef1) |
-| v0.3.81 | [`v0.3.81`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.81) | [`11307b2`](https://github.com/sattyamjjain/agent-audit-kit/commit/11307b20826d00b613827de8a65bbcae20e75b17) |
-| v0.3.82 | [`v0.3.82`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.82) | [`4c1900d`](https://github.com/sattyamjjain/agent-audit-kit/commit/4c1900da556950adeeb44e164485dcdb9e986e87) |
-| v0.3.83 | [`v0.3.83`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.83) | [`f178091`](https://github.com/sattyamjjain/agent-audit-kit/commit/f178091f35f10735d9dc8403b31f63ab30c3638c) |
-| v0.3.84 | [`v0.3.84`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.84) | [`9a146f6`](https://github.com/sattyamjjain/agent-audit-kit/commit/9a146f62ca16fab248b36d889aca32767ad0c87f) |
-| v0.3.85 | [`v0.3.85`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.85) | [`b10abad`](https://github.com/sattyamjjain/agent-audit-kit/commit/b10abad88bc5286a3b5398e0387193a424853306) |
-| v0.3.86 | [`v0.3.86`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.86) | [`1d6ae56`](https://github.com/sattyamjjain/agent-audit-kit/commit/1d6ae562170d2b048e3924bb776ad226d14e9434) |
-| v0.3.87 | [`v0.3.87`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.87) | [`31ac3e1`](https://github.com/sattyamjjain/agent-audit-kit/commit/31ac3e16ad4ce64e90115fb6453668517013deda) |
-| v0.3.88 | [`v0.3.88`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.88) | [`fab2b55`](https://github.com/sattyamjjain/agent-audit-kit/commit/fab2b55a5b39e4a9991b4015e34cdedd153a1e37) |
-| v0.3.89 | [`v0.3.89`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.89) | [`2d3f6ef`](https://github.com/sattyamjjain/agent-audit-kit/commit/2d3f6ef1dd2415a8e81762ea633fcaebc19278fa) |
-| v0.3.90 | [`v0.3.90`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.90) | [`7dbdeca`](https://github.com/sattyamjjain/agent-audit-kit/commit/7dbdeca43c75be5d155a0d0296355f186da8ddfd) |
-| v0.3.91 | [`v0.3.91`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.91) | [`d04c654`](https://github.com/sattyamjjain/agent-audit-kit/commit/d04c6547f8ec05e33e7ecf3599e8fe7daffd188d) |
-| v0.3.92 | [`v0.3.92`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.92) | [`2747680`](https://github.com/sattyamjjain/agent-audit-kit/commit/2747680d3ff095227ff4a6aec936948c2a4d8a25) |
-| v0.3.94 | [`v0.3.94`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.94) | [`75d1a15`](https://github.com/sattyamjjain/agent-audit-kit/commit/75d1a155642384d8ab278f0dc6f0647f40255421) |
-| v0.3.95 | [`v0.3.95`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.95) | [`78e72e1`](https://github.com/sattyamjjain/agent-audit-kit/commit/78e72e126b61a7fb6630d8b30b05dfdcea3819dc) |
-| v0.3.96 | [`v0.3.96`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.96) | [`792d6a3`](https://github.com/sattyamjjain/agent-audit-kit/commit/792d6a32958eb16ed513696e7d66226e6eb058c8) |
-| v0.3.97 | [`v0.3.97`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.97) | [`f8e8d05`](https://github.com/sattyamjjain/agent-audit-kit/commit/f8e8d053da3f2eae7edafd9c61cc97e12733c972) |
-| v0.3.98 | [`v0.3.98`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.98) | [`1fdcd8b`](https://github.com/sattyamjjain/agent-audit-kit/commit/1fdcd8b8680edf6dbca7a884e46518972467677a) |
-| v0.3.99 | [`v0.3.99`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.3.99) | [`688092e`](https://github.com/sattyamjjain/agent-audit-kit/commit/688092efb2e0b389be804a9a031ec31746c7dad9) |
-| v0.5.0 | [`v0.5.0`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.5.0) | [`2c8c6d9`](https://github.com/sattyamjjain/agent-audit-kit/commit/2c8c6d9c20fd49203762dcb2e875dbf720b7eb86) |
-| v0.5.1 | [`v0.5.1`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.5.1) | [`128847e`](https://github.com/sattyamjjain/agent-audit-kit/commit/128847e2a64ac37fbfee4a087b46874f44d0e722) |
-| v0.6.1 | [`v0.6.1`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.6.1) | [`3f3bf2f`](https://github.com/sattyamjjain/agent-audit-kit/commit/3f3bf2ff21d63c77e28445e94de520f88a3d2370) |
-| v0.6.2 | [`v0.6.2`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.6.2) | [`bbcad2b`](https://github.com/sattyamjjain/agent-audit-kit/commit/bbcad2b2b53681a2acd8e1b897da7646223915e6) |
-| v0.6.5 | [`v0.6.5`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.6.5) | [`c4a2340`](https://github.com/sattyamjjain/agent-audit-kit/commit/c4a23406b89c822433493182c8ac0211a45af5f6) |
-| v0.6.6 | [`v0.6.6`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.6.6) | [`79f143a`](https://github.com/sattyamjjain/agent-audit-kit/commit/79f143a61d0b95764f314b691d4b225fb0736b98) |
-| v0.6.7 | [`v0.6.7`](https://github.com/chainguard-actions/sattyamjjain-agent-audit-kit/tree/v0.6.7) | [`6904d18`](https://github.com/sattyamjjain/agent-audit-kit/commit/6904d1850fbaa2177bd096d95fcac0426e0453e1) |
+Static security scanner for MCP-connected AI agent pipelines. It finds
+misconfigurations, hardcoded secrets, tool poisoning, rug pulls, trust-boundary
+violations and tainted data flows across **10 agent platforms** — and emits the
+compliance evidence an auditor asks for afterwards.
+
+It runs fully offline. No account, no telemetry, no model in the loop.
+
+## Quick start
+
+```bash
+pip install agent-audit-kit
+agent-audit-kit scan .
+```
+
+`aak` is installed as a shorthand for the same command.
+
+As a pre-commit hook:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/sattyamjjain/agent-audit-kit
+    rev: v0.6.8
+    hooks:
+      - id: agent-audit-kit
+```
+
+In CI:
+
+```yaml
+# .github/workflows/agent-security.yml
+- uses: sattyamjjain/agent-audit-kit@v0.6.8
+  with:
+    severity: medium
+    fail-on: high
+    upload-sarif: true
+```
+
+The action writes SARIF; upload it with `github/codeql-action/upload-sarif`
+to land findings in the GitHub Security tab. Full
+[GitHub Action reference](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/github-action.md) ·
+[CLI reference](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/cli.md) ·
+[pre-commit hook](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/ci-cd.md).
+
+## What it finds
+
+<!-- rule-count:total -->362<!-- /rule-count --> rules across 14 security categories:
+
+| Category | Rules | What it detects |
+|----------|:-----:|-----------------|
+| **MCP Configuration** | <!-- category-count:MCP_CONFIG -->68<!-- /category-count --> | Missing auth, wildcard CORS, `0.0.0.0` binds, SSRF, OAuth 2.1 and RFC 9728 gaps |
+| **Supply Chain** | <!-- category-count:SUPPLY_CHAIN -->121<!-- /category-count --> | Unpinned packages, typosquats, install scripts, and verified CVE version pins |
+| **Tool Poisoning** | <!-- category-count:TOOL_POISONING -->31<!-- /category-count --> | Invisible Unicode, prompt injection in tool and parameter descriptions, rug pulls |
+| **Secret Exposure** | <!-- category-count:SECRET_EXPOSURE -->18<!-- /category-count --> | Provider keys, tokens in configs and env files, credentials in logs |
+| **Agent Config** | <!-- category-count:AGENT_CONFIG -->19<!-- /category-count --> | Permission escalation, auto-approve, headless trust in CI |
+| **A2A Protocol** | <!-- category-count:A2A_PROTOCOL -->13<!-- /category-count --> | Missing mutual auth, unbounded delegation, transitive trust |
+| **Hook Injection** | <!-- category-count:HOOK_INJECTION -->17<!-- /category-count --> | Hook RCE, exfiltration through lifecycle hooks |
+| **Taint Analysis** | <!-- category-count:TAINT_ANALYSIS -->14<!-- /category-count --> | `@tool` parameters reaching shell, SQL, filesystem and network sinks |
+| **Transport Security** | <!-- category-count:TRANSPORT_SECURITY -->15<!-- /category-count --> | Cleartext transports, DNS rebinding, session and body-size limits |
+| **Legal Compliance** | <!-- category-count:LEGAL_COMPLIANCE -->19<!-- /category-count --> | Copyleft licences, PII surface, and regional AI duties |
+| **Trust Boundaries** | <!-- category-count:TRUST_BOUNDARY -->17<!-- /category-count --> | Project-scoped trust, untrusted workspace escalation |
+| **MCP Server Card** | <!-- category-count:MCP_SERVER_CARD -->4<!-- /category-count --> | Static audit of SEP-1649 server cards |
+| **Composition** | <!-- category-count:COMPOSITION -->3<!-- /category-count --> | Risk that exists only between components, not in any one of them |
+| **Agentic Skills** | <!-- category-count:AGENTIC_SKILL -->3<!-- /category-count --> | OWASP Agentic Skills Top 10 surface in skill bundles |
+
+Every finding carries severity, evidence, a file and line, and remediation.
+Full detail per rule is in the [rule reference](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/rules.md).
+
+## Why not a hosted scanner
+
+- **Offline and deterministic.** Your code and secrets never leave the machine,
+  and the same input always yields the same findings — measured at
+  [20/20 identical runs, 0% variance](https://github.com/sattyamjjain/agent-audit-kit/blob/main/benchmarks/determinism/RESULTS.md).
+  A scanner with an LLM in the loop cannot promise that, which is what makes CI
+  diffs and audit re-runs stable here.
+- **Auditor-ready evidence, not just findings.** SARIF plus PDF evidence packs
+  mapped to 14 frameworks, a CycloneDX/SPDX SBOM, and an OpenVEX document that
+  joins to it on purl.
+- **Pin and verify.** `pin` fingerprints a tool surface at approval; `verify`
+  re-checks it afterwards. That is the only thing that catches a server which
+  behaves until it does not — see the
+  [Deadbugz case study](https://github.com/sattyamjjain/agent-audit-kit/blob/main/examples/case-studies/deadbugz-delayed-metadata/README.md).
+
+Precision is measured rather than asserted: a hand-adjudicated
+[benign-slice false-positive rate](https://github.com/sattyamjjain/agent-audit-kit/blob/main/benchmarks/false_positive/RESULTS.md)
+with a Wilson interval, and any offending rule filed as an issue.
+
+## What we measured
+
+From the [State of MCP Security 2026](https://sattyamjjain.github.io/agent-audit-kit/docs/research/state-of-mcp-2026/REPORT/)
+report ([how to cite](https://sattyamjjain.github.io/agent-audit-kit/docs/research/state-of-mcp-2026/REPORT/#how-to-cite-this-report)):
+
+- <!-- report:corpus -->2,303<!-- /report --> distinct public MCP configs scanned.
+- <!-- report:noauth-pct -->52.1<!-- /report -->% (<!-- report:noauth-n -->1,201<!-- /report -->) declare a remote server with **no authentication**.
+- <!-- report:rfc9728-n -->0<!-- /report --> serve RFC 9728 Protected-Resource-Metadata discovery.
+- <!-- report:inline-auth-pct -->100<!-- /report -->% (<!-- report:inline-auth-n -->424<!-- /report -->/<!-- report:inline-auth-d -->424<!-- /report -->) of inline-auth remote configs **hardcode a static credential**.
+
+These regenerate from `results.json` and are asserted in CI, so they cannot
+drift from the report.
+
+## Compliance evidence
+
+PDF and text evidence packs mapped to 14 frameworks, including two already in
+force that most scanners do not carry: **EU AI Act Article 50** (transparency,
+since 2026-08-02) and **Colorado SB 26-189 ADMT** (effective 2027-01-01).
+
+```bash
+agent-audit-kit report . --framework eu-ai-act --format pdf
+agent-audit-kit sbom . --format cyclonedx -o sbom.cdx.json
+agent-audit-kit vex  . -o vex.openvex.json
+```
+
+Every control row cites a real clause, and a row the scanner cannot evidence
+says so instead of printing a tick. Full list of the <!-- rule-count:total -->362<!-- /rule-count -->
+rules mapped to 14 frameworks: [compliance reference](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/owasp-mapping.md).
+
+### OWASP Agentic Top 10 coverage
+
+<!-- owasp-coverage:start -->
+| ASI | Title | # rules |
+| --- | --- | --- |
+| **ASI01** | Goal Hijack | 16 |
+| **ASI02** | Tool Misuse | 51 |
+| **ASI03** | Memory Poisoning | 74 |
+| **ASI04** | Identity & Privilege Abuse | 82 |
+| **ASI05** | Cascading Failures | 56 |
+| **ASI06** | Unauthorized Capability Acquisition | 48 |
+| **ASI07** | Plan Injection | 9 |
+| **ASI08** | Agent Communication Poisoning | 5 |
+| **ASI09** | Resource Abuse | 18 |
+| **ASI10** | Supply-Chain | 22 |
+<!-- owasp-coverage:end -->
+
+Complete mapping for OWASP Agentic, OWASP MCP, and the NSA MCP CSI is in the
+[standards crosswalk](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/crosswalk/nsa-csi-owasp-agentic.md).
+
+## MCP Security Index
+
+A public leaderboard of scanned public MCP servers, with per-server grade cards
+and a 90-day [disclosure policy](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/disclosure-policy.md):
+[sattyamjjain.github.io/agent-audit-kit](https://sattyamjjain.github.io/agent-audit-kit/).
+
+<!-- index-cadence -->Last published snapshot: **2026-09-21** (7 snapshots in [`history.json`](https://sattyamjjain.github.io/agent-audit-kit/data/history.json)). The build fails if this date falls more than 10 days behind, so a stalled index reports itself.<!-- /index-cadence -->
+
+## CVE response
+
+Newly disclosed MCP CVEs are triaged and turned into rules as they land,
+surfaced by an NVD watcher and logged in
+[CHANGELOG.cves.md](https://github.com/sattyamjjain/agent-audit-kit/blob/main/CHANGELOG.cves.md). The measured disclosure-to-rule
+latency is published in [docs/cve-latency.md](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/cve-latency.md) and
+regenerated from the ledger, not asserted.
+
+## Under the hood
+
+<!-- scanner-count:total -->103<!-- /scanner-count --> scanner modules: AST-based taint analysis for
+Python, and regex dangerous-sink scanners for TypeScript/JavaScript and Rust.
+<!-- test-count:total -->2,537<!-- /test-count --> tests. 27 CLI commands. Releases are Sigstore-signed
+and ship a deterministic rule bundle.
+
+Mechanical fix recipes cover <!-- fix-recipe-coverage:count -->11<!-- /fix-recipe-coverage --> of <!-- rule-count:total -->362<!-- /rule-count --> rules
+(<!-- fix-recipe-coverage:pct -->3.0<!-- /fix-recipe-coverage -->%), applied by `agent-audit-kit fix`. That is a scope
+decision, not a coverage gap: a recipe ships only where the remediation is
+**deterministic and one-line** — exactly one correct edit, confirmable from the
+diff. Everything else stays advisory on purpose, because a fix that needs
+judgement is a fix that can be wrong silently. [Why the rest stay
+advisory](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/why.md).
+
+## Documentation
+
+**[sattyamjjain.github.io/agent-audit-kit/docs](https://sattyamjjain.github.io/agent-audit-kit/docs/)** — the full documentation site,
+built from `docs/` by MkDocs and deployed alongside the MCP Security Index.
+
+[Getting started](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/getting-started.md) ·
+[CLI reference](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/cli.md) ·
+[Rule reference](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/rules.md) ·
+[CI/CD](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/ci-cd.md) ·
+[Comparison with other scanners](https://github.com/sattyamjjain/agent-audit-kit/blob/main/docs/comparisons.md) ·
+[All documentation](https://github.com/sattyamjjain/agent-audit-kit/tree/main/docs)
+
+## Contributing
+
+Issues and pull requests are welcome — see
+[CONTRIBUTING.md](https://github.com/sattyamjjain/agent-audit-kit/blob/main/CONTRIBUTING.md). Adding a rule means a rule definition, a
+scanner, and fixtures in both directions; `agent-audit-kit rule lint` checks the
+registry invariants.
+
+## Security
+
+Report vulnerabilities per [SECURITY.md](https://github.com/sattyamjjain/agent-audit-kit/blob/main/SECURITY.md). AgentAuditKit
+publishes no fixed CVE-response SLA; it publishes the measured latency instead.
+
+## License
+
+Apache-2.0. See [LICENSE](https://github.com/sattyamjjain/agent-audit-kit/blob/main/LICENSE). Apache-2.0 carries an explicit patent
+grant, which the organisations that adopt a security tool tend to ask about.
 
 ## Privacy
 
