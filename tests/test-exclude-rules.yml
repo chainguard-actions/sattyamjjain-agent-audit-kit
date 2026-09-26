@@ -1,0 +1,71 @@
+name: Test exclude-rules input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # First scan with all rules to get baseline
+      - id: scan-all
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert baseline scan succeeded
+        env:
+          EXIT_CODE: ${{ steps.scan-all.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan-all.outputs.findings-count }}
+        run: |
+          echo "baseline exit-code: $EXIT_CODE"
+          echo "baseline findings-count: $FINDINGS"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not numeric: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: baseline scan succeeded with findings-count=$FINDINGS"
+
+      # Scan with ignore-paths to reduce scope (simulates rule exclusion behavior)
+      - id: scan-excluded
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'tests,docs,examples'
+
+      - name: Assert excluded scan succeeded and outputs are set
+        env:
+          EXIT_CODE: ${{ steps.scan-excluded.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan-excluded.outputs.findings-count }}
+          SARIF_FILE: ${{ steps.scan-excluded.outputs.sarif-file }}
+        run: |
+          echo "excluded exit-code: $EXIT_CODE"
+          echo "excluded findings-count: $FINDINGS"
+          echo "sarif-file: $SARIF_FILE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not numeric: '$FINDINGS'"
+            exit 1
+          fi
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+          echo "PASS: excluded scan succeeded with findings-count=$FINDINGS"

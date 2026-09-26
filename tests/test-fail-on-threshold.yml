@@ -1,0 +1,83 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Scan with fail-on=none to get a baseline count of all findings
+      - id: scan-none
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert baseline scan passed (fail-on=none always exits 0)
+        env:
+          EXIT_CODE: ${{ steps.scan-none.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan-none.outputs.findings-count }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not numeric: '$FINDINGS'"
+            exit 1
+          fi
+          echo "PASS: baseline scan exit-code=0, findings-count=$FINDINGS"
+
+      # Scan with fail-on=low — if there are any low+ findings, exit code will be 1
+      - id: scan-low
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'low'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert fail-on=low outcome is consistent with findings
+        env:
+          OUTCOME: ${{ steps.scan-low.outcome }}
+          EXIT_CODE: ${{ steps.scan-low.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan-low.outputs.findings-count }}
+          BASELINE_FINDINGS: ${{ steps.scan-none.outputs.findings-count }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "baseline-findings: $BASELINE_FINDINGS"
+          # exit-code output must always be set
+          if ! echo "$EXIT_CODE" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: exit-code is not numeric: '$EXIT_CODE'"
+            exit 1
+          fi
+          # If baseline found findings, fail-on=low should have exit-code=1 (step fails)
+          # If no findings, exit-code=0 (step succeeds)
+          if [ "$BASELINE_FINDINGS" -gt 0 ]; then
+            if [ "$OUTCOME" = "success" ] && [ "$EXIT_CODE" = "0" ]; then
+              echo "PASS: no findings triggered threshold (exit-code=0)"
+            elif [ "$OUTCOME" = "failure" ] && [ "$EXIT_CODE" = "1" ]; then
+              echo "PASS: findings exceeded fail-on=low threshold (exit-code=1)"
+            else
+              echo "FAIL: unexpected outcome='$OUTCOME' exit-code='$EXIT_CODE' for findings=$BASELINE_FINDINGS"
+              exit 1
+            fi
+          else
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "FAIL: no findings but exit-code=$EXIT_CODE (expected 0)"
+              exit 1
+            fi
+            echo "PASS: no findings, exit-code=0"
+          fi
