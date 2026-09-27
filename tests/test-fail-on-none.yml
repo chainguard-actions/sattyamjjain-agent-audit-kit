@@ -1,0 +1,45 @@
+name: Test fail-on=none always passes
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert exit-code is 0 when fail-on=none
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          echo "high-count: $HIGH"
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+          echo "PASS: exit-code is 0 as expected with fail-on=none"
+
+          # All count outputs should be numeric
+          for val in "$FINDINGS" "$CRITICAL" "$HIGH"; do
+            if ! echo "$val" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: count output '$val' is not a number"
+              exit 1
+            fi
+          done
+          echo "PASS: all count outputs are numeric"
