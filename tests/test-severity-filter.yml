@@ -1,0 +1,87 @@
+name: Test severity filter
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - name: Scan with low severity (all findings)
+        id: scan-low
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Scan with critical severity (fewer findings)
+        id: scan-critical
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert both scans completed
+        env:
+          LOW_OUTCOME: ${{ steps.scan-low.outcome }}
+          CRITICAL_OUTCOME: ${{ steps.scan-critical.outcome }}
+          LOW_FINDINGS: ${{ steps.scan-low.outputs.findings-count }}
+          CRITICAL_FINDINGS: ${{ steps.scan-critical.outputs.findings-count }}
+          LOW_EXIT: ${{ steps.scan-low.outputs.exit-code }}
+          CRITICAL_EXIT: ${{ steps.scan-critical.outputs.exit-code }}
+        run: |
+          echo "low-severity outcome: $LOW_OUTCOME"
+          echo "critical-severity outcome: $CRITICAL_OUTCOME"
+          echo "low-severity findings: $LOW_FINDINGS"
+          echo "critical-severity findings: $CRITICAL_FINDINGS"
+          echo "low-severity exit-code: $LOW_EXIT"
+          echo "critical-severity exit-code: $CRITICAL_EXIT"
+
+          if [ "$LOW_OUTCOME" = "failure" ]; then
+            echo "FAIL: low-severity scan failed unexpectedly"
+            exit 1
+          fi
+
+          if [ "$CRITICAL_OUTCOME" = "failure" ]; then
+            echo "FAIL: critical-severity scan failed unexpectedly"
+            exit 1
+          fi
+
+          # Both should produce numeric findings counts
+          if ! echo "$LOW_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: low-severity findings-count is not numeric: '$LOW_FINDINGS'"
+            exit 1
+          fi
+
+          if ! echo "$CRITICAL_FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: critical-severity findings-count is not numeric: '$CRITICAL_FINDINGS'"
+            exit 1
+          fi
+
+          # Low severity should report >= critical severity findings
+          if [ "$LOW_FINDINGS" -lt "$CRITICAL_FINDINGS" ]; then
+            echo "FAIL: low-severity scan ($LOW_FINDINGS) reported fewer findings than critical-severity scan ($CRITICAL_FINDINGS)"
+            exit 1
+          fi
+
+          echo "PASS: severity filter works — low=$LOW_FINDINGS critical=$CRITICAL_FINDINGS"
