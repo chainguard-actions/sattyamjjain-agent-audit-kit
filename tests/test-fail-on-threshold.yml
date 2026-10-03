@@ -1,0 +1,91 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      # First: scan with fail-on=none should always pass
+      - id: scan-none
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert fail-on=none always passes
+        env:
+          EXIT_CODE: ${{ steps.scan-none.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan-none.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success with fail-on=none but got '$OUTCOME'"
+            exit 1
+          fi
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code=0 with fail-on=none, got '$EXIT_CODE'"
+            exit 1
+          fi
+
+          echo "PASS: fail-on=none correctly passes"
+
+      # Second: scan with fail-on=critical should pass (only fails if critical findings exist)
+      - id: scan-critical
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'critical'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert fail-on=critical produces valid exit code
+        env:
+          EXIT_CODE: ${{ steps.scan-critical.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan-critical.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan-critical.outputs.critical-count }}
+          OUTCOME: ${{ steps.scan-critical.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+
+          # exit-code must be 0 or 1 (valid scan outcomes)
+          if [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "1" ]; then
+            echo "FAIL: unexpected exit-code '$EXIT_CODE' (expected 0 or 1)"
+            exit 1
+          fi
+
+          # If exit-code=1, there must be critical findings
+          if [ "$EXIT_CODE" = "1" ]; then
+            if ! echo "$CRITICAL" | grep -qE '^[1-9][0-9]*$'; then
+              echo "FAIL: exit-code=1 but critical-count='$CRITICAL' is not positive"
+              exit 1
+            fi
+            echo "PASS: exit-code=1 with $CRITICAL critical findings"
+          else
+            echo "PASS: exit-code=0 (no critical findings to trigger threshold)"
+          fi

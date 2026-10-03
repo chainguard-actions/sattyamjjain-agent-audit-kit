@@ -1,0 +1,98 @@
+name: Test severity filtering
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up a git origin reachable inside the Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      # Scan with severity=low (all findings)
+      - id: scan-low
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      # Scan with severity=critical (only critical findings)
+      - id: scan-critical
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert severity=low scan succeeded
+        env:
+          FINDINGS_LOW: ${{ steps.scan-low.outputs.findings-count }}
+          OUTCOME_LOW: ${{ steps.scan-low.outcome }}
+        run: |
+          echo "severity=low outcome: $OUTCOME_LOW"
+          echo "severity=low findings: $FINDINGS_LOW"
+
+          if [ "$OUTCOME_LOW" != "success" ]; then
+            echo "FAIL: severity=low scan failed with outcome '$OUTCOME_LOW'"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS_LOW" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS_LOW'"
+            exit 1
+          fi
+
+          echo "PASS: severity=low scan produced $FINDINGS_LOW findings"
+
+      - name: Assert severity=critical scan succeeded
+        env:
+          FINDINGS_CRITICAL: ${{ steps.scan-critical.outputs.findings-count }}
+          OUTCOME_CRITICAL: ${{ steps.scan-critical.outcome }}
+        run: |
+          echo "severity=critical outcome: $OUTCOME_CRITICAL"
+          echo "severity=critical findings: $FINDINGS_CRITICAL"
+
+          if [ "$OUTCOME_CRITICAL" != "success" ]; then
+            echo "FAIL: severity=critical scan failed with outcome '$OUTCOME_CRITICAL'"
+            exit 1
+          fi
+
+          if ! echo "$FINDINGS_CRITICAL" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS_CRITICAL'"
+            exit 1
+          fi
+
+          echo "PASS: severity=critical scan produced $FINDINGS_CRITICAL findings"
+
+      - name: Assert critical findings <= low findings
+        env:
+          FINDINGS_LOW: ${{ steps.scan-low.outputs.findings-count }}
+          FINDINGS_CRITICAL: ${{ steps.scan-critical.outputs.findings-count }}
+        run: |
+          echo "findings with severity=low: $FINDINGS_LOW"
+          echo "findings with severity=critical: $FINDINGS_CRITICAL"
+
+          # Critical-only scan should report <= findings than low-severity scan
+          if [ "$FINDINGS_CRITICAL" -gt "$FINDINGS_LOW" ]; then
+            echo "FAIL: severity=critical reported more findings ($FINDINGS_CRITICAL) than severity=low ($FINDINGS_LOW)"
+            exit 1
+          fi
+
+          echo "PASS: severity filtering works correctly ($FINDINGS_CRITICAL critical <= $FINDINGS_LOW low)"
