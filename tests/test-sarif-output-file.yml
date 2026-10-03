@@ -1,0 +1,66 @@
+name: Test SARIF output file is written
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert SARIF file is written to workspace
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome:    $OUTCOME"
+          echo "sarif-file: $SARIF_FILE"
+
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: action did not succeed (outcome=$OUTCOME)"
+            exit 1
+          fi
+
+          if [ -z "$SARIF_FILE" ]; then
+            echo "FAIL: sarif-file output is empty"
+            exit 1
+          fi
+
+          FULL_PATH="${GITHUB_WORKSPACE}/${SARIF_FILE}"
+          echo "Checking for SARIF file at: $FULL_PATH"
+
+          if [ ! -f "$FULL_PATH" ]; then
+            echo "FAIL: SARIF file not found at $FULL_PATH"
+            ls -la "$GITHUB_WORKSPACE" || true
+            exit 1
+          fi
+
+          echo "SARIF file exists, checking it is valid JSON..."
+          if ! python3 -c "import json; json.load(open('$FULL_PATH'))" 2>/dev/null; then
+            echo "FAIL: SARIF file is not valid JSON"
+            cat "$FULL_PATH" | head -20
+            exit 1
+          fi
+
+          echo "Checking SARIF schema version field..."
+          VERSION=$(python3 -c "import json; d=json.load(open('$FULL_PATH')); print(d.get('\$schema',''))" 2>/dev/null || echo "")
+          echo "schema: $VERSION"
+
+          # SARIF must have a 'runs' array
+          RUNS=$(python3 -c "import json; d=json.load(open('$FULL_PATH')); print(len(d.get('runs',[])))" 2>/dev/null || echo "0")
+          echo "runs count: $RUNS"
+          if [ "$RUNS" -lt 1 ]; then
+            echo "FAIL: SARIF file has no 'runs' array entries"
+            exit 1
+          fi
+
+          echo "PASS: SARIF file is valid and present at $FULL_PATH"
