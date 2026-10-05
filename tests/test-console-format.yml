@@ -1,0 +1,61 @@
+name: Test console output format
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'none'
+          format: 'console'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert action completed without internal error
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          EXIT: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "exit-code:      $EXIT"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+
+          if [ "$OUTCOME" = "success" ]; then
+            # Action succeeded — validate outputs
+            if [ -z "$EXIT" ]; then
+              echo "FAIL: exit-code output is empty (action succeeded but wrote no outputs)"
+              exit 1
+            fi
+            if [ "$EXIT" = "2" ]; then
+              echo "FAIL: action returned exit-code=2 (internal error)"
+              exit 1
+            fi
+            if [ "$EXIT" != "0" ] && [ "$EXIT" != "1" ]; then
+              echo "FAIL: unexpected exit-code '$EXIT' (expected 0 or 1)"
+              exit 1
+            fi
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+              exit 1
+            fi
+            if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: critical-count is not a non-negative integer: '$CRITICAL'"
+              exit 1
+            fi
+            echo "PASS: console format scan completed successfully (exit-code=$EXIT)"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error in act environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

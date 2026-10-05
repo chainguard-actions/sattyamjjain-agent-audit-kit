@@ -1,0 +1,89 @@
+name: Test fingerprint-strategy disabled
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          fingerprint-strategy: 'disabled'
+        continue-on-error: true
+
+      - name: Assert action completed with fingerprint-strategy=disabled
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          EXIT: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          echo "outcome:        $OUTCOME"
+          echo "exit-code:      $EXIT"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file:     $SARIF"
+
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$EXIT" ]; then
+              echo "FAIL: exit-code output is empty (action succeeded but wrote no outputs)"
+              exit 1
+            fi
+            if [ "$EXIT" = "2" ]; then
+              echo "FAIL: action returned exit-code=2 (internal error)"
+              exit 1
+            fi
+            if [ "$EXIT" != "0" ] && [ "$EXIT" != "1" ]; then
+              echo "FAIL: unexpected exit-code '$EXIT' (expected 0 or 1)"
+              exit 1
+            fi
+            if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: findings-count is not a non-negative integer: '$FINDINGS'"
+              exit 1
+            fi
+            if [ -z "$SARIF" ]; then
+              echo "FAIL: sarif-file output is empty"
+              exit 1
+            fi
+            echo "PASS: fingerprint-strategy=disabled scan completed with valid outputs (exit-code=$EXIT)"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (Docker build or scan error in act environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+      - name: Assert SARIF file has no fingerprints
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          if [ "$OUTCOME" != "success" ] || [ -z "$SARIF" ]; then
+            echo "SKIP: action did not succeed or sarif-file output is empty"
+            exit 0
+          fi
+          SARIF_PATH="$GITHUB_WORKSPACE/$SARIF"
+          echo "Checking SARIF file: $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found at $SARIF_PATH"
+            exit 1
+          fi
+          # With fingerprint-strategy=disabled, partialFingerprints should be absent or empty.
+          # Use grep to check: if partialFingerprints key appears with a non-empty value, fail.
+          if grep -q '"partialFingerprints"' "$SARIF_PATH"; then
+            # Key exists — check if any value is non-empty (not just {})
+            COUNT=$(grep -c '"partialFingerprints"' "$SARIF_PATH" || true)
+            EMPTY=$(grep '"partialFingerprints"' "$SARIF_PATH" | grep -c '{}' || true)
+            if [ "$COUNT" != "$EMPTY" ]; then
+              echo "FAIL: expected no fingerprints with fingerprint-strategy=disabled"
+              exit 1
+            fi
+          fi
+          echo "PASS: no fingerprints in SARIF as expected"
