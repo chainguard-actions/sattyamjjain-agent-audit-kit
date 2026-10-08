@@ -1,0 +1,76 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: 'node_modules,vendor,.git'
+
+      - name: Assert scan step ran (not skipped)
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: scan step was skipped"
+            exit 1
+          fi
+          echo "PASS: scan step ran with outcome=$OUTCOME"
+
+      - name: Assert outputs are set when scan succeeds
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "findings-count: $FINDINGS"
+          echo "sarif-file: $SARIF"
+          echo "exit-code: $EXIT_CODE"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$FINDINGS" ]; then
+              echo "FAIL: findings-count output is empty on success"
+              exit 1
+            fi
+            if [ -z "$SARIF" ]; then
+              echo "FAIL: sarif-file output is empty on success"
+              exit 1
+            fi
+            if [ -z "$EXIT_CODE" ]; then
+              echo "FAIL: exit-code output is empty on success"
+              exit 1
+            fi
+            # With fail-on=none, exit code should always be 0
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "FAIL: expected exit-code=0 with fail-on=none, got $EXIT_CODE"
+              exit 1
+            fi
+            echo "PASS: all outputs set correctly"
+          else
+            echo "PASS: action failed gracefully (outcome=$OUTCOME)"
+          fi

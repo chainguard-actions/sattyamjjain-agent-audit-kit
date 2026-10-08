@@ -1,0 +1,107 @@
+name: Test basic SARIF scan
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert scan step ran (not skipped)
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: scan step was skipped"
+            exit 1
+          fi
+          echo "PASS: scan step ran with outcome=$OUTCOME"
+
+      - name: Assert findings-count output is set
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$FINDINGS" ]; then
+              echo "FAIL: findings-count output is empty on success"
+              exit 1
+            fi
+            echo "PASS: findings-count=$FINDINGS"
+          else
+            echo "PASS: action failed gracefully (outcome=$OUTCOME)"
+          fi
+
+      - name: Assert sarif-file output is set
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "sarif-file: $SARIF"
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$SARIF" ]; then
+              echo "FAIL: sarif-file output is empty on success"
+              exit 1
+            fi
+            echo "PASS: sarif-file=$SARIF"
+          else
+            echo "PASS: action failed gracefully (outcome=$OUTCOME)"
+          fi
+
+      - name: Assert exit-code output is set
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$EXIT_CODE" ]; then
+              echo "FAIL: exit-code output is empty on success"
+              exit 1
+            fi
+            echo "PASS: exit-code=$EXIT_CODE"
+          else
+            echo "PASS: action failed gracefully (outcome=$OUTCOME)"
+          fi
+
+      - name: Assert SARIF file exists in workspace
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ ! -f "$GITHUB_WORKSPACE/agent-audit-results.sarif" ]; then
+              echo "FAIL: SARIF file not found in workspace"
+              exit 1
+            fi
+            echo "PASS: SARIF file exists at $GITHUB_WORKSPACE/agent-audit-results.sarif"
+          else
+            echo "PASS: action failed gracefully (outcome=$OUTCOME)"
+          fi

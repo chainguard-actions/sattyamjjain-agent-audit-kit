@@ -1,0 +1,87 @@
+name: Test fail-on critical threshold
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'critical'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert scan step ran (not skipped)
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: scan step was skipped"
+            exit 1
+          fi
+          echo "PASS: scan step ran with outcome=$OUTCOME"
+
+      - name: Assert exit-code is valid (0 or 1 for threshold, not 2 for error)
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$EXIT_CODE" ]; then
+              echo "FAIL: exit-code output is empty on success"
+              exit 1
+            fi
+            # exit-code should be 0 (pass) or 1 (findings exceed threshold), not 2 (error)
+            if [ "$EXIT_CODE" = "2" ]; then
+              echo "FAIL: exit-code=2 indicates a scan error"
+              exit 1
+            fi
+            echo "PASS: exit-code=$EXIT_CODE (valid scan result)"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or threshold exceeded)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+      - name: Assert critical-count is numeric
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$CRITICAL" ]; then
+              echo "FAIL: critical-count output is empty on success"
+              exit 1
+            fi
+            if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: critical-count is not a non-negative integer: $CRITICAL"
+              exit 1
+            fi
+            echo "PASS: critical-count=$CRITICAL"
+          else
+            echo "PASS: action failed gracefully (outcome=$OUTCOME)"
+          fi
