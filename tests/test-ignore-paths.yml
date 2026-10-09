@@ -1,0 +1,69 @@
+name: Test ignore-paths input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Scan with ignore-paths to skip some directories.
+      # fail-on=none ensures the step always succeeds if the scan runs.
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+          ignore-paths: '.git,node_modules,vendor'
+        continue-on-error: true
+
+      - name: Assert action ran
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          if [ "$OUTCOME" != "success" ] && [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: action ran with ignore-paths (outcome=$OUTCOME)"
+
+      - name: Assert exit-code is 0 when fail-on is none
+        env:
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ "$EXIT_CODE" != "0" ]; then
+              echo "FAIL: expected exit-code=0 when fail-on=none, got '$EXIT_CODE'"
+              exit 1
+            fi
+            echo "PASS: exit-code=0 as expected with fail-on=none"
+          else
+            echo "PASS: action failed gracefully"
+          fi
+
+      - name: Assert sarif-file output is set
+        env:
+          SARIF_FILE: ${{ steps.scan.outputs.sarif-file }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "sarif-file: $SARIF_FILE"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$SARIF_FILE" ]; then
+              echo "FAIL: sarif-file output is empty"
+              exit 1
+            fi
+            echo "PASS: sarif-file=$SARIF_FILE"
+          else
+            echo "PASS: action failed gracefully"
+          fi

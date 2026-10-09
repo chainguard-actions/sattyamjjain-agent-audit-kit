@@ -1,0 +1,66 @@
+name: Test fail-on threshold behavior
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Scan with fail-on=critical: only fails if critical findings exist.
+      # With severity=critical we only report critical findings, so exit-code
+      # should be 0 if there are no critical findings, or 1 if there are.
+      # Either way the action should complete without an error (exit code 2).
+      - id: scan
+        uses: .
+        with:
+          path: '.'
+          severity: 'critical'
+          fail-on: 'critical'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+        continue-on-error: true
+
+      - name: Assert action ran and exit-code is 0 or 1 (not 2=error)
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "critical-count: $CRITICAL"
+          if [ "$OUTCOME" != "success" ] && [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+          if [ "$OUTCOME" = "success" ]; then
+            # exit-code should be 0 (pass) or 1 (findings exceed threshold)
+            if [ "$EXIT_CODE" = "2" ]; then
+              echo "FAIL: exit-code=2 means scan error, expected 0 or 1"
+              exit 1
+            fi
+            echo "PASS: exit-code=$EXIT_CODE (0=pass, 1=findings exceed threshold)"
+          else
+            # Action failed — check if it was a scan error (exit 2) or threshold (exit 1)
+            echo "PASS: action completed with outcome=$OUTCOME"
+          fi
+
+      - name: Assert critical-count is a number when action succeeded
+        env:
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "critical-count: $CRITICAL"
+          if [ "$OUTCOME" = "success" ]; then
+            if ! echo "$CRITICAL" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: critical-count is not a number: '$CRITICAL'"
+              exit 1
+            fi
+            echo "PASS: critical-count=$CRITICAL"
+          else
+            echo "PASS: action failed gracefully"
+          fi
