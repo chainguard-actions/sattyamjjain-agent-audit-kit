@@ -1,0 +1,77 @@
+name: Test fail-on high threshold behavior
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'high'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert scan ran and produced valid outputs
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+          HIGH: ${{ steps.scan.outputs.high-count }}
+          CRITICAL: ${{ steps.scan.outputs.critical-count }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          echo "findings-count: $FINDINGS"
+          echo "high-count: $HIGH"
+          echo "critical-count: $CRITICAL"
+
+          # The step must have either succeeded or failed — not skipped
+          if [ "$OUTCOME" != "success" ] && [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+
+          # exit-code must be set
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output is empty"
+            exit 1
+          fi
+
+          # exit-code must be 0 or 1 (not 2=error)
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2"
+            exit 1
+          fi
+
+          # If outcome=success, exit-code must be 0
+          if [ "$OUTCOME" = "success" ] && [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: outcome=success but exit-code=$EXIT_CODE (expected 0)"
+            exit 1
+          fi
+
+          # If outcome=failure, exit-code must be 1 (findings exceeded threshold)
+          if [ "$OUTCOME" = "failure" ] && [ "$EXIT_CODE" != "1" ]; then
+            echo "FAIL: outcome=failure but exit-code=$EXIT_CODE (expected 1)"
+            exit 1
+          fi
+
+          # Counts must be non-negative integers
+          for val in "$FINDINGS" "$HIGH" "$CRITICAL"; do
+            if [ -z "$val" ]; then
+              echo "FAIL: a count output is empty"
+              exit 1
+            fi
+            if ! echo "$val" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: count output is not a non-negative integer: $val"
+              exit 1
+            fi
+          done
+
+          echo "PASS: scan ran correctly with fail-on=high (outcome=$OUTCOME, exit-code=$EXIT_CODE)"

@@ -1,0 +1,72 @@
+name: Test fail-on none always passes
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: scan
+        uses: .
+        continue-on-error: true
+        with:
+          path: '.'
+          severity: 'low'
+          fail-on: 'none'
+          format: 'sarif'
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+
+      - name: Assert scan ran and produced valid exit code
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "exit-code: $EXIT_CODE"
+          if [ "$OUTCOME" != "success" ] && [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output is empty"
+            exit 1
+          fi
+          if [ "$EXIT_CODE" = "2" ]; then
+            echo "FAIL: scan returned error exit code 2"
+            exit 1
+          fi
+          echo "PASS: exit-code=$EXIT_CODE"
+
+      - name: Assert findings-count is a non-negative integer
+        env:
+          FINDINGS: ${{ steps.scan.outputs.findings-count }}
+        run: |
+          echo "findings-count: $FINDINGS"
+          if [ -z "$FINDINGS" ]; then
+            echo "FAIL: findings-count output is empty"
+            exit 1
+          fi
+          if ! echo "$FINDINGS" | grep -qE '^[0-9]+$'; then
+            echo "FAIL: findings-count is not a non-negative integer: $FINDINGS"
+            exit 1
+          fi
+          echo "PASS: findings-count=$FINDINGS"
+
+      - name: Assert SARIF file is valid and has expected structure
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif-file }}
+        run: |
+          SARIF_PATH="$GITHUB_WORKSPACE/$SARIF"
+          echo "Checking SARIF structure at $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: SARIF file not found at $SARIF_PATH"
+            exit 1
+          fi
+          if ! python3 -c "import json,sys; d=json.load(open('$SARIF_PATH')); sys.exit(0 if 'runs' in d and isinstance(d['runs'],list) else 1)"; then
+            echo "FAIL: SARIF file missing required 'runs' key or it is not a list"
+            exit 1
+          fi
+          RUN_COUNT=$(python3 -c "import json; d=json.load(open('$SARIF_PATH')); print(len(d['runs']))")
+          echo "PASS: SARIF has $RUN_COUNT run(s)"

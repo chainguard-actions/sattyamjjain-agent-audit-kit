@@ -1,0 +1,60 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # ruff's minor is pinned in pyproject.toml (`ruff>=0.15,<0.17`) so CI lint
+      # stays reproducible. A new ruff minor adds rules that turn CI red without a
+      # deliberate `ruff check --fix` adoption, so don't auto-propose the cap bump
+      # (that was PR #494 — closed, failed all four `test` jobs). Adopting a newer
+      # ruff is a manual, reviewed change with the auto-fixes committed alongside;
+      # patch updates within 0.15.x are still allowed.
+      - dependency-name: "ruff"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Group all github-actions bumps into a single PR. The codeql-action
+    # sub-actions (init / autobuild / analyze / upload-sarif) MUST share one
+    # version — CodeQL fails with a configuration error otherwise — so ungrouped
+    # per-action PRs each create a mismatch. One grouped PR keeps them in lockstep.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major"]
+
+  # The VS Code extension: TypeScript with devDependencies only, and its
+  # package-lock.json is gitignored, so these PRs move the ranges in
+  # vscode-extension/package.json. One grouped PR for the lot.
+  - package-ecosystem: "npm"
+    directory: "/vscode-extension"
+    schedule:
+      interval: "weekly"
+    groups:
+      vscode-extension:
+        patterns:
+          - "*"
+    ignore:
+      # @types/vscode tracks engines.vscode (^1.85.0). vsce refuses to package
+      # when the types are newer than the engine, so the two move together, by hand.
+      - dependency-name: "@types/vscode"
+      # @types/node should describe the Node that VS Code runs extensions on, and
+      # VS Code bundles an older Node than the newest release. The first grouped
+      # PR (#873) proposed @types/node 26, which would let `tsc` accept APIs the
+      # runtime lacks, so majors move by hand too.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
