@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "y": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "openclaw"
+      ]
+    }
+  }
+}
