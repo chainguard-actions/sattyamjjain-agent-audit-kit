@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.example.com/mcp"
+      ]
+    },
+    "other": {
+      "serverUrl": "https://mcp.example.com/mcp"
+    },
+    "empty": {
+      "url": "https://mcp.example.com/mcp",
+      "headers": {
+        "X-Foo-Key": ""
+      }
+    },
+    "embedded": {
+      "url": "https://mcp.example.com/mcp",
+      "headers": {
+        "X-Foo-Key": "k9f2-example-77a1"
+      }
+    },
+    "local": {
+      "url": "http://localhost:8001/mcp"
+    }
+  }
+}

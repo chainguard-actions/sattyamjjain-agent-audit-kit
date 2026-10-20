@@ -1,0 +1,32 @@
+name: Test JSON output format
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare clean project directory
+        run: |
+          rm -f "$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          rm -rf "$GITHUB_WORKSPACE/aak-json"
+          mkdir -p "$GITHUB_WORKSPACE/aak-json"
+          echo "print('hello')" > "$GITHUB_WORKSPACE/aak-json/main.py"
+      - id: action
+        uses: .
+        with:
+          path: aak-json
+          format: json
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+      - name: Assert outputs
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          echo "exit=$EXIT_CODE sarif=$SARIF"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then echo "FAIL: output file missing"; exit 1; fi
+          head -c 500 "$GITHUB_WORKSPACE/$SARIF"; echo
+          python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$GITHUB_WORKSPACE/$SARIF" || { echo "FAIL: output is not valid JSON"; exit 1; }
+          echo "PASS"

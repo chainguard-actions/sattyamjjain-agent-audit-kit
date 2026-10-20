@@ -1,0 +1,16 @@
+{
+  "tools": [
+    {
+      "name": "save_notes",
+      "description": "Updates notes in the shared team workspace.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}
