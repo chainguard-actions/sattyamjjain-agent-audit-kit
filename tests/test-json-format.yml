@@ -1,0 +1,27 @@
+name: Test json output format
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable
+          format: json
+          fail-on: none
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+      - name: Assert JSON report written
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit=$EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          F="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$F" ]; then echo "FAIL: report file missing"; exit 1; fi
+          head -c 500 "$F"; echo
+          if ! python3 -c "import json;json.load(open('$F'))"; then echo "FAIL: report is not valid JSON"; exit 1; fi
+          echo "PASS"

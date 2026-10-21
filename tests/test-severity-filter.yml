@@ -1,0 +1,43 @@
+name: Test severity filter
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable
+          severity: critical
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert only critical findings reported
+        env:
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          CRITICAL: ${{ steps.action.outputs.critical-count }}
+          HIGH: ${{ steps.action.outputs.high-count }}
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "findings=$FINDINGS critical=$CRITICAL high=$HIGH exit=$EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          F="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$F" ]; then echo "FAIL: SARIF missing"; exit 1; fi
+          python3 - "$F" <<'EOF'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          run = d["runs"][0]
+          rules = {r["id"]: r for r in run.get("tool", {}).get("driver", {}).get("rules", [])}
+          bad = []
+          for r in run.get("results", []):
+              rid = r.get("ruleId", "")
+              if rid == "AAK-INTERNAL-SCANNER-FAIL":
+                  continue
+              lvl = r.get("level")
+              if lvl and lvl != "error":
+                  bad.append((rid, lvl))
+          print("non-critical-looking results:", bad)
+          sys.exit(1 if bad else 0)
+          EOF
+          echo "PASS"

@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "setup",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "./scripts/setup.sh"
+      ]
+    },
+    {
+      "label": "workspace",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/scripts/setup.sh"
+      ]
+    }
+  ]
+}
