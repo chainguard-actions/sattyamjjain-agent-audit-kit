@@ -1,0 +1,41 @@
+name: Test vulnerable project with fail-on none
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Remove stale SARIF
+        run: rm -f "$GITHUB_WORKSPACE/agent-audit-results.sarif"
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/aak-vulnerable
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert findings reported but scan passed
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          CRITICAL: ${{ steps.action.outputs.critical-count }}
+          HIGH: ${{ steps.action.outputs.high-count }}
+        run: |
+          echo "exit-code=$EXIT_CODE findings=$FINDINGS critical=$CRITICAL high=$HIGH"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0 with fail-on none"; exit 1; fi
+          case "$FINDINGS" in ''|*[!0-9]*) echo "FAIL: findings-count not numeric"; exit 1;; esac
+          if [ "$FINDINGS" -lt 1 ]; then echo "FAIL: expected findings in vulnerable fixture"; exit 1; fi
+          if [ $((CRITICAL + HIGH)) -lt 1 ]; then echo "FAIL: expected at least one critical/high finding"; exit 1; fi
+          echo "PASS"
+      - name: Assert SARIF has results
+        run: |
+          F="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$F" ]; then echo "FAIL: SARIF file missing"; exit 1; fi
+          python3 - "$F" <<'EOF'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          results = d["runs"][0].get("results", [])
+          print("results:", len(results))
+          assert len(results) > 0, "no results in SARIF"
+          print("PASS")
+          EOF
