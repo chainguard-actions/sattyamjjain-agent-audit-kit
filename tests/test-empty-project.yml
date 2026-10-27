@@ -1,0 +1,31 @@
+name: Test scan of empty project with fail-on none
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create empty project
+        run: |
+          rm -rf "$GITHUB_WORKSPACE/aak-empty"
+          mkdir -p "$GITHUB_WORKSPACE/aak-empty"
+          echo "# empty project" > "$GITHUB_WORKSPACE/aak-empty/README.md"
+      - id: action
+        uses: .
+        with:
+          path: aak-empty
+          fail-on: none
+          upload-sarif: 'false'
+          comment-on-pr: 'false'
+      - name: Assert outputs
+        env:
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          echo "findings=$FINDINGS exit=$EXIT_CODE sarif=$SARIF"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          case "$FINDINGS" in ''|*[!0-9]*) echo "FAIL: findings-count not numeric"; exit 1;; esac
+          if [ "$SARIF" != "agent-audit-results.sarif" ]; then echo "FAIL: unexpected sarif-file"; exit 1; fi
+          echo "PASS"

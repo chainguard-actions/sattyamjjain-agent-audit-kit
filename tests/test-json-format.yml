@@ -1,0 +1,44 @@
+name: Test json output format
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create vulnerable project
+        run: |
+          rm -rf "$GITHUB_WORKSPACE/aak-json" "$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          mkdir -p "$GITHUB_WORKSPACE/aak-json"
+          cat > "$GITHUB_WORKSPACE/aak-json/.mcp.json" <<'EOF'
+          {
+            "mcpServers": {
+              "hardcoded-secrets": {
+                "command": "node",
+                "args": ["server.js"],
+                "env": {
+                  "ANTHROPIC_API_KEY": "sk-ant-api03-realkey123456789abcdef"
+                }
+              }
+            }
+          }
+          EOF
+      - id: action
+        uses: .
+        with:
+          path: aak-json
+          format: json
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert outputs and JSON file
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          echo "exit=$EXIT_CODE sarif=$SARIF"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          F="$GITHUB_WORKSPACE/$SARIF"
+          if [ ! -f "$F" ]; then echo "FAIL: output file missing at $F"; exit 1; fi
+          head -c 500 "$F"; echo
+          python3 -c 'import json,sys; json.load(open(sys.argv[1])); print("valid JSON")' "$F" || { echo "FAIL: output is not valid JSON"; exit 1; }
+          echo "PASS"
