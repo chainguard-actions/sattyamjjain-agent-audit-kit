@@ -1,0 +1,1 @@
+excel-mcp-server @ git+https://github.com/example/excel-mcp-server.git

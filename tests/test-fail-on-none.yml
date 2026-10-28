@@ -1,0 +1,33 @@
+name: Test fail-on none reports but passes
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert findings reported but exit 0
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          CRITICAL: ${{ steps.action.outputs.critical-count }}
+          HIGH: ${{ steps.action.outputs.high-count }}
+        run: |
+          echo "exit-code=$EXIT_CODE findings=$FINDINGS critical=$CRITICAL high=$HIGH"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          if ! [[ "$FINDINGS" =~ ^[0-9]+$ ]] || [ "$FINDINGS" -lt 1 ]; then
+            echo "FAIL: expected findings-count >= 1"; exit 1
+          fi
+          if ! [[ "$CRITICAL" =~ ^[0-9]+$ ]] || ! [[ "$HIGH" =~ ^[0-9]+$ ]]; then
+            echo "FAIL: counts not numeric"; exit 1
+          fi
+          if [ $((CRITICAL + HIGH)) -gt "$FINDINGS" ]; then
+            echo "FAIL: critical+high exceeds total"; exit 1
+          fi
+          echo "PASS"

@@ -1,0 +1,42 @@
+# AgentAuditKit
+
+**Security scanner for MCP-connected AI agent pipelines.**
+
+The missing `npm audit` for the agentic AI stack. Scans MCP configurations, hooks, trust boundaries, secrets, supply chain, agent instructions, tool descriptions, and code-level taint flows.
+
+## Quick Start
+
+```bash
+pip install agent-audit-kit
+agent-audit-kit scan .
+```
+
+## Features
+
+- **<!-- rule-count:total -->424<!-- /rule-count --> detection rules** across 14 categories
+- **OWASP Top 10 for Agentic Applications** (Version 2026): rules for every entry, ASI01-ASI10, under OWASP's own ids and titles ([per-entry lists](coverage/owasp-agentic-top10.md))
+- **OWASP MCP Top 10** (v0.1, 2025 edition): at least one rule for every entry, MCP01-MCP10, unevenly spread ([per-entry lists](coverage/owasp-mcp-top10.md))
+- **Adversa AI Top 25** mapping
+- **Compliance frameworks** (14): EU AI Act (Art. 15, 50, 55), SOC 2, ISO 27001, ISO 42001, HIPAA, NIST AI RMF, NSA MCP CSI, + regional (India DPDP, Singapore, Alabama, Tennessee, Colorado SB 26-189 ADMT)
+- **Tool pinning** for rug pull detection
+- **Taint analysis** for @tool function security
+- **Multi-agent discovery** across 11 agent platforms
+- **Auto-fix** for common misconfigurations
+- **Security scoring** with A-F grades and SVG badges
+- **SARIF output** for GitHub Code Scanning integration
+- **SBOM + VEX evidence pair** (`sbom`, `vex`) for CRA and EU AI Act bundles — see [VEX and SBOM](vex.md)
+- **Pre-commit hook** and **GitHub Action** for CI/CD
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `agent-audit-kit scan .` | Scan a project |
+| `agent-audit-kit discover .` | Find AI agent configs in a project and your home directory |
+| `agent-audit-kit pin` | Pin tool definitions |
+| `agent-audit-kit verify` | Verify tool pins |
+| `agent-audit-kit fix` | Auto-fix issues |
+| `agent-audit-kit score .` | Show security grade |
+| `agent-audit-kit update` | Update vulnerability DB |
+| `agent-audit-kit sbom .` | Emit a CycloneDX 1.5 / SPDX 2.3 SBOM |
+| `agent-audit-kit vex .` | Emit an OpenVEX exploitability document, joined to the SBOM on purl |
