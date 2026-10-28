@@ -1,0 +1,43 @@
+name: Test rules input restricts reported rules
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Remove stale SARIF
+        run: rm -f "$GITHUB_WORKSPACE/agent-audit-results.sarif"
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/aak-vulnerable
+          rules: AAK-MCP-003
+          fail-on: none
+      - name: Assert exit code
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+        run: |
+          echo "exit-code=$EXIT_CODE findings=$FINDINGS"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          echo "PASS"
+      - name: Assert only the selected rule is reported
+        run: |
+          F="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$F" ]; then echo "FAIL: SARIF file missing"; exit 1; fi
+          python3 - "$F" <<'EOF'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          ids = [r.get('ruleId') for r in d['runs'][0].get('results', [])]
+          print('ruleIds:', ids)
+          allowed = {'AAK-MCP-003', 'AAK-INTERNAL-SCANNER-FAIL'}
+          bad = [i for i in ids if i not in allowed]
+          if bad:
+              print('FAIL: unexpected rules reported:', bad)
+              sys.exit(1)
+          if 'AAK-MCP-003' not in ids:
+              print('FAIL: expected AAK-MCP-003 finding for hardcoded secret')
+              sys.exit(1)
+          print('PASS')
+          EOF

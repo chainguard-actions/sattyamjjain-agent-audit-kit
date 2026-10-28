@@ -1,0 +1,39 @@
+name: Test JSON output format
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Remove stale output
+        run: rm -f "$GITHUB_WORKSPACE/agent-audit-results.sarif"
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/aak-vulnerable
+          format: json
+          upload-sarif: 'false'
+          fail-on: none
+      - name: Assert outputs
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          echo "exit-code=$EXIT_CODE sarif=$SARIF"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          if [ "$SARIF" != "agent-audit-results.sarif" ]; then echo "FAIL: unexpected output file name"; exit 1; fi
+          echo "PASS"
+      - name: Assert output file is JSON (not SARIF)
+        run: |
+          F="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$F" ]; then echo "FAIL: output file missing"; exit 1; fi
+          head -c 400 "$F"; echo
+          python3 -c "
+          import json
+          d = json.load(open('$F'))
+          if isinstance(d, dict):
+              assert '\$schema' not in d or 'sarif' not in str(d.get('\$schema','')).lower(), 'output looks like SARIF'
+          print('valid JSON')
+          " || { echo "FAIL: output not valid non-SARIF JSON"; exit 1; }
+          echo "PASS"
