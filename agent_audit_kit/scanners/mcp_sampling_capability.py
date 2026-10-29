@@ -1,0 +1,248 @@
+"""AAK-MCP-SAMPLING-001 — MCP `sampling` capability without consent guard.
+
+MCP servers can request LLM completions back through the connected client
+via the `sampling/createMessage` request (MCP 2025-06-18 §6.3). That makes
+the server a privileged caller of the host's LLM — and any output it
+receives must be treated as untrusted tool input. The 2025-03-26 spec
+revision added the `elicitation/create` consent flow specifically to gate
+sampling requests.
+
+This scanner fires when ALL hold:
+
+1. A dependency manifest declares an MCP SDK (Python / TS / Rust / Java).
+2. A repo file participates in the sampling capability — either declaring
+   `capabilities.sampling`, calling `sampling/createMessage` /
+   `create_message`, or implementing a CreateMessage request handler.
+3. No consent / elicitation guard is found anywhere in the repo —
+   `elicitation/create`, `elicit_*`, `ElicitRequestSchema`,
+   `requires_consent`, `human_in_the_loop`, `confirmSampling`, etc.
+4. `.agent-audit-kit.yml` does NOT carry
+   `accepts_sampling_risk: true` plus a non-empty `justification:`.
+
+Also fires when an MCP config file (`.mcp.json` family) explicitly lists
+`"sampling"` in a per-server `capabilities` block without a sibling
+consent / `requires_consent` flag — captures host-side allow-lists.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+import yaml
+
+from agent_audit_kit.models import Finding
+
+from ._helpers import (
+    CONFIG_MAX_BYTES,
+    SOURCE_MAX_BYTES,
+    declares_mcp_sdk,
+    find_line_number,
+    in_skip_dir,
+    iter_mcp_servers,
+    load_yaml,
+    loads_jsonc,
+    make_finding,
+    read_text_capped,
+)
+
+_LANG_EXTS = (".py", ".ts", ".tsx", ".js", ".mjs", ".cjs", ".java", ".kt", ".rs")
+
+# Markers that prove the repo participates in MCP sampling. Each pattern is
+# scoped tightly enough that bare prose mentioning "sampling" won't fire.
+_SAMPLING_MARKERS = (
+    # Server / client capability declarations. The scan to `sampling` also stops
+    # at the next opener of its own kind (`capabilities: {`, `ServerCapabilities(`),
+    # whose own scan reaches the same closer, so each opener reads only up to the
+    # next one: with a bare `[^}]*`, every opener in a file of repeated
+    # `capabilities: {` rescanned to the first `}`, and 400,000 characters took
+    # 4.1 seconds, four times the 200,000-character time. A file matches exactly
+    # when it did; with one opener nested in another before the first closer, the
+    # match now starts at the inner one, the object that holds `sampling`.
+    re.compile(r"capabilities\s*[:=]\s*\{(?:(?!capabilities\s*[:=]\s*\{)[^}])*sampling\s*[:=]"),
+    re.compile(r"ServerCapabilities\s*\((?:(?!ServerCapabilities\s*\()[^)])*sampling\s*="),
+    re.compile(r"SamplingCapability\s*\("),
+    # Request schemas — server-side handler installation.
+    re.compile(r"CreateMessageRequestSchema"),
+    re.compile(r"\bsampling/createMessage\b"),
+    re.compile(r"\bcreate_message\s*\("),
+    # SDK method aliases.
+    re.compile(r"\.sampling\.create\s*\("),
+    re.compile(r"\bRequestSampling\b"),
+)
+
+# Markers that prove a consent / elicitation gate is wired up somewhere in
+# the same repo. Any one of these suppresses the finding — they cover the
+# protocol-level `elicitation/create` flow, project-level wrappers, and
+# the human-in-the-loop callbacks commonly used by hosts.
+_CONSENT_MARKERS = (
+    re.compile(r"\belicitation/create\b"),
+    re.compile(r"\bElicitRequestSchema\b"),
+    re.compile(r"\belicit(?:_create|_input|ation)?\s*\("),
+    re.compile(r"\bElicitInput\b"),
+    re.compile(r"\b(?:requires?_consent|require_consent|user_consent)\b"),
+    re.compile(r"\bhuman[_-]?in[_-]?the[_-]?loop\b", re.IGNORECASE),
+    re.compile(r"\b(?:confirm|approve)Sampling\b"),
+    re.compile(r"\bsamplingConsent\b"),
+    re.compile(r"\bhuman_approval\b"),
+)
+
+# Config-file location for explicit per-server sampling allow-listing.
+_MCP_CONFIG_FILES = (
+    ".mcp.json",
+    ".cursor/mcp.json",
+    ".vscode/mcp.json",
+    ".amazonq/mcp.json",
+    ".windsurf/mcp.json",
+    ".continue/config.json",
+    ".roo/mcp.json",
+    ".kiro/mcp.json",
+    "mcp.json",
+)
+
+
+def _sampling_hits(project_root: Path) -> list[tuple[Path, int]]:
+    """Return (path, line_number) for every file/match that proves sampling
+    participation. Tight regex set keeps prose mentions from firing."""
+    hits: list[tuple[Path, int]] = []
+    for path in project_root.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.suffix not in _LANG_EXTS:
+            continue
+        if in_skip_dir(path, project_root):
+            continue
+        try:
+            text = read_text_capped(path, SOURCE_MAX_BYTES, errors="replace")
+        except OSError:
+            continue
+        for pat in _SAMPLING_MARKERS:
+            m = pat.search(text)
+            if m:
+                # Approximate line number from the match offset.
+                line_no = text.count("\n", 0, m.start()) + 1
+                hits.append((path, line_no))
+                break
+    return hits
+
+
+def _has_consent_marker(project_root: Path) -> bool:
+    for path in project_root.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.suffix not in _LANG_EXTS:
+            continue
+        if in_skip_dir(path, project_root):
+            continue
+        try:
+            text = read_text_capped(path, SOURCE_MAX_BYTES, errors="replace")
+        except OSError:
+            continue
+        if any(p.search(text) for p in _CONSENT_MARKERS):
+            return True
+    return False
+
+
+def _accepts_risk(project_root: Path) -> bool:
+    cfg = project_root / ".agent-audit-kit.yml"
+    if not cfg.is_file():
+        return False
+    try:
+        data = load_yaml(read_text_capped(cfg, CONFIG_MAX_BYTES, errors="replace"), cfg) or {}
+    except (yaml.YAMLError, OSError):
+        return False
+    if not isinstance(data, dict):
+        return False
+    if data.get("accepts_sampling_risk") is not True:
+        return False
+    justification = data.get("justification")
+    return isinstance(justification, str) and justification.strip() != ""
+
+
+def _config_sampling_findings(project_root: Path) -> tuple[list[Finding], set[str]]:
+    """Detect explicit per-server `"sampling"` declarations in MCP config
+    files without a sibling `requires_consent` / `consent` flag."""
+    findings: list[Finding] = []
+    scanned: set[str] = set()
+    for name in _MCP_CONFIG_FILES:
+        path = project_root / name
+        if not path.is_file():
+            continue
+        try:
+            raw = read_text_capped(path, CONFIG_MAX_BYTES, errors="replace")
+        except OSError:
+            continue
+        try:
+            data = loads_jsonc(raw, path)
+        except json.JSONDecodeError:
+            continue
+        # `mcpServers`, and the `servers` map of VS Code's .vscode/mcp.json, a
+        # file this list names but whose servers were never read.
+        for server_name, cfg in iter_mcp_servers(data):
+            caps = cfg.get("capabilities")
+            declares_sampling = False
+            if isinstance(caps, list) and "sampling" in caps:
+                declares_sampling = True
+            elif isinstance(caps, dict) and "sampling" in caps:
+                declares_sampling = True
+            if not declares_sampling:
+                continue
+            requires_consent = (
+                cfg.get("requires_consent") is True
+                or cfg.get("requiresConsent") is True
+                or cfg.get("consent") is True
+                or cfg.get("human_in_the_loop") is True
+            )
+            if requires_consent:
+                continue
+            rel = str(path.relative_to(project_root))
+            scanned.add(rel)
+            findings.append(make_finding(
+                "AAK-MCP-SAMPLING-001",
+                rel,
+                f"Server '{server_name}' declares the `sampling` capability "
+                "with no `requires_consent` / `human_in_the_loop` flag.",
+                find_line_number(raw, "sampling"),
+            ))
+    return findings, scanned
+
+
+def scan(project_root: Path) -> tuple[list[Finding], set[str]]:
+    scanned: set[str] = set()
+    findings: list[Finding] = []
+
+    # 1) Per-server config-side allow-listing — independent of SDK use.
+    cfg_findings, cfg_scanned = _config_sampling_findings(project_root)
+    findings.extend(cfg_findings)
+    scanned.update(cfg_scanned)
+
+    # 2) Source-side participation: only fires when an SDK is declared.
+    declared, manifests = declares_mcp_sdk(project_root)
+    if not declared:
+        return findings, scanned
+    for m in manifests:
+        scanned.add(m)
+
+    hits = _sampling_hits(project_root)
+    if not hits:
+        return findings, scanned
+
+    if _accepts_risk(project_root):
+        scanned.add(".agent-audit-kit.yml")
+        return findings, scanned
+
+    if _has_consent_marker(project_root):
+        return findings, scanned
+
+    for path, line_no in hits:
+        rel = str(path.relative_to(project_root))
+        scanned.add(rel)
+        findings.append(make_finding(
+            "AAK-MCP-SAMPLING-001",
+            rel,
+            "MCP `sampling` capability is wired up but no elicitation / "
+            "consent gate is present in the repo.",
+            line_no,
+        ))
+    return findings, scanned

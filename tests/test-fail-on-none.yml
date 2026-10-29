@@ -1,0 +1,29 @@
+name: Test fail-on none reports findings without failing
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable-project
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert exit-code 0 with findings
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          TOTAL: ${{ steps.action.outputs.findings-count }}
+        run: |
+          echo "exit-code=$EXIT_CODE findings=$TOTAL"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0"
+            exit 1
+          fi
+          if ! [[ "$TOTAL" =~ ^[0-9]+$ ]] || [ "$TOTAL" -lt 1 ]; then
+            echo "FAIL: expected at least one finding"
+            exit 1
+          fi
+          echo "PASS"

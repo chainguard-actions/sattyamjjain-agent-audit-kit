@@ -1,0 +1,39 @@
+name: Test json output format
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable-project
+          format: json
+          upload-sarif: 'false'
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert exit-code 0
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code=$EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert output file is valid JSON
+        env:
+          OUT: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          f="$GITHUB_WORKSPACE/$OUT"
+          echo "output file: $f"
+          if [ ! -f "$f" ]; then
+            echo "FAIL: output file missing"
+            exit 1
+          fi
+          head -c 500 "$f"; echo
+          python3 -c 'import json,sys; json.load(open(sys.argv[1])); print("valid JSON")' "$f" || { echo "FAIL: invalid JSON"; exit 1; }
+          echo "PASS"

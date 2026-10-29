@@ -1,0 +1,59 @@
+name: Test clean project scan passes
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/clean-project
+          comment-on-pr: 'false'
+      - name: Assert exit-code is 0
+        env:
+          ACTUAL: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $ACTUAL"
+          if [ "$ACTUAL" != "0" ]; then
+            echo "FAIL: expected exit-code 0"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert no critical/high findings
+        env:
+          CRIT: ${{ steps.action.outputs.critical-count }}
+          HIGH: ${{ steps.action.outputs.high-count }}
+          TOTAL: ${{ steps.action.outputs.findings-count }}
+        run: |
+          echo "total=$TOTAL critical=$CRIT high=$HIGH"
+          if [ "$CRIT" != "0" ] || [ "$HIGH" != "0" ]; then
+            echo "FAIL: expected zero critical/high findings"
+            exit 1
+          fi
+          if ! [[ "$TOTAL" =~ ^[0-9]+$ ]]; then
+            echo "FAIL: findings-count is not a number"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert SARIF file written and valid
+        env:
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          echo "sarif-file: $SARIF"
+          if [ "$SARIF" != "agent-audit-results.sarif" ]; then
+            echo "FAIL: unexpected sarif-file output"
+            exit 1
+          fi
+          if [ ! -f "$GITHUB_WORKSPACE/$SARIF" ]; then
+            echo "FAIL: SARIF file not found in workspace"
+            exit 1
+          fi
+          python3 - "$GITHUB_WORKSPACE/$SARIF" <<'EOF'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          assert "runs" in d and isinstance(d["runs"], list) and d["runs"], "missing runs"
+          print("SARIF version:", d.get("version"))
+          EOF
+          echo "PASS"
