@@ -1,0 +1,28 @@
+name: Test vulnerable config with fail-on none
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/act-vulnerable
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert findings reported without failing
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          CRITICAL: ${{ steps.action.outputs.critical-count }}
+          HIGH: ${{ steps.action.outputs.high-count }}
+        run: |
+          echo "exit=$EXIT_CODE findings=$FINDINGS critical=$CRITICAL high=$HIGH"
+          [ "$EXIT_CODE" = "0" ] || { echo "FAIL: exit-code"; exit 1; }
+          [ "$FINDINGS" -gt 0 ] || { echo "FAIL: expected findings > 0"; exit 1; }
+          [ $((CRITICAL + HIGH)) -le "$FINDINGS" ] || { echo "FAIL: critical+high exceeds total"; exit 1; }
+          [ $((CRITICAL + HIGH)) -gt 0 ] || { echo "FAIL: expected some critical/high findings"; exit 1; }
+          grep -q '"results"' "$GITHUB_WORKSPACE/agent-audit-results.sarif" || { echo "FAIL: SARIF lacks results"; exit 1; }
+          echo "PASS"

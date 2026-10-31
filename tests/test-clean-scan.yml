@@ -1,0 +1,33 @@
+name: Test clean scan
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/act-clean
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert outputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          CRITICAL: ${{ steps.action.outputs.critical-count }}
+          HIGH: ${{ steps.action.outputs.high-count }}
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          echo "outcome=$OUTCOME exit=$EXIT_CODE findings=$FINDINGS critical=$CRITICAL high=$HIGH sarif=$SARIF"
+          [ "$OUTCOME" = "success" ] || { echo "FAIL: outcome"; exit 1; }
+          [ "$EXIT_CODE" = "0" ] || { echo "FAIL: exit-code"; exit 1; }
+          [ "$SARIF" = "agent-audit-results.sarif" ] || { echo "FAIL: sarif-file"; exit 1; }
+          for v in "$FINDINGS" "$CRITICAL" "$HIGH"; do
+            echo "$v" | grep -qE '^[0-9]+$' || { echo "FAIL: non-numeric count '$v'"; exit 1; }
+          done
+          [ -s "$GITHUB_WORKSPACE/$SARIF" ] || { echo "FAIL: SARIF file missing"; exit 1; }
+          grep -q '"runs"' "$GITHUB_WORKSPACE/$SARIF" || { echo "FAIL: SARIF lacks runs"; exit 1; }
+          echo "PASS"

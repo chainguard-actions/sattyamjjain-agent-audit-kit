@@ -1,0 +1,3 @@
+# Clean fixture
+
+This directory intentionally contains no agent or MCP configuration.
