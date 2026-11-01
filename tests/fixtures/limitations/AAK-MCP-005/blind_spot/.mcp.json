@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "srv": {
+      "command": "pnpm",
+      "args": [
+        "dlx",
+        "@acme/mcp-server"
+      ]
+    },
+    "other": {
+      "command": "pipx",
+      "args": [
+        "run",
+        "acme-mcp-server"
+      ]
+    },
+    "win": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@acme/mcp-server"
+      ]
+    },
+    "absolute": {
+      "command": "/usr/local/bin/npx",
+      "args": [
+        "-y",
+        "@acme/mcp-server"
+      ]
+    }
+  }
+}

@@ -1,0 +1,52 @@
+name: Test vulnerable config produces findings
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert outputs
+        env:
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          CRITICAL: ${{ steps.action.outputs.critical-count }}
+          HIGH: ${{ steps.action.outputs.high-count }}
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "findings=$FINDINGS critical=$CRITICAL high=$HIGH sarif=$SARIF exit=$EXIT_CODE"
+          for v in "$FINDINGS" "$CRITICAL" "$HIGH"; do
+            if ! echo "$v" | grep -qE '^[0-9]+$'; then
+              echo "FAIL: count '$v' is not numeric"; exit 1
+            fi
+          done
+          if [ "$FINDINGS" -lt 1 ]; then
+            echo "FAIL: expected at least one finding"; exit 1
+          fi
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "FAIL: expected exit-code 0 with fail-on none"; exit 1
+          fi
+          if [ "$SARIF" != "agent-audit-results.sarif" ]; then
+            echo "FAIL: unexpected sarif-file"; exit 1
+          fi
+          echo "PASS"
+      - name: Assert SARIF file is valid and has results
+        run: |
+          f="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$f" ]; then echo "FAIL: SARIF not found"; exit 1; fi
+          python3 - "$f" <<'EOF'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          results = d["runs"][0].get("results", [])
+          ids = sorted({r.get("ruleId") for r in results})
+          print("rule ids:", ids)
+          if not results:
+              print("FAIL: no results in SARIF"); sys.exit(1)
+          print("PASS")
+          EOF

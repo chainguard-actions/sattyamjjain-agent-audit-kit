@@ -1,0 +1,30 @@
+name: Test exclude-rules
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable
+          exclude-rules: AAK-MCP-001
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert excluded rule absent
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit=$EXIT_CODE"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit 0"; exit 1; fi
+          python3 - "$GITHUB_WORKSPACE/agent-audit-results.sarif" <<'EOF'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          ids = {r.get("ruleId") for r in d["runs"][0].get("results", [])}
+          print("rule ids:", sorted(ids))
+          if "AAK-MCP-001" in ids:
+              print("FAIL: excluded rule AAK-MCP-001 still reported"); sys.exit(1)
+          print("PASS")
+          EOF

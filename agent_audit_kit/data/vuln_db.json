@@ -1,0 +1,15 @@
+{
+  "npm": {
+    "axios": {
+      "affected": ">=1.7.0 <1.7.4",
+      "description": "Claude Code supply chain compromise (March 31 2026)"
+    }
+  },
+  "python": {},
+  "rust": {},
+  "dmca_blocklist": [
+    "claude-code-leaked",
+    "anthropic-internal",
+    "copilot-source"
+  ]
+}

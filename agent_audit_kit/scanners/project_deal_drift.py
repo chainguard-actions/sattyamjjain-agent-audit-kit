@@ -1,0 +1,186 @@
+"""AAK-PROJECT-DEAL-DRIFT-001 — economic-quality drift in commerce agents.
+
+Anthropic's 2026-04-26 Project Deal experiment showed Opus sellers
+earned $2.68/item more than Haiku sellers for items rated identically
+(4.06 vs 4.05). LLM09 / OWASP-Agentic class: economic-tier drift
+across model deployments without parity checks.
+
+Fires when an LLM client call (`anthropic.messages.create`,
+`openai.chat.completions.create`, `litellm.completion`) lives inside
+a pricing function (`set_price`, `quote`, `bid`, `list_price`,
+`negotiate`) whose `model=` argument is templated from a variable
+(cross-tier deployment likely) AND no `@parity.check` decorator is
+present.
+
+Scope-gated to commerce contexts: the enclosing module must import a
+known commerce library (`stripe`, `shopify`, `medusa`,
+`commercetools`) OR live under a `pricing/` / `commerce/` path. This
+gate keeps the rule from firing on every LLM call in a non-commerce
+codebase.
+"""
+
+from __future__ import annotations
+
+import ast
+import re
+from pathlib import Path
+
+from agent_audit_kit.models import Finding
+
+from ._helpers import (
+    SOURCE_MAX_BYTES,
+    in_skip_dir,
+    make_finding,
+    parse_python,
+    read_text_capped,
+    refusing_overflow,
+    unparse,
+    walk_tree,
+)
+
+
+_PRICING_FUNC_RE = re.compile(
+    r"^(set_price|quote|bid|list_price|negotiate|price_item|compute_price)$"
+)
+_LLM_SINK_RE = re.compile(
+    r"""
+    (?:
+        anthropic(?:\.[A-Za-z_]+)*\.\s*(?:messages|completions)\.create
+      | openai(?:\.[A-Za-z_]+)*\.\s*(?:chat\.completions|ChatCompletion|completions)\.create
+      | litellm\.completion
+      | client\.messages\.create
+      | client\.chat\.completions\.create
+    )
+    """,
+    re.VERBOSE,
+)
+_COMMERCE_HINT_RE = re.compile(
+    r"""
+    \b(?:
+        import\s+(?:stripe|shopify|medusa|commercetools)
+      | from\s+(?:stripe|shopify|medusa|commercetools)\s+import
+    )\b
+    """,
+    re.VERBOSE,
+)
+# A dotted prefix (`x.y.parity.check`) needs no pattern of its own: the `.`
+# before `parity` is the `\W` that opens a match. Reading the prefix with
+# `(?:[\w.]+\.)?` started at every `.` of a dotted run and read to its end, so a
+# long decorator took the square of its length.
+_PARITY_DECORATOR_RE = re.compile(
+    r"""
+    (?:^|\W)
+    (?:
+        parity\s*\.\s*check
+      | parity_check
+      | aak\.parity\.check
+      | parity\b
+    )
+    """,
+    re.VERBOSE,
+)
+
+
+def _has_templated_model_kwarg(call: ast.Call) -> bool:
+    """Return True iff call has model=<Name|Attribute|Subscript> (i.e. variable, not literal)."""
+    for kw in call.keywords:
+        if kw.arg == "model":
+            if isinstance(kw.value, ast.Constant):
+                return False
+            return True
+    return False
+
+
+def _llm_sink_call(func: ast.FunctionDef | ast.AsyncFunctionDef) -> ast.Call | None:
+    """The first call in `func`, in `ast.walk` order, to an LLM client's create
+    method with a templated `model=`.
+
+    The callee's source used to be unparsed for every call, so a callee nested n
+    calls deep (`f()()...()`) was unparsed again at each of its n levels, which
+    took seconds once a walk could reach the bottom (`walk_tree`). The source
+    of a node inside a callee already read is part of that source, and the sink
+    names are letters and dots, which the unparser never spells two ways, so a
+    callee inside one that names no sink names none, and each node's source is
+    read once.
+    """
+    no_sink: set[int] = set()
+    for child in ast.walk(func):
+        if not isinstance(child, ast.Call) or id(child.func) in no_sink:
+            continue
+        callee_src = unparse(child.func)
+        if not _LLM_SINK_RE.search(callee_src):
+            if callee_src:
+                no_sink.update(id(node) for node in ast.walk(child.func))
+            continue
+        if _has_templated_model_kwarg(child):
+            return child
+    return None
+
+
+def _is_in_commerce_context(text: str, project_root: Path, path: Path) -> bool:
+    if _COMMERCE_HINT_RE.search(text):
+        return True
+    rel = str(path.relative_to(project_root)).lower()
+    return any(part in rel for part in ("/pricing/", "/commerce/", "pricing/", "commerce/"))
+
+
+def _walk_python(text: str, path: Path, project_root: Path, scanned: set[str]) -> list[Finding]:
+    if not _is_in_commerce_context(text, project_root, path):
+        return []
+    try:
+        tree = parse_python(text, path)
+    except SyntaxError:
+        return []
+    findings: list[Finding] = []
+
+    class V(ast.NodeVisitor):
+        def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+            self._scan(node)
+            self.generic_visit(node)
+
+        def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+            self._scan(node)
+            self.generic_visit(node)
+
+        def _scan(self, func: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+            if not _PRICING_FUNC_RE.match(func.name):
+                return
+            # Decorator suppresses.
+            for dec in func.decorator_list:
+                src = unparse(dec)
+                if _PARITY_DECORATOR_RE.search(src):
+                    return
+            child = _llm_sink_call(func)
+            if child is None:
+                return
+            rel = str(path.relative_to(project_root))
+            scanned.add(rel)
+            findings.append(make_finding(
+                "AAK-PROJECT-DEAL-DRIFT-001",
+                rel,
+                f"Pricing function `{func.name}` calls an LLM with a "
+                "templated `model=` and no @parity.check decorator. "
+                "Project-Deal-class economic drift: same LLM-quality "
+                "score across tiers can produce $/item differences. "
+                "Tag with @aak.parity.check or assert per-tier parity "
+                "in CI.",
+                line_number=child.lineno,
+            ))
+
+    walk_tree(V().visit, tree)
+    return findings
+
+
+def scan(project_root: Path) -> tuple[list[Finding], set[str]]:
+    scanned: set[str] = set()
+    findings: list[Finding] = []
+    for path in project_root.rglob("*.py"):
+        if in_skip_dir(path, project_root):
+            continue
+        try:
+            text = read_text_capped(path, SOURCE_MAX_BYTES, errors="replace")
+        except OSError:
+            continue
+        with refusing_overflow(path):
+            findings.extend(_walk_python(text, path, project_root, scanned))
+    return findings, scanned

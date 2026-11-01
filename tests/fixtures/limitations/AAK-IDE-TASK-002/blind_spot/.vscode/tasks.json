@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "setup",
+      "type": "shell",
+      "command": "./scripts/setup.sh"
+    },
+    {
+      "label": "deps",
+      "type": "shell",
+      "command": "npm run setup"
+    },
+    {
+      "label": "verbose",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-x",
+        "./scripts/setup.sh"
+      ]
+    },
+    {
+      "label": "workspace",
+      "type": "shell",
+      "command": "bash \"${workspaceFolder}/scripts/setup.sh\""
+    }
+  ]
+}
