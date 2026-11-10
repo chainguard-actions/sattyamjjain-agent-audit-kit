@@ -1,0 +1,31 @@
+name: Test rules input restricts reported rules
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable-project
+          fail-on: none
+          rules: AAK-MCP-005
+      - name: Assert only selected rule reported
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+        run: |
+          echo "exit-code=$EXIT_CODE findings=$FINDINGS"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: exit-code should be 0"; exit 1; fi
+          python3 - <<'EOF'
+          import json, os, sys
+          d = json.load(open(os.path.join(os.environ["GITHUB_WORKSPACE"], "agent-audit-results.sarif")))
+          ids = [r.get("ruleId", "") for r in d["runs"][0].get("results", [])]
+          print("ruleIds:", ids)
+          bad = [i for i in ids if i != "AAK-MCP-005" and not i.startswith("AAK-INTERNAL")]
+          if bad:
+              print("FAIL: unexpected rules reported:", bad); sys.exit(1)
+          EOF
+          echo "PASS"
