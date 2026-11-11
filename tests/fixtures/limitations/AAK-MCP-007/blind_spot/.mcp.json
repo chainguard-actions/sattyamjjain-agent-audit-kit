@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "srv": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@acme/mcp-server@latest"
+      ]
+    },
+    "win": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@acme/mcp-server"
+      ]
+    }
+  }
+}

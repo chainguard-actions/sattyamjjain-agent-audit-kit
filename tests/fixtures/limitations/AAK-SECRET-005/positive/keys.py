@@ -1,0 +1,6 @@
+"""Deploy credentials."""
+
+DEPLOY_KEY = """-----BEGIN OPENSSH PRIVATE KEY-----
+RklYVFVSRU5PVEFLRVlGSVhUVVJFTk9UQUtFWQ
+-----END OPENSSH PRIVATE KEY-----
+"""

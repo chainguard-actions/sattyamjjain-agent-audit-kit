@@ -1,0 +1,36 @@
+name: Test severity filter reduces reported findings
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: low
+        uses: .
+        with:
+          path: tests/fixtures/aak-vulnerable
+          severity: low
+          fail-on: none
+          comment-on-pr: 'false'
+      - id: critical
+        uses: .
+        with:
+          path: tests/fixtures/aak-vulnerable
+          severity: critical
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert critical-only scan reports no more findings than low scan
+        env:
+          LOW_COUNT: ${{ steps.low.outputs.findings-count }}
+          CRIT_TOTAL: ${{ steps.critical.outputs.findings-count }}
+          CRIT_EXIT: ${{ steps.critical.outputs.exit-code }}
+        run: |
+          echo "low=$LOW_COUNT critical-only=$CRIT_TOTAL exit=$CRIT_EXIT"
+          if [ "$CRIT_EXIT" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          for v in "$LOW_COUNT" "$CRIT_TOTAL"; do
+            case "$v" in ''|*[!0-9]*) echo "FAIL: non-numeric count '$v'"; exit 1;; esac
+          done
+          if [ "$LOW_COUNT" -lt 1 ]; then echo "FAIL: expected findings at low severity"; exit 1; fi
+          if [ "$CRIT_TOTAL" -gt "$LOW_COUNT" ]; then echo "FAIL: critical filter reported more findings"; exit 1; fi
+          echo "PASS"

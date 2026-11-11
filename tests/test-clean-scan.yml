@@ -1,0 +1,36 @@
+name: Test clean directory scan
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/aak-clean
+          fail-on: high
+          comment-on-pr: 'false'
+      - name: Assert outputs
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          FINDINGS: ${{ steps.action.outputs.findings-count }}
+          CRITICAL: ${{ steps.action.outputs.critical-count }}
+          HIGH: ${{ steps.action.outputs.high-count }}
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          echo "exit-code=$EXIT_CODE findings=$FINDINGS critical=$CRITICAL high=$HIGH sarif=$SARIF"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          if [ "$SARIF" != "agent-audit-results.sarif" ]; then echo "FAIL: unexpected sarif-file"; exit 1; fi
+          for v in "$FINDINGS" "$CRITICAL" "$HIGH"; do
+            case "$v" in ''|*[!0-9]*) echo "FAIL: non-numeric count '$v'"; exit 1;; esac
+          done
+          if [ "$CRITICAL" != "0" ] || [ "$HIGH" != "0" ]; then echo "FAIL: expected no critical/high findings"; exit 1; fi
+          echo "PASS"
+      - name: Assert SARIF file written to workspace
+        run: |
+          F="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$F" ]; then echo "FAIL: SARIF file missing"; exit 1; fi
+          python3 -c "import json,sys; d=json.load(open('$F')); assert 'runs' in d, 'no runs'; print('version', d.get('version'))"
+          echo "PASS"

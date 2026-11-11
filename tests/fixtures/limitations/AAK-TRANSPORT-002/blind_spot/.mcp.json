@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "x": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@acme/mcp-server"
+      ],
+      "env": {
+        "NPM_CONFIG_STRICT_SSL": "false"
+      }
+    }
+  }
+}

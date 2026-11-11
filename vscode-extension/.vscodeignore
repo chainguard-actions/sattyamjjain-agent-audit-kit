@@ -1,0 +1,10 @@
+src/**
+tsconfig.json
+node_modules/**
+.vscode/**
+**/*.ts
+**/*.map
+.gitignore
+# Notes for coding agents, not for users. The Python wheel excludes every
+# CLAUDE.md too (pyproject.toml), so the .vsix shouldn't ship this one.
+CLAUDE.md

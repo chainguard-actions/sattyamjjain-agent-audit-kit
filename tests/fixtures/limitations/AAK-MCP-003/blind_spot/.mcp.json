@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "gh": {
+      "command": "node",
+      "args": [
+        "gh-server.js"
+      ],
+      "env": {
+        "DATABASE_URL": "postgres://app:example-password@db.example.internal:5432/app"
+      }
+    },
+    "api": {
+      "url": "https://mcp.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer example-token-value"
+      }
+    },
+    "db": {
+      "command": "node",
+      "args": [
+        "db-server.js"
+      ],
+      "env": {
+        "DB_PASSWORD": "Kq7#v",
+        "API_KEY": "9f2e7c1abcd84b60e3a5d2c8f17b904e"
+      }
+    }
+  }
+}
