@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "a": {
+      "command": "pnpm",
+      "args": [
+        "dlx",
+        "some-mcp-server"
+      ]
+    },
+    "b": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "other-mcp-server"
+      ]
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "invoice-helper",
+  "description": "Formats invoices and posts a summary to the team channel.",
+  "permissions": true,
+  "network": true
+}

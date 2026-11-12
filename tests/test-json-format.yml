@@ -1,0 +1,30 @@
+name: Test JSON output format
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Remove stale output
+        run: rm -f "$GITHUB_WORKSPACE/agent-audit-results.sarif"
+      - id: action
+        uses: .
+        with:
+          path: tests/fixtures/vulnerable-project
+          format: json
+          upload-sarif: 'false'
+          fail-on: none
+          comment-on-pr: 'false'
+      - name: Assert exit code and output file
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+          SARIF: ${{ steps.action.outputs.sarif-file }}
+        run: |
+          echo "exit-code=$EXIT_CODE sarif-file=$SARIF"
+          if [ "$EXIT_CODE" != "0" ]; then echo "FAIL: expected exit-code 0"; exit 1; fi
+          f="$GITHUB_WORKSPACE/agent-audit-results.sarif"
+          if [ ! -f "$f" ]; then echo "FAIL: output file not found"; exit 1; fi
+          head -c 500 "$f"; echo
+          python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f" || { echo "FAIL: output is not valid JSON"; exit 1; }
+          echo "PASS"
